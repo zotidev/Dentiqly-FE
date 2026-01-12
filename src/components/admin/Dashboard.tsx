@@ -47,7 +47,7 @@ export const Dashboard: React.FC<{ onNavigateToCalendar?: () => void }> = ({ onN
     const fetchStats = async () => {
       try {
         const [turnosResponse, profesionalesResponse, serviciosResponse] = await Promise.all([
-          turnosApi.listar(),
+          turnosApi.listar({ limit: 1000 }),
           profesionalesApi.listar({ estado: 'Activo' }),
           serviciosApi.listar()
         ])
@@ -67,16 +67,16 @@ export const Dashboard: React.FC<{ onNavigateToCalendar?: () => void }> = ({ onN
 
         // Revenue calculations - sum from all turnos with precio_final OR service price
         const ingresoTotal = turnos
-          .filter(t => t.estado === 'Completado')
+          .filter(t => t.estado === 'Atendido')
           .reduce((acc, t) => {
-            const precio = Number(t.precio_final) || Number(t.servicio?.precio_base) || 0
+            const precio = Number(t.precio_final) || Number(t.subservicio?.precio) || Number(t.servicio?.precio_base) || 0
             return acc + precio
           }, 0)
 
         const ingresoPendiente = turnos
-          .filter(t => t.estado === 'Pendiente' || t.estado === 'Confirmado')
+          .filter(t => t.estado === 'Pendiente' || t.estado === 'Confirmado por email')
           .reduce((acc, t) => {
-            const precio = Number(t.precio_final) || Number(t.servicio?.precio_base) || 0
+            const precio = Number(t.precio_final) || Number(t.subservicio?.precio) || Number(t.servicio?.precio_base) || 0
             return acc + precio
           }, 0)
 
@@ -316,7 +316,7 @@ export const Dashboard: React.FC<{ onNavigateToCalendar?: () => void }> = ({ onN
               const colors: Record<string, string> = {
                 'Pendiente': 'bg-yellow-500',
                 'Confirmado': 'bg-blue-500',
-                'Completado': 'bg-green-500',
+                'Atendido': 'bg-green-500',
                 'Cancelado': 'bg-red-500'
               }
               const percentage = (count / stats.totalTurnos * 100).toFixed(0)

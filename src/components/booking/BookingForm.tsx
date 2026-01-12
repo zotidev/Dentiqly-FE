@@ -80,6 +80,27 @@ export const BookingForm: React.FC = () => {
       const endMins = endMinutes % 60
       const horaFin = `${String(endHours).padStart(2, '0')}:${String(endMins).padStart(2, '0')}`
 
+
+      // Debug: verificar qué servicio se está enviando
+      console.log('=== DEBUG TURNO ===')
+      console.log('Servicio seleccionado:', selectedService)
+      console.log('Servicio ID:', selectedService.id)
+      console.log('Servicio nombre:', selectedService.nombre)
+      console.log('Servicio precio:', selectedService.precio_base)
+
+      const turnoData = {
+        paciente_id: pacienteId,
+        profesional_id: selectedProfessional.id,
+        servicio_id: selectedService.id,
+        fecha: selectedDateTime.split('T')[0],
+        hora_inicio: horaInicio,
+        hora_fin: horaFin,
+        estado: "Pendiente",
+        pago_confirmado: false,
+      }
+
+      console.log('Datos a enviar:', turnoData)
+
       const turnoResponse = await turnosApi.crear({
         paciente_id: pacienteId,
         profesional_id: selectedProfessional.id,

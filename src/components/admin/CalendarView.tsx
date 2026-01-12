@@ -61,7 +61,7 @@ export const CalendarView: React.FC = () => {
 
   const fetchAppointments = async () => {
     try {
-      const response = await turnosApi.listar()
+      const response = await turnosApi.listar({ limit: 1000 })
       if (response.data) {
         setAppointments(response.data)
       }
