@@ -185,6 +185,18 @@ export const PatientForm: React.FC<PatientFormProps> = ({ onPatientData, loading
           </div>
         </div>
 
+        {/* Motivo de la solicitud */}
+        <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm">
+          <label className="block text-sm font-bold text-gray-700 mb-2">Motivo de la solicitud de turno</label>
+          <textarea
+            rows={4}
+            value={formData.observaciones || ""}
+            onChange={(e) => handleChange("observaciones", e.target.value)}
+            className="w-full px-4 py-3 border border-gray-200 rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#026498] focus:border-transparent hover:border-blue-300 bg-gray-50 focus:bg-white resize-none"
+            placeholder="Describa brevemente el motivo de su consulta..."
+          />
+        </div>
+
         {/* Contacto */}
         <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm">
           <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
@@ -291,17 +303,6 @@ export const PatientForm: React.FC<PatientFormProps> = ({ onPatientData, loading
           </div>
         </div>
 
-        {/* Observaciones */}
-        <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm">
-          <label className="block text-sm font-bold text-gray-700 mb-2">Observaciones</label>
-          <textarea
-            rows={4}
-            value={formData.observaciones || ""}
-            onChange={(e) => handleChange("observaciones", e.target.value)}
-            className="w-full px-4 py-3 border border-gray-200 rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#026498] focus:border-transparent hover:border-blue-300 bg-gray-50 focus:bg-white resize-none"
-            placeholder="Información adicional, alergias, medicamentos, etc."
-          />
-        </div>
 
         {/* Copago Info */}
         {copago && (

@@ -304,18 +304,22 @@ export interface CrearHistorialClinicoData {
 export interface Odontograma {
   id: string
   paciente_id: number
+  profesional_id: number
   fecha: string
-  datos_dientes: Record<string, any>
+  dientes_data: Record<string, any>
   observaciones?: string
+  tipo: "Inicial" | "Control" | "Tratamiento"
   createdAt?: string
   updatedAt?: string
 }
 
 export interface CrearOdontogramaData {
   paciente_id: number
+  profesional_id: number
   fecha: string
-  datos_dientes: Record<string, any>
+  dientes_data: Record<string, any>
   observaciones?: string
+  tipo: "Inicial" | "Control" | "Tratamiento"
 }
 
 export interface Prescripcion {

@@ -6,11 +6,12 @@ import { Card } from "../ui/Card"
 import { Button } from "../ui/Button"
 import { Plus, Save, X, Calendar, Trash2, Eye, BarChart3, Trash } from "lucide-react"
 import { odontogramasApi } from "../../api/odontogramas"
-import type { Odontograma, CrearOdontogramaData, DientesData, DatosDiente } from "../../api/odontogramas"
-import { 
-  getDienteImageSrc, 
+import type { DientesData, DatosDiente } from "../../api/odontogramas"
+import type { Odontograma, CrearOdontogramaData } from "../../types"
+import {
+  getDienteImageSrc,
   //esDienteSuperior
- } 
+}
   from "../../utils/dienteImages"
 
 interface OdontogramSectionProps {
@@ -37,7 +38,7 @@ const ESTADOS_DIENTE = [
   { value: "protesis", label: "Prótesis", color: "#A855F7", borderColor: "#9333EA" },
   { value: "corona", label: "Corona", color: "#EAB308", borderColor: "#CA8A04" },
   { value: "endodoncia", label: "Endodoncia", color: "#EC4899", borderColor: "#DB2777" },
-  { value: "fractura", label: "Fractura", color: "#F97316", borderColor:  "#EA580C" },
+  { value: "fractura", label: "Fractura", color: "#F97316", borderColor: "#EA580C" },
 ]
 
 
@@ -50,11 +51,12 @@ export const OdontogramSection: React.FC<OdontogramSectionProps> = ({ pacienteId
   const [selectedOdontograma, setSelectedOdontograma] = useState<Odontograma | null>(null)
   const [dientesData, setDientesData] = useState<DientesData>({})
   const [selectedDiente, setSelectedDiente] = useState<string | null>(null)
-  const [selectedTratamiento, setSelectedTratamiento] = useState<string>("ninguno")
   const [observaciones, setObservaciones] = useState("")
   const [tipo, setTipo] = useState<"Inicial" | "Control" | "Tratamiento">("Inicial")
   const [showEstadisticas, setShowEstadisticas] = useState(false)
   const [profesionalActual] = useState(1)
+  const [superficieMode, setSuperficieMode] = useState(false) // Modo de selección por superficie
+  const [selectedSuperficies, setSelectedSuperficies] = useState<string[]>([]) // Superficies seleccionadas
 
   useEffect(() => {
     fetchOdontogramas()
@@ -102,7 +104,6 @@ export const OdontogramSection: React.FC<OdontogramSectionProps> = ({ pacienteId
     setObservaciones("")
     setTipo("Inicial")
     setSelectedDiente(null)
-    setSelectedTratamiento("ninguno")
     setModalMode("create")
     setShowModal(true)
   }
@@ -141,23 +142,68 @@ export const OdontogramSection: React.FC<OdontogramSectionProps> = ({ pacienteId
   const handleDienteClick = (numeroDiente: string) => {
     if (modalMode === "view") return
     setSelectedDiente(numeroDiente)
+    setSelectedSuperficies([]) // Reset superficie selection when clicking new tooth
   }
 
   const handleEstadoChange = (estado: string) => {
     if (!selectedDiente || modalMode === "view") return
-    
-    setDientesData((prev) => ({
-      ...prev,
-      [selectedDiente]: {
-        ...prev[selectedDiente],
-        estado: estado,
-      },
-    }))
+
+    if (selectedSuperficies.length > 0) {
+      // Aplicar tratamiento solo a superficies seleccionadas
+      setDientesData((prev) => {
+        const currentData = prev[selectedDiente] || {
+          estado: "sano",
+          superficies: {
+            oclusal: "sano",
+            vestibular: "sano",
+            lingual: "sano",
+            mesial: "sano",
+            distal: "sano",
+          },
+          notas: "",
+        }
+
+        const newSuperficies = { ...currentData.superficies }
+        selectedSuperficies.forEach((superficie) => {
+          newSuperficies[superficie as keyof typeof newSuperficies] = estado
+        })
+
+        // Determinar el estado general del diente basado en las superficies
+        const estadosSuperficies = Object.values(newSuperficies)
+        const todasSanas = estadosSuperficies.every(s => s === "sano")
+        const estadoGeneral = todasSanas ? "sano" : estado
+
+        return {
+          ...prev,
+          [selectedDiente]: {
+            ...currentData,
+            estado: estadoGeneral,
+            superficies: newSuperficies,
+          },
+        }
+      })
+    } else {
+      // Modo diente completo (comportamiento original)
+      setDientesData((prev) => ({
+        ...prev,
+        [selectedDiente]: {
+          ...prev[selectedDiente],
+          estado: estado,
+          superficies: {
+            oclusal: estado,
+            vestibular: estado,
+            lingual: estado,
+            mesial: estado,
+            distal: estado,
+          },
+        },
+      }))
+    }
   }
 
   const handleBorrarDiente = () => {
     if (!selectedDiente || modalMode === "view") return
-    
+
     setDientesData((prev) => ({
       ...prev,
       [selectedDiente]: {
@@ -190,7 +236,7 @@ export const OdontogramSection: React.FC<OdontogramSectionProps> = ({ pacienteId
       } else if (modalMode === "edit" && selectedOdontograma) {
         await odontogramasApi.actualizar(Number(selectedOdontograma.id), dataToSend)
       }
-      
+
       setShowModal(false)
       fetchOdontogramas()
     } catch (error) {
@@ -307,7 +353,7 @@ export const OdontogramSection: React.FC<OdontogramSectionProps> = ({ pacienteId
                     </p>
                   )}
                 </div>
-                
+
                 {modalMode !== "view" && (
                   <div className="flex items-center gap-2">
                     <select
@@ -322,7 +368,7 @@ export const OdontogramSection: React.FC<OdontogramSectionProps> = ({ pacienteId
                   </div>
                 )}
               </div>
-              
+
               <div className="flex gap-2">
                 {modalMode !== "view" && (
                   <>
@@ -404,9 +450,9 @@ export const OdontogramSection: React.FC<OdontogramSectionProps> = ({ pacienteId
                 <Card className="mt-6 p-4 bg-blue-50 border-2 border-blue-200">
                   <div className="flex justify-between items-center mb-3">
                     <h4 className="font-semibold text-blue-900">Diente {selectedDiente} seleccionado</h4>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
+                    <Button
+                      variant="outline"
+                      size="sm"
                       onClick={handleBorrarDiente}
                       className="text-red-600 border-red-300 hover:bg-red-50"
                     >
@@ -414,8 +460,67 @@ export const OdontogramSection: React.FC<OdontogramSectionProps> = ({ pacienteId
                       Limpiar
                     </Button>
                   </div>
-                  
+
+
                   <div className="space-y-4">
+                    {/* Selección de Superficies */}
+                    <div>
+                      <div className="flex justify-between items-center mb-2">
+                        <label className="block text-sm font-medium text-gray-700">Modo de Selección</label>
+                        <button
+                          onClick={() => {
+                            setSuperficieMode(!superficieMode)
+                            setSelectedSuperficies([])
+                          }}
+                          className={`px-3 py-1 text-xs rounded-lg font-medium transition-colors ${superficieMode
+                            ? "bg-purple-600 text-white"
+                            : "bg-gray-200 text-gray-700"
+                            }`}
+                        >
+                          {superficieMode ? "Por Superficie" : "Diente Completo"}
+                        </button>
+                      </div>
+
+                      {superficieMode && (
+                        <div className="bg-purple-50 border border-purple-200 rounded-lg p-3">
+                          <p className="text-xs text-purple-900 mb-2 font-medium">Selecciona las superficies a tratar:</p>
+                          <div className="grid grid-cols-2 gap-2">
+                            {[
+                              { key: "oclusal", label: "Oclusal (O)" },
+                              { key: "vestibular", label: "Vestibular (V)" },
+                              { key: "lingual", label: "Lingual/Palatino (L/P)" },
+                              { key: "mesial", label: "Mesial (M)" },
+                              { key: "distal", label: "Distal (D)" },
+                            ].map((superficie) => (
+                              <label
+                                key={superficie.key}
+                                className="flex items-center gap-2 cursor-pointer hover:bg-purple-100 p-2 rounded"
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={selectedSuperficies.includes(superficie.key)}
+                                  onChange={(e) => {
+                                    if (e.target.checked) {
+                                      setSelectedSuperficies([...selectedSuperficies, superficie.key])
+                                    } else {
+                                      setSelectedSuperficies(selectedSuperficies.filter(s => s !== superficie.key))
+                                    }
+                                  }}
+                                  className="w-4 h-4 text-purple-600 rounded focus:ring-purple-500"
+                                />
+                                <span className="text-sm text-gray-700">{superficie.label}</span>
+                              </label>
+                            ))}
+                          </div>
+                          {selectedSuperficies.length > 0 && (
+                            <p className="mt-2 text-xs text-purple-700">
+                              {selectedSuperficies.length} superficie{selectedSuperficies.length > 1 ? 's' : ''} seleccionada{selectedSuperficies.length > 1 ? 's' : ''}
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Estado del Diente</label>
                       <div className="grid grid-cols-3 gap-2">
@@ -428,11 +533,10 @@ export const OdontogramSection: React.FC<OdontogramSectionProps> = ({ pacienteId
                               borderColor: estado.borderColor,
                               color: estado.value === "sano" ? "#374151" : "#FFFFFF"
                             }}
-                            className={`px-3 py-2 rounded-lg text-sm font-medium border-2 transition-all ${
-                              dientesData[selectedDiente]?.estado === estado.value
-                                ? "ring-4 ring-blue-300 scale-105"
-                                : "hover:scale-105"
-                            }`}
+                            className={`px-3 py-2 rounded-lg text-sm font-medium border-2 transition-all ${dientesData[selectedDiente]?.estado === estado.value
+                              ? "ring-4 ring-blue-300 scale-105"
+                              : "hover:scale-105"
+                              }`}
                           >
                             {estado.label}
                           </button>
@@ -479,10 +583,10 @@ export const OdontogramSection: React.FC<OdontogramSectionProps> = ({ pacienteId
                 <div className="grid grid-cols-3 gap-3">
                   {ESTADOS_DIENTE.map((estado) => (
                     <div key={estado.value} className="flex items-center gap-2">
-                      <div 
-                        style={{ 
+                      <div
+                        style={{
                           backgroundColor: estado.color,
-                          borderColor: estado.borderColor 
+                          borderColor: estado.borderColor
                         }}
                         className="w-8 h-8 rounded border-2"
                       ></div>
@@ -517,7 +621,7 @@ const DienteVisual: React.FC<DienteVisualProps> = ({
   esSuperior,
 }) => {
   const [imgError, setImgError] = useState(false)
-  
+
   const getEstadoConfig = (estado: string) => {
     return ESTADOS_DIENTE.find((e) => e.value === estado) || ESTADOS_DIENTE[0]
   }
@@ -528,9 +632,8 @@ const DienteVisual: React.FC<DienteVisualProps> = ({
   return (
     <div
       onClick={onClick}
-      className={`relative cursor-pointer transition-all flex flex-col items-center ${
-        isSelected ? "ring-4 ring-blue-500 rounded-lg scale-110 z-10" : ""
-      } ${isReadOnly ? "cursor-default" : "hover:scale-105"}`}
+      className={`relative cursor-pointer transition-all flex flex-col items-center ${isSelected ? "ring-4 ring-blue-500 rounded-lg scale-110 z-10" : ""
+        } ${isReadOnly ? "cursor-default" : "hover:scale-105"}`}
     >
       {esSuperior ? (
         <>
@@ -540,44 +643,69 @@ const DienteVisual: React.FC<DienteVisualProps> = ({
 
           <div className="grid grid-cols-3 grid-rows-3 gap-0.5 w-14 h-14">
             <div className="bg-gray-200 rounded-tl"></div>
-            <div 
-              style={{ 
-                backgroundColor: datos?.estado !== "sano" ? estadoConfig.color : "#F3F4F6",
-                borderColor: estadoConfig.borderColor 
+            {/* Vestibular (arriba centro) */}
+            <div
+              style={{
+                backgroundColor: datos?.superficies?.vestibular
+                  ? getEstadoConfig(datos.superficies.vestibular).color
+                  : "#F3F4F6",
+                borderColor: datos?.superficies?.vestibular
+                  ? getEstadoConfig(datos.superficies.vestibular).borderColor
+                  : "#D1D5DB"
               }}
               className="border"
             ></div>
             <div className="bg-gray-200 rounded-tr"></div>
-            
-            <div 
-              style={{ 
-                backgroundColor: datos?.estado !== "sano" ? estadoConfig.color : "#F3F4F6",
-                borderColor: estadoConfig.borderColor 
+
+            {/* Mesial (centro izquierda) */}
+            <div
+              style={{
+                backgroundColor: datos?.superficies?.mesial
+                  ? getEstadoConfig(datos.superficies.mesial).color
+                  : "#F3F4F6",
+                borderColor: datos?.superficies?.mesial
+                  ? getEstadoConfig(datos.superficies.mesial).borderColor
+                  : "#D1D5DB"
               }}
               className="border"
             ></div>
-            <div 
-              style={{ 
-                backgroundColor: datos?.estado !== "sano" ? estadoConfig.color : "#FFFFFF",
-                borderColor: estadoConfig.borderColor 
+            {/* Oclusal (centro) */}
+            <div
+              style={{
+                backgroundColor: datos?.superficies?.oclusal
+                  ? getEstadoConfig(datos.superficies.oclusal).color
+                  : "#FFFFFF",
+                borderColor: datos?.superficies?.oclusal
+                  ? getEstadoConfig(datos.superficies.oclusal).borderColor
+                  : "#D1D5DB"
               }}
               className="border-2 flex items-center justify-center"
             >
               {datos?.notas && <span className="text-xs">📝</span>}
             </div>
-            <div 
-              style={{ 
-                backgroundColor: datos?.estado !== "sano" ? estadoConfig.color : "#F3F4F6",
-                borderColor: estadoConfig.borderColor 
+            {/* Distal (centro derecha) */}
+            <div
+              style={{
+                backgroundColor: datos?.superficies?.distal
+                  ? getEstadoConfig(datos.superficies.distal).color
+                  : "#F3F4F6",
+                borderColor: datos?.superficies?.distal
+                  ? getEstadoConfig(datos.superficies.distal).borderColor
+                  : "#D1D5DB"
               }}
               className="border"
             ></div>
-            
+
             <div className="bg-gray-200 rounded-bl"></div>
-            <div 
-              style={{ 
-                backgroundColor: datos?.estado !== "sano" ? estadoConfig.color : "#F3F4F6",
-                borderColor: estadoConfig.borderColor 
+            {/* Lingual (abajo centro) */}
+            <div
+              style={{
+                backgroundColor: datos?.superficies?.lingual
+                  ? getEstadoConfig(datos.superficies.lingual).color
+                  : "#F3F4F6",
+                borderColor: datos?.superficies?.lingual
+                  ? getEstadoConfig(datos.superficies.lingual).borderColor
+                  : "#D1D5DB"
               }}
               className="border"
             ></div>
@@ -587,7 +715,7 @@ const DienteVisual: React.FC<DienteVisualProps> = ({
           <div className="flex justify-center mt-1">
             <div className="w-12 h-16 relative">
               {imageSrc && !imgError ? (
-                <img 
+                <img
                   src={imageSrc}
                   alt={`Diente ${numero}`}
                   className="w-full h-full object-contain"
@@ -597,24 +725,24 @@ const DienteVisual: React.FC<DienteVisualProps> = ({
                   }}
                 />
               ) : (
-                <svg 
-                  viewBox="0 0 48 64" 
+                <svg
+                  viewBox="0 0 48 64"
                   className="w-full h-full"
                   style={{
                     opacity: datos?.estado !== "sano" ? 0.5 : 1
                   }}
                 >
-                  <path 
-                    d="M 16 28 L 24 8 L 32 28 Z" 
-                    fill={estadoConfig.color} 
-                    stroke={estadoConfig.borderColor} 
-                    strokeWidth="1.5" 
+                  <path
+                    d="M 16 28 L 24 8 L 32 28 Z"
+                    fill={estadoConfig.color}
+                    stroke={estadoConfig.borderColor}
+                    strokeWidth="1.5"
                   />
-                  <rect 
-                    x="12" y="28" width="24" height="28" rx="4" 
-                    fill={estadoConfig.color} 
-                    stroke={estadoConfig.borderColor} 
-                    strokeWidth="1.5" 
+                  <rect
+                    x="12" y="28" width="24" height="28" rx="4"
+                    fill={estadoConfig.color}
+                    stroke={estadoConfig.borderColor}
+                    strokeWidth="1.5"
                   />
                 </svg>
               )}
@@ -626,7 +754,7 @@ const DienteVisual: React.FC<DienteVisualProps> = ({
           <div className="flex justify-center mb-1">
             <div className="w-12 h-16 relative">
               {imageSrc && !imgError ? (
-                <img 
+                <img
                   src={imageSrc}
                   alt={`Diente ${numero}`}
                   className="w-full h-full object-contain"
@@ -636,70 +764,96 @@ const DienteVisual: React.FC<DienteVisualProps> = ({
                   }}
                 />
               ) : (
-                <svg 
-                  viewBox="0 0 48 64" 
+                <svg
+                  viewBox="0 0 48 64"
                   className="w-full h-full"
                   style={{
                     opacity: datos?.estado !== "sano" ? 0.5 : 1
                   }}
                 >
-                  <rect 
-                    x="12" y="8" width="24" height="28" rx="4" 
-                    fill={estadoConfig.color} 
-                    stroke={estadoConfig.borderColor} 
-                    strokeWidth="1.5" 
+                  <rect
+                    x="12" y="8" width="24" height="28" rx="4"
+                    fill={estadoConfig.color}
+                    stroke={estadoConfig.borderColor}
+                    strokeWidth="1.5"
                   />
-                  <path 
-                    d="M 16 36 L 24 56 L 32 36 Z" 
-                    fill={estadoConfig.color} 
-                    stroke={estadoConfig.borderColor} 
-                    strokeWidth="1.5" 
+                  <path
+                    d="M 16 36 L 24 56 L 32 36 Z"
+                    fill={estadoConfig.color}
+                    stroke={estadoConfig.borderColor}
+                    strokeWidth="1.5"
                   />
                 </svg>
               )}
             </div>
           </div>
 
+
           <div className="grid grid-cols-3 grid-rows-3 gap-0.5 w-14 h-14">
             <div className="bg-gray-200 rounded-tl"></div>
-            <div 
-              style={{ 
-                backgroundColor: datos?.estado !== "sano" ? estadoConfig.color : "#F3F4F6",
-                borderColor: estadoConfig.borderColor 
+            {/* Vestibular (arriba centro) */}
+            <div
+              style={{
+                backgroundColor: datos?.superficies?.vestibular
+                  ? getEstadoConfig(datos.superficies.vestibular).color
+                  : "#F3F4F6",
+                borderColor: datos?.superficies?.vestibular
+                  ? getEstadoConfig(datos.superficies.vestibular).borderColor
+                  : "#D1D5DB"
               }}
               className="border"
             ></div>
             <div className="bg-gray-200 rounded-tr"></div>
-            
-            <div 
-              style={{ 
-                backgroundColor: datos?.estado !== "sano" ? estadoConfig.color : "#F3F4F6",
-                borderColor: estadoConfig.borderColor 
+
+            {/* Mesial (centro izquierda) */}
+            <div
+              style={{
+                backgroundColor: datos?.superficies?.mesial
+                  ? getEstadoConfig(datos.superficies.mesial).color
+                  : "#F3F4F6",
+                borderColor: datos?.superficies?.mesial
+                  ? getEstadoConfig(datos.superficies.mesial).borderColor
+                  : "#D1D5DB"
               }}
               className="border"
             ></div>
-            <div 
-              style={{ 
-                backgroundColor: datos?.estado !== "sano" ? estadoConfig.color : "#FFFFFF",
-                borderColor: estadoConfig.borderColor 
+            {/* Oclusal (centro) */}
+            <div
+              style={{
+                backgroundColor: datos?.superficies?.oclusal
+                  ? getEstadoConfig(datos.superficies.oclusal).color
+                  : "#FFFFFF",
+                borderColor: datos?.superficies?.oclusal
+                  ? getEstadoConfig(datos.superficies.oclusal).borderColor
+                  : "#D1D5DB"
               }}
               className="border-2 flex items-center justify-center"
             >
               {datos?.notas && <span className="text-xs">📝</span>}
             </div>
-            <div 
-              style={{ 
-                backgroundColor: datos?.estado !== "sano" ? estadoConfig.color : "#F3F4F6",
-                borderColor: estadoConfig.borderColor 
+            {/* Distal (centro derecha) */}
+            <div
+              style={{
+                backgroundColor: datos?.superficies?.distal
+                  ? getEstadoConfig(datos.superficies.distal).color
+                  : "#F3F4F6",
+                borderColor: datos?.superficies?.distal
+                  ? getEstadoConfig(datos.superficies.distal).borderColor
+                  : "#D1D5DB"
               }}
               className="border"
             ></div>
-            
+
             <div className="bg-gray-200 rounded-bl"></div>
-            <div 
-              style={{ 
-                backgroundColor: datos?.estado !== "sano" ? estadoConfig.color : "#F3F4F6",
-                borderColor: estadoConfig.borderColor 
+            {/* Lingual (abajo centro) */}
+            <div
+              style={{
+                backgroundColor: datos?.superficies?.lingual
+                  ? getEstadoConfig(datos.superficies.lingual).color
+                  : "#F3F4F6",
+                borderColor: datos?.superficies?.lingual
+                  ? getEstadoConfig(datos.superficies.lingual).borderColor
+                  : "#D1D5DB"
               }}
               className="border"
             ></div>
