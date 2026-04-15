@@ -234,6 +234,7 @@ export interface CrearTurnoData {
   pago_confirmado?: boolean
   precio_final?: number
   estado?: string
+  sobre_turno?: boolean
 }
 
 export interface CrearTurnoBookingData {

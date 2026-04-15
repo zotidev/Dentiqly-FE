@@ -12,11 +12,13 @@ import {
   Phone,
   Mail,
   List,
-  LayoutGrid
+  LayoutGrid,
+  Plus
 } from 'lucide-react'
 import { turnosApi } from '../../api'
 import type { Turno, Profesional } from '../../types'
 import { EditAppointmentModal } from './EditAppointmentModal'
+import { AdminAppointmentModal } from './AdminAppointmentModal'
 import { profesionalesApi } from '../../api/profesionales'
 
 type ViewType = 'day' | 'week' | 'month'
@@ -43,6 +45,7 @@ export const CalendarView: React.FC = () => {
 
   const [selectedAppointment, setSelectedAppointment] = useState<Turno | null>(null)
   const [showEditModal, setShowEditModal] = useState(false)
+  const [showNewModal, setShowNewModal] = useState(false)
   const [viewType, setViewType] = useState<ViewType>('month')
 
   useEffect(() => {
@@ -436,6 +439,14 @@ export const CalendarView: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-3">
+            <Button
+              onClick={() => setShowNewModal(true)}
+              size="sm"
+              className="bg-[#026498]"
+            >
+              <Plus className="h-4 w-4 mr-1" />
+              <span className="hidden sm:inline">Forzar Turno</span>
+            </Button>
             {/* Professional Filter */}
             <select
               value={selectedProfessionalId ?? ''}
@@ -487,7 +498,6 @@ export const CalendarView: React.FC = () => {
       {viewType === 'week' && renderWeekView()}
       {viewType === 'month' && renderMonthView()}
 
-      {/* Modal de detalles */}
       {selectedAppointment && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-xl max-w-md w-full">
@@ -608,6 +618,17 @@ export const CalendarView: React.FC = () => {
             fetchAppointments()
             setSelectedAppointment(null)
             setShowEditModal(false)
+          }}
+        />
+      )}
+      
+      {showNewModal && (
+        <AdminAppointmentModal
+          onClose={() => setShowNewModal(false)}
+          onCreate={() => {
+            fetchAppointments()
+            setShowNewModal(false)
+            alert('Turno creado exitosamente')
           }}
         />
       )}

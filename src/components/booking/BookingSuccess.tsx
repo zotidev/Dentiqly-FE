@@ -1,9 +1,10 @@
 "use client"
 
 import type React from "react"
+import { Link } from "react-router-dom"
 import { Card } from "../ui/Card"
 import { Button } from "../ui/Button"
-import { CheckCircle, Calendar, User, Phone, Mail } from "lucide-react"
+import { CheckCircle, Calendar, User, Phone, Mail, UserCircle, Key } from "lucide-react"
 
 interface BookingSuccessProps {
   appointmentData: {
@@ -13,6 +14,7 @@ interface BookingSuccessProps {
     patientName: string
     patientPhone: string
     patientEmail: string
+    patientDni?: string
   }
   onNewBooking: () => void
 }
@@ -99,6 +101,38 @@ export const BookingSuccess: React.FC<BookingSuccessProps> = ({ appointmentData,
               <li>• Si tienes obra social, trae tu tarjeta</li>
               <li>• Para cancelar o reprogramar, contactanos con 24hs de anticipación</li>
             </ul>
+          </div>
+
+          {/* Cuenta del paciente */}
+          <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 mb-6">
+            <div className="flex items-center gap-2 mb-3">
+              <UserCircle className="h-5 w-5 text-emerald-600" />
+              <h4 className="font-semibold text-foreground">Tu cuenta ha sido creada</h4>
+            </div>
+            <p className="text-sm text-muted-foreground mb-3">
+              Ya podes gestionar tu turno desde nuestro portal de pacientes. Tus datos de acceso son:
+            </p>
+            <div className="bg-white rounded-lg p-3 space-y-2 text-sm">
+              <div className="flex items-center gap-2">
+                <Mail className="h-4 w-4 text-muted-foreground" />
+                <span className="font-medium">Email:</span>
+                <span>{appointmentData.patientEmail}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Key className="h-4 w-4 text-muted-foreground" />
+                <span className="font-medium">Contraseña:</span>
+                <span>{appointmentData.patientDni || "Tu número de DNI"}</span>
+              </div>
+            </div>
+            <p className="text-xs text-emerald-600 mt-2">
+              Usá tu DNI como contraseña para acceder
+            </p>
+            <Link
+              to="/paciente/login"
+              className="block w-full mt-3 text-center px-4 py-2 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 transition-colors"
+            >
+              Ir a Mi Portal
+            </Link>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3">

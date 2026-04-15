@@ -11,6 +11,7 @@ interface DateTimeSelectionProps {
   selectedProfessional: Profesional | null
   selectedDateTime: string | null
   onDateTimeSelect: (dateTime: string) => void
+  mesActualBloqueado?: boolean
 }
 
 export const DateTimeSelection: React.FC<DateTimeSelectionProps> = ({
@@ -18,6 +19,7 @@ export const DateTimeSelection: React.FC<DateTimeSelectionProps> = ({
   selectedProfessional,
   selectedDateTime,
   onDateTimeSelect,
+  mesActualBloqueado = false,
 }) => {
   const [selectedDate, setSelectedDate] = useState<string>("")
   const [availableSlots, setAvailableSlots] = useState<string[]>([])
@@ -48,21 +50,33 @@ export const DateTimeSelection: React.FC<DateTimeSelectionProps> = ({
     loadProfessionalSchedule()
   }, [selectedProfessional])
 
-  // Generar próximos 14 días (incluyendo todos los días)
+  // Generar próximos 60 días (incluyendo todos los días)
   const getAvailableDates = () => {
     const dates = []
     const today = new Date()
+    const currentYear = today.getFullYear()
+    const currentMonth = today.getMonth() + 1
 
-    // Generar los próximos 14 días sin excluir ninguno
-    for (let i = 1; i <= 14; i++) {
+    // Si el mes actual está bloqueado, comenzar desde el próximo mes
+    let startOffset = 1
+    if (mesActualBloqueado) {
+      // Encontrar el primer día del próximo mes
+      const nextMonth = currentMonth === 12 ? 1 : currentMonth + 1
+      const nextMonthYear = currentMonth === 12 ? currentYear + 1 : currentYear
+      const firstDayNextMonth = new Date(`${nextMonthYear}-${String(nextMonth).padStart(2, '0')}-01`)
+      startOffset = Math.ceil((firstDayNextMonth.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+    }
+
+    // Generar los próximos 60 días starting from startOffset
+    for (let i = startOffset; i <= startOffset + 60; i++) {
       const date = new Date(today)
       date.setDate(today.getDate() + i)
 
-      // Generar fecha en formato YYYY-MM-DD usando hora local
-      const year = date.getFullYear()
-      const month = String(date.getMonth() + 1).padStart(2, '0')
-      const day = String(date.getDate()).padStart(2, '0')
-      dates.push(`${year}-${month}-${day}`)
+      const dateYear = date.getFullYear()
+      const dateMonth = date.getMonth() + 1
+      const monthKey = `${dateYear}-${String(dateMonth).padStart(2, '0')}`
+
+      dates.push(`${monthKey}-${String(date.getDate()).padStart(2, '0')}`)
     }
 
     return dates

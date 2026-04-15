@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { ServiceSelection } from "./ServiceSelection"
 import { ProfessionalSelection } from "./ProfessionalSelection"
 import { DateTimeSelection } from "./DateTimeSelection"
@@ -8,6 +8,7 @@ import { PatientForm } from "./PatientForm"
 import { BookingSuccess } from "./BookingSuccess"
 import type { Servicio, Profesional, CrearPacienteData } from "../../types"
 import { turnosApi, pacientesApi } from "../../api"
+import { patientPortalApi, getPatientToken } from "../../api/patient-portal"
 import { Calendar, ChevronLeft } from "lucide-react"
 
 // Payment configuration
@@ -27,6 +28,51 @@ export const BookingForm: React.FC = () => {
   const [bookingSuccess, setBookingSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
   const [bookingId, setBookingId] = useState<number | null>(null)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [mesActualBloqueado, setMesActualBloqueado] = useState(false)
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const token = getPatientToken()
+      if (token) {
+        try {
+          const perfil = await patientPortalApi.obtenerPerfil()
+          if (perfil.paciente) {
+            setIsAuthenticated(true)
+            const paciente = perfil.paciente
+            setPatientData({
+              nombre: paciente.nombre,
+              apellido: paciente.apellido,
+              tipo_documento: paciente.tipo_documento,
+              numero_documento: paciente.numero_documento,
+              fecha_nacimiento: paciente.fecha_nacimiento,
+              sexo: paciente.sexo,
+              email: paciente.email,
+              telefono: paciente.telefono,
+              direccion: paciente.direccion || "",
+              observaciones: "",
+            })
+            
+            // Verificar si tiene turno en el mes actual
+            const turnos = await patientPortalApi.obtenerMisTurnos()
+            const today = new Date()
+            const currentMonth = today.getMonth()
+            const currentYear = today.getFullYear()
+            const tieneTurnoEsteMes = turnos.some((t: any) => {
+              const fechaTurno = new Date(t.fecha)
+              return fechaTurno.getMonth() === currentMonth && 
+                     fechaTurno.getFullYear() === currentYear &&
+                     t.estado !== 'Cancelado'
+            })
+            setMesActualBloqueado(tieneTurnoEsteMes)
+          }
+        } catch (e) {
+          console.error("Error al obtener perfil:", e)
+        }
+      }
+    }
+    checkAuth()
+  }, [])
 
   const handleServiceSelect = (service: Servicio) => {
     setSelectedService(service)
@@ -40,7 +86,11 @@ export const BookingForm: React.FC = () => {
 
   const handleDateTimeSelect = (dateTime: string) => {
     setSelectedDateTime(dateTime)
-    setStep(4)
+    if (isAuthenticated && patientData) {
+      setStep(5) // Skip patient form, go directly to payment
+    } else {
+      setStep(4)
+    }
   }
 
   const handleBack = () => {
@@ -145,9 +195,10 @@ export const BookingForm: React.FC = () => {
           service: selectedService.nombre,
           professional: `${selectedProfessional.nombre} ${selectedProfessional.apellido}`,
           dateTime: selectedDateTime,
-          patientName: "",
-          patientPhone: "",
-          patientEmail: "",
+          patientName: patientData ? `${patientData.nombre} ${patientData.apellido}` : "",
+          patientPhone: patientData?.telefono || "",
+          patientEmail: patientData?.email || "",
+          patientDni: patientData?.numero_documento || "",
         }}
         onNewBooking={resetBooking}
       />
@@ -241,7 +292,7 @@ export const BookingForm: React.FC = () => {
                         {s}
                       </div>
                       <span className={`mt-2 text-xs font-medium transition-colors duration-300 ${step >= s ? "text-[#026498]" : "text-gray-400"}`}>
-                        {s === 1 ? "Servicio" : s === 2 ? "Profesional" : s === 3 ? "Fecha" : "Datos"}
+                        {s === 1 ? "Servicio" : s === 2 ? "Profesional" : s === 3 ? "Fecha" : (isAuthenticated ? "Pago" : "Datos")}
                       </span>
                     </div>
                   ))}
@@ -266,6 +317,7 @@ export const BookingForm: React.FC = () => {
                         selectedProfessional={selectedProfessional}
                         onDateTimeSelect={handleDateTimeSelect}
                         selectedDateTime={selectedDateTime}
+                        mesActualBloqueado={mesActualBloqueado}
                       />
 
                       {/* Copago Information Banner */}
@@ -420,6 +472,19 @@ export const BookingForm: React.FC = () => {
                     </div>
                   </div>
 
+                  {isAuthenticated && patientData ? (
+                    <div className="flex items-start space-x-3">
+                      <div className="p-2 bg-white/10 rounded-lg">
+                        <div className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="text-blue-100 text-xs uppercase tracking-wider font-medium mb-1">Paciente</p>
+                        <p className="font-semibold text-lg leading-tight">
+                          {patientData.nombre} {patientData.apellido}
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
                   <div className={`flex items-start space-x-3 transition-opacity duration-300 ${step >= 2 ? "opacity-100" : "opacity-50"}`}>
                     <div className="p-2 bg-white/10 rounded-lg">
                       <div className="w-5 h-5" /> {/* Placeholder icon */}
@@ -433,6 +498,7 @@ export const BookingForm: React.FC = () => {
                       </p>
                     </div>
                   </div>
+                  )}
 
                   <div className={`flex items-start space-x-3 transition-opacity duration-300 ${step >= 3 ? "opacity-100" : "opacity-50"}`}>
                     <div className="p-2 bg-white/10 rounded-lg">

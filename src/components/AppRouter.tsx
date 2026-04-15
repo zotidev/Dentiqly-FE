@@ -5,6 +5,7 @@ import { dentalColors } from '../config/colors'
 // Import both apps
 import { BookingForm } from './booking/BookingForm'
 import { AdminApp } from './admin/AdminApp'
+import { PatientApp } from './patient-portal/PatientApp'
 
 const BookingLayout: React.FC = () => {
   return (
@@ -22,6 +23,7 @@ export const AppRouter: React.FC = () => {
     <Routes>
       <Route path="/" element={<BookingLayout />} />
       <Route path="/admin/*" element={<AdminApp />} />
+      <Route path="/paciente/*" element={<PatientApp />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
