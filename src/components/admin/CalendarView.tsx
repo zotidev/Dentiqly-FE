@@ -445,7 +445,7 @@ export const CalendarView: React.FC = () => {
               className="bg-[#026498]"
             >
               <Plus className="h-4 w-4 mr-1" />
-              <span className="hidden sm:inline">Forzar Turno</span>
+              <span className="hidden sm:inline">Agregar sobreturno</span>
             </Button>
             {/* Professional Filter */}
             <select

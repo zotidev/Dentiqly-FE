@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Button } from '../ui/Button'
 import { Input } from '../ui/Input'
+import { Plus } from 'lucide-react'
 import { turnosApi, profesionalesApi, pacientesApi, serviciosApi } from '../../api'
 import type { Profesional, Paciente, Servicio } from '../../types'
 
@@ -113,138 +114,173 @@ export const AdminAppointmentModal: React.FC<AdminAppointmentModalProps> = ({ on
     }
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-            <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 my-8">
-                <h3 className="text-lg font-semibold mb-4 text-[#026498]">Forzar Nuevo Turno (Admin)</h3>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <div>
-                        <label className="block text-sm font-medium mb-1">Buscar Paciente</label>
-                        <Input
-                            type="text"
-                            placeholder="DNI, nombre o apellido..."
-                            value={searchPaciente}
-                            onChange={(e) => setSearchPaciente(e.target.value)}
-                            className="mb-2"
-                        />
-                        <select
-                            value={formData.paciente_id}
-                            onChange={(e) => setFormData({ ...formData, paciente_id: e.target.value })}
-                            className="w-full border rounded-md p-2"
-                            required
-                        >
-                            <option value="">Seleccionar paciente</option>
-                            {pacientes.map((paciente) => (
-                                <option key={paciente.id} value={paciente.id}>
-                                    {paciente.numero_documento} - {paciente.apellido}, {paciente.nombre}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-all duration-500">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-8 my-8 relative animate-in fade-in zoom-in-95 duration-300">
+                <button 
+                    onClick={onClose}
+                    className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                    <Plus className="w-6 h-6 rotate-45" />
+                </button>
 
-                    <div>
-                        <label className="block text-sm font-medium mb-1">Profesional</label>
-                        <select
-                            value={formData.profesional_id || ''}
-                            onChange={(e) => setFormData({ ...formData, profesional_id: parseInt(e.target.value) })}
-                            className="w-full border rounded-md p-2"
-                            required
-                        >
-                            <option value="">Seleccionar profesional</option>
-                            {profesionales.map((prof) => (
-                                <option key={prof.id} value={prof.id}>
-                                    {prof.apellido}, {prof.nombre} - {prof.especialidad}
-                                </option>
-                            ))}
-                        </select>
+                <h3 className="text-2xl font-black mb-6 text-[#026498] flex items-center tracking-tight">
+                    <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center mr-3 text-[#026498]">
+                        <Plus className="w-6 h-6" />
                     </div>
+                    Agregar Sobreturno
+                </h3>
 
-                    <div>
-                        <label className="block text-sm font-medium mb-1">Servicio</label>
-                        <select
-                            value={formData.servicio_id || ''}
-                            onChange={(e) => setFormData({ ...formData, servicio_id: parseInt(e.target.value) })}
-                            className="w-full border rounded-md p-2"
-                            required
-                        >
-                            <option value="">Seleccionar servicio</option>
-                            {servicios.map((serv) => (
-                                <option key={serv.id} value={serv.id}>
-                                    {serv.nombre} ({serv.duracion_estimada} min)
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className="space-y-4">
+                        <div className="bg-gray-50/80 p-5 rounded-2xl border border-gray-100 space-y-4">
+                            <div>
+                                <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Buscar Paciente</label>
+                                <Input
+                                    type="text"
+                                    placeholder="DNI, nombre o apellido..."
+                                    value={searchPaciente}
+                                    onChange={(e) => setSearchPaciente(e.target.value)}
+                                    className="mb-3 h-11"
+                                />
+                                <select
+                                    value={formData.paciente_id}
+                                    onChange={(e) => setFormData({ ...formData, paciente_id: e.target.value })}
+                                    className="w-full border border-gray-200 rounded-xl p-3 h-12 bg-white text-sm focus:ring-2 focus:ring-[#026498] focus:border-transparent outline-none transition-all"
+                                    required
+                                >
+                                    <option value="">Seleccionar paciente</option>
+                                    {pacientes.map((paciente) => (
+                                        <option key={paciente.id} value={paciente.id}>
+                                            {paciente.numero_documento} - {paciente.apellido}, {paciente.nombre}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
 
-                    <div className="flex space-x-2">
-                        <div className="w-1/2">
-                            <label className="block text-sm font-medium mb-1">Fecha</label>
-                            <Input
-                                type="date"
-                                value={formData.fecha}
-                                onChange={(e) => setFormData({ ...formData, fecha: e.target.value })}
-                                required
-                            />
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Profesional</label>
+                                    <select
+                                        value={formData.profesional_id || ''}
+                                        onChange={(e) => setFormData({ ...formData, profesional_id: parseInt(e.target.value) })}
+                                        className="w-full border border-gray-200 rounded-xl p-3 h-12 bg-white text-sm focus:ring-2 focus:ring-[#026498] focus:border-transparent outline-none transition-all"
+                                        required
+                                    >
+                                        <option value="">Seleccionar profesional</option>
+                                        {profesionales.map((prof) => (
+                                            <option key={prof.id} value={prof.id}>
+                                                {prof.apellido}, {prof.nombre} - {prof.especialidad}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Servicio</label>
+                                    <select
+                                        value={formData.servicio_id || ''}
+                                        onChange={(e) => setFormData({ ...formData, servicio_id: parseInt(e.target.value) })}
+                                        className="w-full border border-gray-200 rounded-xl p-3 h-12 bg-white text-sm focus:ring-2 focus:ring-[#026498] focus:border-transparent outline-none transition-all"
+                                        required
+                                    >
+                                        <option value="">Seleccionar servicio</option>
+                                        {servicios.map((serv) => (
+                                            <option key={serv.id} value={serv.id}>
+                                                {serv.nombre} ({serv.duracion_estimada} min)
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
                         </div>
-                        <div className="w-1/4">
-                            <label className="block text-sm font-medium mb-1">Inicio</label>
-                            <Input
-                                type="time"
-                                value={formData.hora_inicio}
-                                onChange={(e) => setFormData({ ...formData, hora_inicio: e.target.value })}
-                                required
-                            />
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 bg-blue-50/30 p-5 rounded-2xl border border-blue-50">
+                            <div className="sm:col-span-2">
+                                <label className="block text-[10px] font-black uppercase tracking-widest text-[#026498] mb-2">Fecha</label>
+                                <Input
+                                    type="date"
+                                    value={formData.fecha}
+                                    onChange={(e) => setFormData({ ...formData, fecha: e.target.value })}
+                                    required
+                                    className="h-11 border-blue-100"
+                                />
+                            </div>
+                            <div className="sm:col-span-1">
+                                <label className="block text-[10px] font-black uppercase tracking-widest text-[#026498] mb-2">Inicio</label>
+                                <Input
+                                    type="time"
+                                    value={formData.hora_inicio}
+                                    onChange={(e) => setFormData({ ...formData, hora_inicio: e.target.value })}
+                                    required
+                                    className="h-11 border-blue-100"
+                                />
+                            </div>
+                            <div className="sm:col-span-1">
+                                <label className="block text-[10px] font-black uppercase tracking-widest text-[#026498] mb-2">Fin</label>
+                                <Input
+                                    type="time"
+                                    value={formData.hora_fin}
+                                    onChange={(e) => setFormData({ ...formData, hora_fin: e.target.value })}
+                                    required
+                                    className="h-11 border-blue-100"
+                                />
+                            </div>
                         </div>
-                        <div className="w-1/4">
-                            <label className="block text-sm font-medium mb-1">Fin</label>
-                            <Input
-                                type="time"
-                                value={formData.hora_fin}
-                                onChange={(e) => setFormData({ ...formData, hora_fin: e.target.value })}
-                                required
+
+                        <div className="p-4 bg-red-50/50 border border-red-100 rounded-2xl flex items-center animate-pulse-subtle">
+                            <input
+                                type="checkbox"
+                                id="sobre_turno"
+                                checked={formData.sobre_turno}
+                                onChange={(e) => setFormData({ ...formData, sobre_turno: e.target.checked })}
+                                className="mr-4 w-6 h-6 text-red-600 rounded-lg focus:ring-red-500 border-red-200 transition-all cursor-pointer"
                             />
+                            <label htmlFor="sobre_turno" className="text-sm font-black text-red-900 cursor-pointer flex-1">
+                                Ignorar Reglas / Forzar (Sobre Turno)
+                            </label>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Estado</label>
+                                <select
+                                    value={formData.estado}
+                                    onChange={(e) => setFormData({ ...formData, estado: e.target.value })}
+                                    className="w-full border border-gray-200 rounded-xl p-3 h-12 bg-white text-sm focus:ring-2 focus:ring-[#026498] focus:border-transparent outline-none transition-all"
+                                >
+                                    <option value="Confirmado">Confirmado</option>
+                                    <option value="Creado">Creado</option>
+                                    <option value="En sala de espera">En sala de espera</option>
+                                    <option value="Atendido">Atendido</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Observaciones</label>
+                                <textarea
+                                    value={formData.observaciones}
+                                    onChange={(e) => setFormData({ ...formData, observaciones: e.target.value })}
+                                    className="w-full border border-gray-200 rounded-xl p-3 h-12 bg-white text-sm focus:ring-2 focus:ring-[#026498] focus:border-transparent outline-none transition-all resize-none"
+                                    placeholder="Notas adicionales..."
+                                />
+                            </div>
                         </div>
                     </div>
 
-                    <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-center">
-                        <input
-                            type="checkbox"
-                            id="sobre_turno"
-                            checked={formData.sobre_turno}
-                            onChange={(e) => setFormData({ ...formData, sobre_turno: e.target.checked })}
-                            className="mr-3 w-5 h-5 text-red-600 rounded focus:ring-red-500"
-                        />
-                        <label htmlFor="sobre_turno" className="text-sm font-bold text-red-800 cursor-pointer">
-                            Ignorar Reglas / Forzar (Sobre Turno)
-                        </label>
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium mb-1">Estado</label>
-                        <select
-                            value={formData.estado}
-                            onChange={(e) => setFormData({ ...formData, estado: e.target.value })}
-                            className="w-full border rounded-md p-2"
+                    <div className="flex gap-4 pt-4">
+                        <Button 
+                            type="button" 
+                            variant="outline" 
+                            onClick={onClose}
+                            className="flex-1 h-12 rounded-xl font-bold"
                         >
-                            <option value="Confirmado">Confirmado</option>
-                            <option value="Creado">Creado</option>
-                            <option value="En sala de espera">En sala de espera</option>
-                            <option value="Atendido">Atendido</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium mb-1">Observaciones</label>
-                        <textarea
-                            value={formData.observaciones}
-                            onChange={(e) => setFormData({ ...formData, observaciones: e.target.value })}
-                            className="w-full border rounded-md p-2 h-16"
-                        />
-                    </div>
-                    <div className="flex justify-end space-x-3 pt-2">
-                        <Button type="button" variant="outline" onClick={onClose}>
                             Cancelar
                         </Button>
-                        <Button type="submit" disabled={loading} className="bg-[#026498]">
-                            {loading ? 'Guardando...' : 'Crear Turno Manual'}
+                        <Button 
+                            type="submit" 
+                            disabled={loading} 
+                            className="flex-1 h-12 rounded-xl bg-[#026498] text-white font-black shadow-lg shadow-blue-900/10 hover:shadow-xl hover:-translate-y-0.5 transition-all"
+                        >
+                            {loading ? 'Guardando...' : 'Agregar Sobreturno'}
                         </Button>
                     </div>
                 </form>

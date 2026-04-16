@@ -1,6 +1,6 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { useNavigate, Link } from "react-router-dom"
-import { patientPortalApi, setPatientToken } from "../../api/patient-portal"
+import { patientPortalApi, setPatientToken, getPatientToken } from "../../api/patient-portal"
 import { Button } from "../ui/Button"
 import { Input } from "../ui/Input"
 import { dentalColors } from "../../config/colors"
@@ -11,6 +11,13 @@ export const LoginPaciente: React.FC = () => {
   const [dni, setDni] = useState("")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    const token = getPatientToken()
+    if (token) {
+      navigate("/paciente/dashboard")
+    }
+  }, [navigate])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

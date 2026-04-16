@@ -304,28 +304,6 @@ export const PatientForm: React.FC<PatientFormProps> = ({ onPatientData, loading
         </div>
 
 
-        {/* Copago Info */}
-        {copago && (
-          <div className="bg-blue-50 border border-blue-100 rounded-2xl p-8 shadow-sm">
-            <div className="flex items-start">
-              <div className="flex-shrink-0">
-                <svg className="h-6 w-6 text-[#026498]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <div className="ml-3">
-                <h3 className="text-lg font-bold text-[#026498]">Información de Copago</h3>
-                <div className="mt-2 text-blue-700">
-                  <p>
-                    {copago.monto > 0
-                      ? `Deberá abonar un copago de $${copago.monto} al momento de la consulta.`
-                      : "No debe abonar copago para esta prestación."}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
 
         <div className="pt-6">
           <Button

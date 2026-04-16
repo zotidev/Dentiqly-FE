@@ -1,10 +1,8 @@
 "use client"
 
-import type React from "react"
+import React from "react"
 import { Link } from "react-router-dom"
-import { Card } from "../ui/Card"
-import { Button } from "../ui/Button"
-import { CheckCircle, Calendar, User, Phone, Mail, UserCircle, Key } from "lucide-react"
+import { CheckCircle, Calendar, User, Phone, Mail, UserCircle, Key, Printer, ArrowRight, Stethoscope } from "lucide-react"
 
 interface BookingSuccessProps {
   appointmentData: {
@@ -39,112 +37,140 @@ export const BookingSuccess: React.FC<BookingSuccessProps> = ({ appointmentData,
   const { date, time } = formatDateTime(appointmentData.dateTime)
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <Card>
-        <div className="text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
-            <CheckCircle className="h-8 w-8 text-green-600" />
+    <div className="max-w-3xl mx-auto py-10 animate-in fade-in zoom-in duration-700">
+      <div className="bg-white rounded-[3rem] shadow-2xl shadow-gray-200/50 border border-white overflow-hidden">
+        <div className="bg-[#026498] p-12 text-center text-white relative overflow-hidden">
+          {/* Decorative elements */}
+          <div className="absolute top-0 right-0 -mt-16 -mr-16 w-64 h-64 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
+          <div className="absolute bottom-0 left-0 -mb-16 -ml-16 w-64 h-64 bg-black/10 rounded-full blur-3xl pointer-events-none"></div>
+          
+          <div className="relative z-10">
+            <div className="inline-flex items-center justify-center w-24 h-24 bg-white/20 rounded-[2rem] mb-6 backdrop-blur-sm border border-white/20 animate-bounce-subtle">
+              <CheckCircle className="h-12 w-12 text-white" />
+            </div>
+            <h2 className="text-4xl font-black mb-4 tracking-tight">¡Turno Reservado!</h2>
+            <p className="text-blue-100 text-lg font-medium max-w-md mx-auto opacity-90">
+              Tu cita ha sido agendada con éxito. Te enviamos un email con todos los detalles.
+            </p>
           </div>
+        </div>
 
-          <h2 className="text-2xl font-bold text-foreground mb-2">¡Cita Confirmada!</h2>
+        <div className="p-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+            {/* Detalles de la cita */}
+            <div className="space-y-8">
+              <h3 className="text-xl font-black text-gray-900 flex items-center mb-6">
+                <span className="w-1.5 h-6 bg-[#026498] rounded-full mr-3"></span>
+                Detalles de tu Cita
+              </h3>
 
-          <p className="text-muted-foreground mb-6">
-            Tu cita ha sido agendada exitosamente. Recibirás un email de confirmación en breve.
-          </p>
-
-          {/* Detalles de la cita */}
-          <div className="bg-muted/50 rounded-lg p-6 mb-6 text-left">
-            <h3 className="font-semibold text-foreground mb-4">Detalles de tu Cita</h3>
-
-            <div className="space-y-3">
-              <div className="flex items-center">
-                <Calendar className="h-5 w-5 text-primary mr-3" />
-                <div>
-                  <p className="font-medium text-foreground capitalize">{date}</p>
-                  <p className="text-sm text-muted-foreground">a las {time}hs</p>
+              <div className="space-y-6">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-[#026498] flex-shrink-0">
+                    <Calendar className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">Fecha y Hora</p>
+                    <p className="font-bold text-gray-900 text-lg capitalize">{date}</p>
+                    <p className="text-[#026498] font-black">{time} hs</p>
+                  </div>
                 </div>
-              </div>
 
-              <div className="flex items-center">
-                <User className="h-5 w-5 text-primary mr-3" />
-                <div>
-                  <p className="font-medium text-foreground">{appointmentData.professional}</p>
-                  <p className="text-sm text-muted-foreground">{appointmentData.service}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center">
-                <User className="h-5 w-5 text-primary mr-3" />
-                <div>
-                  <p className="font-medium text-foreground">{appointmentData.patientName}</p>
-                  <div className="flex items-center space-x-4 mt-1">
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <Phone className="h-3 w-3 mr-1" />
-                      {appointmentData.patientPhone}
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-[#026498] flex-shrink-0">
+                    <User className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">Profesional</p>
+                    <p className="font-bold text-gray-900 text-lg">{appointmentData.professional}</p>
+                    <div className="flex items-center text-gray-500 font-medium text-sm mt-1">
+                      <Stethoscope className="h-3.5 w-3.5 mr-1.5 text-[#026498]" />
+                      {appointmentData.service}
                     </div>
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <Mail className="h-3 w-3 mr-1" />
-                      {appointmentData.patientEmail}
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-[#026498] flex-shrink-0">
+                    <UserCircle className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">Paciente</p>
+                    <p className="font-bold text-gray-900 text-lg">{appointmentData.patientName}</p>
+                    <div className="flex flex-wrap items-center gap-4 mt-2">
+                      <div className="flex items-center text-xs text-gray-500 font-bold">
+                        <Phone className="h-3.5 w-3.5 mr-1.5 text-[#026498]" />
+                        {appointmentData.patientPhone}
+                      </div>
+                      <div className="flex items-center text-xs text-gray-500 font-bold">
+                        <Mail className="h-3.5 w-3.5 mr-1.5 text-[#026498]" />
+                        {appointmentData.patientEmail}
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
+
+            {/* Acceso al Portal */}
+            <div className="space-y-8">
+              <h3 className="text-xl font-black text-gray-900 flex items-center mb-6">
+                <span className="w-1.5 h-6 bg-emerald-500 rounded-full mr-3"></span>
+                Gestiona tu Turno
+              </h3>
+
+              <div className="bg-emerald-50/50 rounded-[2rem] p-8 border border-emerald-100 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 -mt-4 -mr-4 w-20 h-20 bg-emerald-500/5 rounded-full blur-xl transition-transform duration-500 group-hover:scale-150"></div>
+                
+                <p className="text-sm font-medium text-gray-600 mb-6 leading-relaxed">
+                  Ya podés gestionar tus turnos desde el portal. Usá tu <span className="font-black text-emerald-700">DNI</span> como contraseña.
+                </p>
+
+                <div className="space-y-4 mb-8">
+                  <div className="bg-white px-5 py-4 rounded-2xl border border-emerald-100 flex items-center justify-between">
+                    <div>
+                      <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mb-1">Usuario / Email</p>
+                      <p className="font-bold text-gray-800 text-sm">{appointmentData.patientEmail}</p>
+                    </div>
+                    <Mail className="h-5 w-5 text-emerald-200" />
+                  </div>
+                  <div className="bg-white px-5 py-4 rounded-2xl border border-emerald-100 flex items-center justify-between">
+                    <div>
+                      <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mb-1">Contraseña</p>
+                      <p className="font-bold text-gray-800 text-sm">{appointmentData.patientDni || "Tu número de DNI"}</p>
+                    </div>
+                    <Key className="h-5 w-5 text-emerald-200" />
+                  </div>
+                </div>
+
+                <Link
+                  to="/paciente/dashboard"
+                  className="group/btn relative flex items-center justify-center gap-3 bg-emerald-600 hover:bg-emerald-700 text-white font-black px-6 py-4 rounded-2xl transition-all duration-300 shadow-xl shadow-emerald-900/10 hover:-translate-y-1"
+                >
+                  Acceder a Mi Portal
+                  <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover/btn:translate-x-1" />
+                </Link>
+              </div>
+            </div>
           </div>
 
-          {/* Información importante */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-            <h4 className="font-semibold text-foreground mb-2">Información Importante</h4>
-            <ul className="text-sm text-muted-foreground text-left space-y-1">
-              <li>• Llega 15 minutos antes de tu cita</li>
-              <li>• Trae tu documento de identidad</li>
-              <li>• Si tienes obra social, trae tu tarjeta</li>
-              <li>• Para cancelar o reprogramar, contactanos con 24hs de anticipación</li>
-            </ul>
-          </div>
-
-          {/* Cuenta del paciente */}
-          <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 mb-6">
-            <div className="flex items-center gap-2 mb-3">
-              <UserCircle className="h-5 w-5 text-emerald-600" />
-              <h4 className="font-semibold text-foreground">Tu cuenta ha sido creada</h4>
-            </div>
-            <p className="text-sm text-muted-foreground mb-3">
-              Ya podes gestionar tu turno desde nuestro portal de pacientes. Tus datos de acceso son:
-            </p>
-            <div className="bg-white rounded-lg p-3 space-y-2 text-sm">
-              <div className="flex items-center gap-2">
-                <Mail className="h-4 w-4 text-muted-foreground" />
-                <span className="font-medium">Email:</span>
-                <span>{appointmentData.patientEmail}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Key className="h-4 w-4 text-muted-foreground" />
-                <span className="font-medium">Contraseña:</span>
-                <span>{appointmentData.patientDni || "Tu número de DNI"}</span>
-              </div>
-            </div>
-            <p className="text-xs text-emerald-600 mt-2">
-              Usá tu DNI como contraseña para acceder
-            </p>
-            <Link
-              to="/paciente/login"
-              className="block w-full mt-3 text-center px-4 py-2 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 transition-colors"
+          <div className="mt-12 pt-10 border-t border-gray-100 flex flex-col sm:flex-row gap-4">
+            <button
+              onClick={onNewBooking}
+              className="flex-1 px-8 py-5 rounded-[1.5rem] font-black text-gray-500 bg-gray-50 hover:bg-white hover:text-[#026498] hover:shadow-xl hover:shadow-gray-200 transition-all duration-300 border-2 border-transparent hover:border-blue-100 uppercase tracking-widest text-xs"
             >
-              Ir a Mi Portal
-            </Link>
-          </div>
-
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Button variant="outline" onClick={onNewBooking} className="flex-1 bg-transparent">
               Agendar Nueva Cita
-            </Button>
-            <Button onClick={() => window.print()} className="flex-1">
-              Imprimir Confirmación
-            </Button>
+            </button>
+            <button
+              onClick={() => window.print()}
+              className="flex-1 flex items-center justify-center gap-3 px-8 py-5 rounded-[1.5rem] font-black text-white bg-[#026498] hover:bg-[#0c4a6e] shadow-xl shadow-blue-900/10 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 uppercase tracking-widest text-xs"
+            >
+              <Printer className="h-5 w-5" />
+              Imprimir Comprobante
+            </button>
           </div>
         </div>
-      </Card>
+      </div>
     </div>
   )
 }

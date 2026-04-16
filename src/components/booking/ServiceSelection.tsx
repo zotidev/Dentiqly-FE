@@ -5,7 +5,7 @@ import { useEffect, useState } from "react"
 import { Button } from "../ui/Button"
 import type { Servicio } from "../../types"
 import { serviciosApi } from "../../api/servicios"
-import { Clock } from "lucide-react"
+import { Clock, ChevronLeft } from "lucide-react"
 
 interface ServiceSelectionProps {
   selectedService: Servicio | null
@@ -67,26 +67,27 @@ export const ServiceSelection: React.FC<ServiceSelectionProps> = ({ selectedServ
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {services.map((service) => (
           <div
             key={service.id}
             onClick={() => onServiceSelect(service)}
             className={`
-              relative group p-8 rounded-2xl border-2 transition-all duration-300 cursor-pointer overflow-hidden
+              relative group p-10 rounded-[2rem] border-2 transition-all duration-500 cursor-pointer overflow-hidden
               ${selectedService?.id === service.id
-                ? "border-[#026498] bg-blue-50/30 shadow-lg scale-[1.02]"
-                : "border-gray-100 bg-white hover:border-blue-200 hover:shadow-xl hover:-translate-y-1"
+                ? "border-[#026498] bg-blue-50/40 shadow-2xl shadow-blue-900/10 scale-[1.02]"
+                : "border-gray-100 bg-white hover:border-blue-200 hover:shadow-2xl hover:shadow-gray-200/50 hover:-translate-y-2"
               }
             `}
           >
+            {/* Selection Indicator */}
             <div className={`
-              absolute top-0 right-0 p-3 rounded-bl-2xl transition-colors duration-300
-              ${selectedService?.id === service.id ? "bg-[#026498] text-white" : "bg-gray-100 text-gray-400 group-hover:bg-blue-100 group-hover:text-[#026498]"}
+              absolute top-0 right-0 p-5 rounded-bl-[1.5rem] transition-all duration-500
+              ${selectedService?.id === service.id ? "bg-[#026498] text-white" : "bg-gray-50 text-gray-300 group-hover:bg-blue-100 group-hover:text-[#026498]"}
             `}>
               {selectedService?.id === service.id ? (
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                <svg className="w-6 h-6 animate-in zoom-in duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                 </svg>
               ) : (
                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -96,29 +97,44 @@ export const ServiceSelection: React.FC<ServiceSelectionProps> = ({ selectedServ
             </div>
 
             <div className="mb-6">
-              <h4 className={`text-xl font-bold mb-2 ${selectedService?.id === service.id ? "text-[#026498]" : "text-gray-900"}`}>
+              <span className={`text-[10px] font-black uppercase tracking-[0.2em] mb-3 block ${selectedService?.id === service.id ? "text-[#026498]/60" : "text-gray-400"}`}>
+                {service.categoria || "Tratamiento"}
+              </span>
+              <h4 className={`text-2xl font-black mb-3 leading-tight ${selectedService?.id === service.id ? "text-[#026498]" : "text-gray-900"}`}>
                 {service.nombre}
               </h4>
             </div>
 
             {service.descripcion && (
-              <p className="text-gray-500 text-sm mb-6 leading-relaxed line-clamp-3">
+              <p className="text-gray-500 text-sm mb-8 leading-relaxed line-clamp-2">
                 {service.descripcion}
               </p>
             )}
 
-            <div className="flex items-center justify-between pt-6 border-t border-gray-100">
-              <div className="flex items-center text-sm text-gray-500 font-medium">
-                <Clock className="h-5 w-5 mr-2 text-[#026498]" />
-                {service.duracion_estimada} minutos
+            <div className="flex items-center justify-between pt-8 border-t border-dashed border-gray-100">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-[#026498]">
+                  <Clock className="w-5 h-5" />
+                </div>
+                <div>
+                  <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Duración</p>
+                  <p className="text-sm font-black text-gray-900">{service.duracion_estimada} min</p>
+                </div>
               </div>
-              <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">
-                {service.categoria}
-              </span>
+              
+              <div className="text-right">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-500 ${selectedService?.id === service.id ? "bg-[#026498] text-white" : "bg-gray-50 text-gray-300"}`}>
+                  <ChevronLeft className="w-5 h-5 rotate-180" />
+                </div>
+              </div>
             </div>
+
+            {/* Subtle background decoration */}
+            <div className={`absolute -bottom-10 -right-10 w-40 h-40 rounded-full blur-3xl transition-opacity duration-500 ${selectedService?.id === service.id ? "bg-blue-200/20 opacity-100" : "opacity-0"}`} />
           </div>
         ))}
       </div>
+
     </div>
   )
 }

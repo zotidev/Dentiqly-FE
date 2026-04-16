@@ -88,52 +88,58 @@ export const ProfessionalSelection: React.FC<ProfessionalSelectionProps> = ({
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {professionals.map((professional) => (
           <div
             key={professional.id}
             onClick={() => onProfessionalSelect(professional)}
             className={`
-              flex items-center p-6 rounded-2xl border-2 transition-all duration-300 cursor-pointer
+              relative group flex items-center p-8 rounded-[2rem] border-2 transition-all duration-500 cursor-pointer overflow-hidden
               ${selectedProfessional?.id === professional.id
-                ? "border-[#026498] bg-blue-50/30 shadow-lg scale-[1.02]"
-                : "border-gray-100 bg-white hover:border-blue-200 hover:shadow-xl hover:-translate-y-1"
+                ? "border-[#026498] bg-blue-50/40 shadow-2xl shadow-blue-900/10 scale-[1.02]"
+                : "border-gray-100 bg-white hover:border-blue-200 hover:shadow-2xl hover:shadow-gray-200/50 hover:-translate-y-2"
               }
             `}
           >
+            {/* Avatar Section */}
             <div className={`
-              w-20 h-20 rounded-full flex items-center justify-center mr-6 shadow-md border-4
-              ${selectedProfessional?.id === professional.id ? "bg-[#026498] text-white border-blue-200" : "bg-gray-50 text-gray-400 border-white"}
+              relative w-24 h-24 rounded-3xl flex items-center justify-center mr-8 shadow-2xl transition-all duration-500 overflow-hidden
+              ${selectedProfessional?.id === professional.id ? "bg-[#026498] text-white rotate-6" : "bg-gray-50 text-gray-400 group-hover:rotate-6"}
             `}>
-              <User className="h-10 w-10" />
+              {/* Decorative background in avatar */}
+              <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-50" />
+              <User className={`w-12 h-12 relative z-10 transition-transform duration-500 ${selectedProfessional?.id === professional.id ? "scale-110" : "group-hover:scale-110"}`} />
             </div>
 
-            <div className="flex-1">
-              <h4 className={`font-bold text-xl mb-1 ${selectedProfessional?.id === professional.id ? "text-[#026498]" : "text-gray-900"}`}>
+            <div className="flex-1 min-w-0 pr-8">
+              <span className={`text-[10px] font-black uppercase tracking-[0.2em] mb-2 block ${selectedProfessional?.id === professional.id ? "text-[#026498]/60" : "text-gray-400"}`}>
+                Especialista
+              </span>
+              <h4 className={`text-2xl font-black mb-2 truncate leading-tight ${selectedProfessional?.id === professional.id ? "text-[#026498]" : "text-gray-900"}`}>
                 {professional.nombre} {professional.apellido}
               </h4>
-              <div className="flex items-center text-sm font-medium text-gray-500 mb-2">
-                <Award className="h-4 w-4 mr-1.5 text-[#026498]" />
-                {professional.especialidad}
-              </div>
-              <div className={`
-                text-xs font-semibold px-3 py-1 rounded-full inline-block
-                ${selectedProfessional?.id === professional.id ? "bg-blue-100 text-[#026498]" : "bg-gray-100 text-gray-500"}
-              `}>
-                Disponible
+              <div className="flex items-center text-sm font-bold text-gray-500">
+                <Award className="h-4 w-4 mr-2 text-[#026498]" />
+                <span className="truncate">{professional.especialidad}</span>
               </div>
             </div>
 
-            {selectedProfessional?.id === professional.id && (
-              <div className="ml-4 text-[#026498]">
-                <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-            )}
+            {/* Selection Tick */}
+            <div className={`
+              absolute top-0 right-0 p-5 rounded-bl-[1.5rem] transition-all duration-500
+              ${selectedProfessional?.id === professional.id ? "bg-[#026498] text-white" : "bg-transparent text-transparent"}
+            `}>
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+
+            {/* Subtle background decoration */}
+            <div className={`absolute -bottom-10 -right-10 w-32 h-32 rounded-full blur-3xl transition-opacity duration-500 ${selectedProfessional?.id === professional.id ? "bg-blue-200/20 opacity-100" : "opacity-0"}`} />
           </div>
         ))}
       </div>
+
     </div>
   )
 }
