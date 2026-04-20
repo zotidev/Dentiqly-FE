@@ -26,8 +26,12 @@ export class ApiClient {
 
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const headers: HeadersInit = {
-      "Content-Type": "application/json",
       ...options.headers,
+    }
+
+    // Solo añadir Content-Type si no es FormData
+    if (!(options.body instanceof FormData)) {
+      headers["Content-Type"] = "application/json"
     }
 
     if (this.token) {
@@ -57,17 +61,19 @@ export class ApiClient {
     return this.request<T>(endpoint, { method: "GET" })
   }
 
-  async post<T>(endpoint: string, data: any): Promise<T> {
+  async post<T>(endpoint: string, data: any, options: Partial<RequestInit> = {}): Promise<T> {
     return this.request<T>(endpoint, {
+      ...options,
       method: "POST",
-      body: JSON.stringify(data),
+      body: data instanceof FormData ? data : JSON.stringify(data),
     })
   }
 
-  async put<T>(endpoint: string, data: any): Promise<T> {
+  async put<T>(endpoint: string, data: any, options: Partial<RequestInit> = {}): Promise<T> {
     return this.request<T>(endpoint, {
+      ...options,
       method: "PUT",
-      body: JSON.stringify(data),
+      body: data instanceof FormData ? data : JSON.stringify(data),
     })
   }
 

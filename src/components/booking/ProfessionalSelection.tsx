@@ -108,19 +108,27 @@ export const ProfessionalSelection: React.FC<ProfessionalSelectionProps> = ({
             `}>
               {/* Decorative background in avatar */}
               <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-50" />
-              <User className={`w-12 h-12 relative z-10 transition-transform duration-500 ${selectedProfessional?.id === professional.id ? "scale-110" : "group-hover:scale-110"}`} />
+              {professional.foto_url ? (
+                <img 
+                  src={professional.foto_url} 
+                  alt={`${professional.nombre} ${professional.apellido}`} 
+                  className={`w-full h-full object-cover relative z-10 transition-transform duration-500 ${selectedProfessional?.id === professional.id ? "scale-110" : "group-hover:scale-110"}`} 
+                />
+              ) : (
+                <User className={`w-12 h-12 relative z-10 transition-transform duration-500 ${selectedProfessional?.id === professional.id ? "scale-110" : "group-hover:scale-110"}`} />
+              )}
             </div>
 
             <div className="flex-1 min-w-0 pr-8">
               <span className={`text-[10px] font-black uppercase tracking-[0.2em] mb-2 block ${selectedProfessional?.id === professional.id ? "text-[#026498]/60" : "text-gray-400"}`}>
                 Especialista
               </span>
-              <h4 className={`text-2xl font-black mb-2 truncate leading-tight ${selectedProfessional?.id === professional.id ? "text-[#026498]" : "text-gray-900"}`}>
+              <h4 className={`text-2xl font-black mb-2 leading-tight ${selectedProfessional?.id === professional.id ? "text-[#026498]" : "text-gray-900"}`}>
                 {professional.nombre} {professional.apellido}
               </h4>
               <div className="flex items-center text-sm font-bold text-gray-500">
                 <Award className="h-4 w-4 mr-2 text-[#026498]" />
-                <span className="truncate">{professional.especialidad}</span>
+                <span>{professional.especialidad}</span>
               </div>
             </div>
 

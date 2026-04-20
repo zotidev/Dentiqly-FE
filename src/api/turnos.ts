@@ -87,4 +87,8 @@ export const turnosApi = {
       }
     }
   },
+
+  async confirmarTodosPendientes(): Promise<{ message: string; count: number }> {
+    return apiClient.put<{ message: string; count: number }>("/turnos/confirmar-todos-pendientes", {})
+  },
 }

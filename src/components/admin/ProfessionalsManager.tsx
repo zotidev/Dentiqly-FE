@@ -5,7 +5,7 @@ import { useState, useEffect } from "react"
 import { Card } from "../ui/Card"
 import { Button } from "../ui/Button"
 import { Input } from "../ui/Input"
-import { Plus, Search, Edit, Trash2, User, Mail, Phone, Award, Award as IdCard, Clock, Briefcase } from 'lucide-react'
+import { Plus, Search, Edit, Trash2, User, Mail, Phone, Award, Award as IdCard, Clock, Briefcase, Upload, X } from 'lucide-react'
 import { adminApi } from "../../api/admin"
 import { ScheduleManager } from "../schedule/ScheduleManager"
 import { ServiceAssignment } from "./ServiceAssignment"
@@ -22,6 +22,7 @@ export const ProfessionalsManager: React.FC = () => {
   const [editingProfessional, setEditingProfessional] = useState<Profesional | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("")
+  const [uploading, setUploading] = useState(false)
 
   const [formData, setFormData] = useState<CrearProfesionalData>({
     apellido: "",
@@ -163,6 +164,23 @@ export const ProfessionalsManager: React.FC = () => {
     }
   }
 
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !editingProfessional) return
+
+    try {
+      setUploading(true)
+      const response = await adminApi.profesionales.subirFoto(editingProfessional.id, file)
+      setFormData((prev) => ({ ...prev, foto_url: response.foto_url }))
+      alert("Foto subida correctamente")
+    } catch (error) {
+      console.error("Error uploading photo:", error)
+      alert("Error al subir la foto")
+    } finally {
+      setUploading(false)
+    }
+  }
+
   if (viewMode === 'schedule' && selectedProfessional) {
     return (
       <div className="space-y-6">
@@ -292,8 +310,12 @@ export const ProfessionalsManager: React.FC = () => {
                   >
                     <td className="py-4 px-4">
                       <div className="flex items-center">
-                        <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center mr-3">
-                          <User className="h-5 w-5 text-primary-foreground" />
+                        <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center mr-3 overflow-hidden border border-border">
+                          {professional.foto_url ? (
+                            <img src={professional.foto_url} alt={`${professional.nombre} ${professional.apellido}`} className="w-full h-full object-cover" />
+                          ) : (
+                            <User className="h-5 w-5 text-primary-foreground" />
+                          )}
                         </div>
                         <div>
                           <p className="font-medium text-foreground">
@@ -483,6 +505,63 @@ export const ProfessionalsManager: React.FC = () => {
                   </span>
                 </div>
               </div>
+
+              {editingProfessional && (
+                <div className="border-t border-border pt-4 mt-6">
+                  <label className="block text-sm font-medium text-foreground mb-2">Foto de Perfil</label>
+                  <div className="flex items-center space-x-6">
+                    <div className="relative w-24 h-24 rounded-2xl bg-muted overflow-hidden border-2 border-dashed border-border flex items-center justify-center">
+                      {formData.foto_url ? (
+                        <img src={formData.foto_url} alt="Preview" className="w-full h-full object-cover" />
+                      ) : (
+                        <User className="w-8 h-8 text-muted-foreground opacity-50" />
+                      )}
+                      {uploading && (
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                          <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-xs text-muted-foreground mb-3">
+                        Formatos aceptados: JPG, PNG, WEBP. Máximo 5MB.<br />
+                        La imagen se redimensionará automáticamente.
+                      </p>
+                      <div className="flex space-x-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={uploading}
+                          onClick={() => document.getElementById('photo-upload')?.click()}
+                        >
+                          <Upload className="w-4 h-4 mr-2" />
+                          {formData.foto_url ? 'Cambiar Foto' : 'Subir Foto'}
+                        </Button>
+                        {formData.foto_url && (
+                          <Button 
+                            type="button" 
+                            variant="outline" 
+                            size="sm" 
+                            className="text-red-600 border-red-100 hover:bg-red-50"
+                            onClick={() => handleChange("foto_url", "")}
+                          >
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Eliminar
+                          </Button>
+                        )}
+                      </div>
+                      <input
+                        id="photo-upload"
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleFileChange}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <div className="flex justify-end space-x-3 pt-4">
                 <Button type="button" variant="outline" onClick={resetForm}>

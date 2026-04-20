@@ -46,6 +46,11 @@ export const adminApi = {
     async removerServicio(id: number, servicioId: number): Promise<{ message: string }> {
       return apiClient.delete<{ message: string }>(`/profesionales/${id}/servicios/${servicioId}`)
     },
+    async subirFoto(id: number, file: File): Promise<{ foto_url: string }> {
+      const formData = new FormData()
+      formData.append("foto", file)
+      return apiClient.post<{ foto_url: string }>(`/profesionales/${id}/foto`, formData)
+    },
   },
 
   // Servicios

@@ -112,6 +112,7 @@ export interface Profesional {
   servicios?: Servicio[]
   porcentaje_comision?: number
   color?: string
+  foto_url?: string
 }
 
 export interface CrearProfesionalData {
@@ -127,6 +128,7 @@ export interface CrearProfesionalData {
   horarios_atencion?: HorariosSemanales
   estado?: string
   observaciones?: string
+  foto_url?: string
 }
 
 export interface HorarioAtencion {
@@ -143,6 +145,8 @@ export interface RangoHorario {
 export interface HorarioDia {
   activo: boolean
   rangos: RangoHorario[]
+  frecuencia?: 'semanal' | 'quincenal'
+  semana_inicio?: 0 | 1 // 0 = Semana 1, 1 = Semana 2
 }
 
 export interface HorariosSemanales {

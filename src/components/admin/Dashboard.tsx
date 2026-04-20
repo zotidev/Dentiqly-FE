@@ -6,7 +6,8 @@ import {
   Clock,
   DollarSign,
   TrendingUp,
-  Activity
+  Activity,
+  CheckCircle2
 } from 'lucide-react'
 import { turnosApi, profesionalesApi, serviciosApi } from '../../api'
 import type { Turno } from '../../types'
@@ -156,6 +157,25 @@ export const Dashboard: React.FC<{ onNavigateToCalendar?: () => void }> = ({ onN
     }
   }
 
+  const handleConfirmAll = async () => {
+    if (!window.confirm('¿Estás seguro de que quieres confirmar TODOS los turnos pendientes?')) {
+      return
+    }
+
+    try {
+      setLoading(true)
+      const response = await turnosApi.confirmarTodosPendientes()
+      alert(response.message)
+      // Refresh data
+      window.location.reload()
+    } catch (error) {
+      console.error('Error confirming all appointments:', error)
+      alert('Error al confirmar los turnos')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('es-AR', {
       style: 'currency',
@@ -212,13 +232,24 @@ export const Dashboard: React.FC<{ onNavigateToCalendar?: () => void }> = ({ onN
   return (
     <div className="space-y-6">
       {/* Welcome section */}
-      <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
-          Panel de Control - ODAF
-        </h2>
-        <p className="text-gray-600">
-          Resumen de actividad y métricas del centro odontológico
-        </p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            Panel de Control - ODAF
+          </h2>
+          <p className="text-gray-600">
+            Resumen de actividad y métricas del centro odontológico
+          </p>
+        </div>
+        <div>
+          <button
+            onClick={handleConfirmAll}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-sm transition-all transform hover:scale-105"
+          >
+            <CheckCircle2 className="h-5 w-5" />
+            Confirmar todos los pendientes
+          </button>
+        </div>
       </div>
 
       {/* Pending Payments Alert */}

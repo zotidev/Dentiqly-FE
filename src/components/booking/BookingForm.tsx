@@ -13,13 +13,7 @@ import { patientPortalApi, getPatientToken } from "../../api/patient-portal"
 import { 
   Calendar, 
   ChevronLeft, 
-  Instagram, 
-  Facebook, 
-  Mail, 
-  Phone, 
-  UserCircle,
   Info,
-  CreditCard
 } from "lucide-react"
 
 // Payment configuration
@@ -206,55 +200,6 @@ export const BookingForm: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#f8fafc] py-8 px-4 sm:px-6 lg:px-8 font-sans selection:bg-blue-100 selection:text-[#026498]">
       <div className="max-w-6xl mx-auto">
-        {/* Compact Branded Header */}
-        <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4 bg-white/50 backdrop-blur-md p-4 rounded-[2rem] border border-white shadow-sm">
-          {/* Logo Section */}
-          <div className="flex-shrink-0 group cursor-pointer">
-            <div className="relative">
-              <div className="absolute -inset-1 bg-gradient-to-r from-[#026498] to-blue-400 rounded-xl blur opacity-20 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
-              <img
-                src="/assets/odaf-logo.png"
-                alt="ODAF"
-                className="relative h-10 w-auto transform transition duration-500 group-hover:scale-105"
-              />
-            </div>
-          </div>
-
-          <div className="flex flex-wrap justify-center items-center gap-4">
-            <div className="flex items-center gap-2">
-              {[
-                { icon: Phone, href: "https://wa.me/5491140483693", label: "WSP", color: "hover:text-green-500" },
-                { icon: Instagram, href: "https://www.instagram.com/odaf_odontologia/", label: "IG", color: "hover:text-pink-500" },
-                { icon: Facebook, href: "https://www.facebook.com/estetic.lanus", label: "FB", color: "hover:text-blue-600" },
-                { icon: Mail, href: "mailto:odafodonto@gmail.com", label: "Mail", color: "hover:text-red-500" }
-              ].map((social, idx) => (
-                <a
-                  key={idx}
-                  href={social.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`p-2 bg-white rounded-xl text-gray-400 ${social.color} shadow-xs border border-gray-100 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5`}
-                  title={social.label}
-                >
-                  <social.icon className="w-4 h-4" />
-                </a>
-              ))}
-            </div>
-            {isAuthenticated && (
-              <>
-                <div className="h-8 w-px bg-gray-200 hidden md:block" />
-                <a 
-                  href="/paciente/dashboard" 
-                  className="flex items-center gap-2 text-sm font-bold text-[#026498] bg-blue-50 px-5 py-2.5 rounded-2xl hover:bg-[#026498] hover:text-white transition-all duration-300 shadow-sm"
-                >
-                  <UserCircle className="w-4 h-4" />
-                  Mi Portal
-                </a>
-              </>
-            )}
-          </div>
-        </div>
-
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Main Content Area */}
           <div className="lg:col-span-8 order-2 lg:order-1">

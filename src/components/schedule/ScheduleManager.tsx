@@ -25,11 +25,11 @@ const diasSemana = [
 ] as const
 
 const horariosPorDefecto: HorariosSemanales = {
-  lunes: { activo: true, rangos: [{ inicio: "08:00", fin: "17:00" }] },
-  martes: { activo: true, rangos: [{ inicio: "08:00", fin: "17:00" }] },
-  miercoles: { activo: true, rangos: [{ inicio: "08:00", fin: "17:00" }] },
-  jueves: { activo: true, rangos: [{ inicio: "08:00", fin: "17:00" }] },
-  viernes: { activo: true, rangos: [{ inicio: "08:00", fin: "17:00" }] },
+  lunes: { activo: true, rangos: [{ inicio: "09:00", fin: "12:00" }, { inicio: "14:00", fin: "18:00" }] },
+  martes: { activo: true, rangos: [{ inicio: "09:00", fin: "12:00" }, { inicio: "14:00", fin: "18:00" }] },
+  miercoles: { activo: true, rangos: [{ inicio: "09:00", fin: "12:00" }, { inicio: "14:00", fin: "16:00" }] },
+  jueves: { activo: true, rangos: [{ inicio: "09:00", fin: "12:00" }, { inicio: "14:00", fin: "18:00" }] },
+  viernes: { activo: true, rangos: [{ inicio: "10:00", fin: "12:30" }, { inicio: "14:00", fin: "16:30" }] },
   sabado: { activo: false, rangos: [{ inicio: "09:00", fin: "13:00" }] },
   domingo: { activo: false, rangos: [{ inicio: "00:00", fin: "00:00" }] },
 }
@@ -127,6 +127,29 @@ export const ScheduleManager: React.FC<ScheduleManagerProps> = ({ professional, 
         return newErrors
       })
     }
+  }
+
+  const handleFrequencyChange = (dia: keyof HorariosSemanales, frecuencia: "semanal" | "quincenal") => {
+    setHorarios((prev) => ({
+      ...prev,
+      [dia]: {
+        ...prev[dia],
+        frecuencia,
+        semana_inicio: frecuencia === "quincenal" ? (prev[dia].semana_inicio ?? 0) : undefined,
+      },
+    }))
+    setHasChanges(true)
+  }
+
+  const handleSemanaInicioChange = (dia: keyof HorariosSemanales, semana_inicio: 0 | 1) => {
+    setHorarios((prev) => ({
+      ...prev,
+      [dia]: {
+        ...prev[dia],
+        semana_inicio,
+      },
+    }))
+    setHasChanges(true)
   }
 
   const handleRangeChange = (
@@ -270,7 +293,40 @@ export const ScheduleManager: React.FC<ScheduleManagerProps> = ({ professional, 
             </div>
 
             {horarios[key].activo && (
-              <div className="space-y-3">
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-2 border-b border-border/50">
+                  <div>
+                    <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                      Frecuencia
+                    </label>
+                    <select
+                      value={horarios[key].frecuencia || "semanal"}
+                      onChange={(e) => handleFrequencyChange(key, e.target.value as "semanal" | "quincenal")}
+                      className="w-full h-9 px-3 py-1 text-sm border border-input rounded-md focus:outline-none focus:ring-1 focus:ring-ring"
+                    >
+                      <option value="semanal">Cada semana</option>
+                      <option value="quincenal">Cada 15 días (quincenal)</option>
+                    </select>
+                  </div>
+
+                  {horarios[key].frecuencia === "quincenal" && (
+                    <div>
+                      <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                        Quincena de Inicio
+                      </label>
+                      <select
+                        value={horarios[key].semana_inicio ?? 0}
+                        onChange={(e) => handleSemanaInicioChange(key, parseInt(e.target.value) as 0 | 1)}
+                        className="w-full h-9 px-3 py-1 text-sm border border-input rounded-md focus:outline-none focus:ring-1 focus:ring-ring"
+                      >
+                        <option value={0}>Semana 1</option>
+                        <option value={1}>Semana 2</option>
+                      </select>
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-3">
                 {horarios[key].rangos.map((rango, rangoIndex) => (
                   <div key={rangoIndex} className="grid grid-cols-[1fr_1fr_auto] gap-4 items-end">
                     <div>
@@ -320,7 +376,8 @@ export const ScheduleManager: React.FC<ScheduleManagerProps> = ({ professional, 
                   Agregar horario
                 </Button>
               </div>
-            )}
+            </div>
+          )}
 
             {!horarios[key].activo && (
               <div className="text-center py-4 text-muted-foreground">

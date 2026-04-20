@@ -169,7 +169,7 @@ export const BookingSummary: React.FC<BookingSummaryProps> = ({
           <a href="tel:77115716" className="block text-xl font-black text-[#026498] text-center bg-gray-50 py-4 rounded-2xl border border-gray-100 hover:bg-blue-50 hover:border-blue-100 transition-all duration-200">
             7711-5716
           </a>
-          <p className="text-[10px] text-center text-gray-400 font-bold uppercase tracking-widest">Atención Lun a Vie 9-20hs</p>
+          <p className="text-[10px] text-center text-gray-400 font-bold uppercase tracking-widest px-2">Lun, Mar, Jue 9-12/14-18 | Mié 9-16 | Vie 10-16:30</p>
         </div>
       </div>
     </div>

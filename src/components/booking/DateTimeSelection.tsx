@@ -102,6 +102,21 @@ export const DateTimeSelection: React.FC<DateTimeSelectionProps> = ({
       return false
     }
 
+    // Verificar si es quincenal
+    if (daySchedule.frecuencia === "quincenal") {
+      const refDate = new Date("2024-01-01T00:00:00") // Lunes 1 de Enero 2024 (Referencia fija)
+      const targetDate = new Date(dateString + "T00:00:00")
+      const diffInMs = targetDate.getTime() - refDate.getTime()
+      const diffInWeeks = Math.floor(diffInMs / (7 * 24 * 60 * 60 * 1000))
+      const semanaActual = Math.abs(diffInWeeks % 2) // 0 o 1
+      
+      const semanaInicio = daySchedule.semana_inicio || 0 // 0 = Semana 1, 1 = Semana 2
+
+      if (semanaActual !== semanaInicio) {
+        return false
+      }
+    }
+
     // El día está activo en el horario del profesional
     return true
   }
