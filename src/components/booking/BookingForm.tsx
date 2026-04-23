@@ -72,7 +72,9 @@ export const BookingForm: React.FC = () => {
             setMesActualBloqueado(tieneTurnoEsteMes)
           }
         } catch (e) {
-          console.error("Error al obtener perfil:", e)
+          console.error("Error al obtener perfil (token posible expirado):", e)
+          localStorage.removeItem("patientToken")
+          setIsAuthenticated(false)
         }
       }
     }

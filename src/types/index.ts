@@ -57,6 +57,7 @@ export interface Paciente {
   recomendado_por?: string
   condicion_iva?: string
   numero_afiliado?: string
+  foto_url?: string
   tipo_facturacion: 'A' | 'B' | 'C'
   numero_facturacion?: string
   etiquetas?: string[]

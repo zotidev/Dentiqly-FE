@@ -4,6 +4,7 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import type { Profesional, Servicio } from "../../types"
 import { profesionalesApi } from "../../api/profesionales"
+import { feriadosApi } from "../../api/feriados"
 import { Calendar, Clock } from "lucide-react"
 
 interface DateTimeSelectionProps {
@@ -26,6 +27,21 @@ export const DateTimeSelection: React.FC<DateTimeSelectionProps> = ({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [professionalSchedule, setProfessionalSchedule] = useState<any>(null)
+  const [holidays, setHolidays] = useState<string[]>([])
+
+  // Cargar feriados
+  useEffect(() => {
+    const loadHolidays = async () => {
+      try {
+        const response = await feriadosApi.listar()
+        const holidayDates = response.map(f => f.fecha.split('T')[0])
+        setHolidays(holidayDates)
+      } catch (e) {
+        console.error('Error loading holidays:', e)
+      }
+    }
+    loadHolidays()
+  }, [])
 
   // Cargar horarios del profesional cuando se selecciona
   useEffect(() => {
@@ -84,6 +100,11 @@ export const DateTimeSelection: React.FC<DateTimeSelectionProps> = ({
 
   // Verificar si un día está disponible según el horario del profesional
   const isDayAvailable = (dateString: string): boolean => {
+    // 1. Verificar si es feriado
+    if (holidays.includes(dateString)) {
+      return false
+    }
+
     const date = new Date(dateString + "T00:00:00")
     const dayOfWeek = date.getDay() // 0 = domingo, 1 = lunes, ..., 6 = sábado
 

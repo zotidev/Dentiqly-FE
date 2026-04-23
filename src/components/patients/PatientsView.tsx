@@ -19,8 +19,10 @@ import {
   Pill,
   Smile,
   File,
+  Camera,
 } from "lucide-react"
 import { pacientesApi, obrasSocialesApi } from "../../api"
+import { apiClient } from "../../lib/api-client"
 import type { Paciente, CrearPacienteData, ObraSocial } from "../../types"
 import { ClinicalHistorySection } from "./ClinicalHistorySection"
 import { OdontogramSection } from "./OdontogramSection"
@@ -43,6 +45,9 @@ export const PatientsView: React.FC = () => {
   const [formData, setFormData] = useState<Partial<CrearPacienteData>>({})
   const [activeTab, setActiveTab] = useState<TabType>("info")
   const [obrasSociales, setObrasSociales] = useState<ObraSocial[]>([])
+  const [uploadingPhoto, setUploadingPhoto] = useState(false)
+
+  const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api"
 
   useEffect(() => {
     fetchPatients()
@@ -137,6 +142,35 @@ export const PatientsView: React.FC = () => {
       age--
     }
     return age
+  }
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>, patientId: string) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    try {
+      setUploadingPhoto(true)
+      const formData = new FormData()
+      formData.append("foto", file)
+      const updated = await apiClient.put<Paciente>(`/pacientes/${patientId}/foto`, formData)
+      if (selectedPatient && selectedPatient.id === patientId) {
+        setSelectedPatient({ ...selectedPatient, foto_url: updated.foto_url })
+      }
+      fetchPatients()
+    } catch (error) {
+      console.error("Error uploading photo:", error)
+      alert("Error al subir la foto")
+    } finally {
+      setUploadingPhoto(false)
+    }
+  }
+
+  const getPhotoUrl = (patient: Paciente) => {
+    if (!patient.foto_url) return null
+    // If it's an absolute URL (Cloudinary, etc.), use as-is
+    if (patient.foto_url.startsWith("http")) return patient.foto_url
+    // Otherwise, prepend the API base URL (remove /api suffix)
+    const baseUrl = API_BASE_URL.replace(/\/api$/, "")
+    return `${baseUrl}/${patient.foto_url.replace(/^src\//, "")}`
   }
 
   const tabs = [
@@ -360,6 +394,47 @@ export const PatientsView: React.FC = () => {
                   <div className="p-6">
                     {activeTab === "info" && (
                       <div className="space-y-6">
+                        {/* Foto y Nombre */}
+                        <div className="flex items-start gap-6">
+                          <div className="relative group">
+                            {getPhotoUrl(selectedPatient) ? (
+                              <img
+                                src={getPhotoUrl(selectedPatient)!}
+                                alt={`${selectedPatient.nombre} ${selectedPatient.apellido}`}
+                                className="h-24 w-24 rounded-full object-cover border-2 border-gray-200"
+                              />
+                            ) : (
+                              <div className="h-24 w-24 rounded-full bg-blue-100 flex items-center justify-center border-2 border-gray-200">
+                                <User className="h-12 w-12 text-blue-600" />
+                              </div>
+                            )}
+                            <label className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 rounded-full opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity">
+                              <Camera className="h-6 w-6 text-white" />
+                              <input
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={(e) => handlePhotoUpload(e, selectedPatient.id)}
+                                disabled={uploadingPhoto}
+                              />
+                            </label>
+                            {uploadingPhoto && (
+                              <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full">
+                                <span className="text-white text-xs">Subiendo...</span>
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="text-xl font-bold text-gray-900">
+                              {selectedPatient.apellido}, {selectedPatient.nombre}
+                            </h3>
+                            <p className="text-sm text-gray-500">{selectedPatient.tipo_documento} {selectedPatient.numero_documento}</p>
+                            <p className="text-sm text-gray-500 mt-1">
+                              {new Date(selectedPatient.fecha_nacimiento).toLocaleDateString("es-ES")} ({calculateAge(selectedPatient.fecha_nacimiento)} años) · {selectedPatient.sexo}
+                            </p>
+                          </div>
+                        </div>
+
                         {/* Información Personal */}
                         <div>
                           <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center">

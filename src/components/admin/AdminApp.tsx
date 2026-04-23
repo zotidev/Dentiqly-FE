@@ -10,6 +10,7 @@ import { PatientsView } from '../patients/PatientsView'
 import { LiquidacionesManager } from './LiquidacionesManager'
 import DebtorsReport from './DebtorsReport'
 import CashFlow from './CashFlow'
+import { FeriadosManager } from './FeriadosManager'
 
 export const AdminApp: React.FC = () => {
   const [currentView, setCurrentView] = useState('dashboard')
@@ -32,6 +33,8 @@ export const AdminApp: React.FC = () => {
         return <DebtorsReport />
       case 'cashflow':
         return <CashFlow />
+      case 'feriados':
+        return <FeriadosManager />
       case 'settings':
         return (
           <div className="text-center py-12">

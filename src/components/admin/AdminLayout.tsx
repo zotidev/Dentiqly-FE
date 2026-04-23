@@ -36,6 +36,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
     { id: 'liquidaciones', label: 'Liquidaciones', icon: DollarSign },
     { id: 'debtors', label: 'Reporte de deudores', icon: FileText },
     { id: 'cashflow', label: 'Flujo de caja', icon: Wallet },
+    { id: 'feriados', label: 'Feriados', icon: Calendar },
     { id: 'settings', label: 'Configuración', icon: Settings },
   ]
 

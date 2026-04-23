@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { Button } from '../ui/Button'
 import { Input } from '../ui/Input'
-import { turnosApi, adminApi } from '../../api'
+import { turnosApi, adminApi, recordatoriosApi } from '../../api'
 import type { Turno, Profesional } from '../../types'
+import { Mail } from 'lucide-react'
 
 interface EditAppointmentModalProps {
     appointment: Turno
@@ -21,6 +22,7 @@ export const EditAppointmentModal: React.FC<EditAppointmentModalProps> = ({ appo
     })
     const [loading, setLoading] = useState(false)
     const [profesionales, setProfesionales] = useState<Profesional[]>([])
+    const [sendingReminder, setSendingReminder] = useState(false)
 
     useEffect(() => {
         const fetchProfesionales = async () => {
@@ -136,13 +138,35 @@ export const EditAppointmentModal: React.FC<EditAppointmentModalProps> = ({ appo
                             className="w-full border rounded-md p-2 h-24"
                         />
                     </div>
-                    <div className="flex justify-end space-x-3">
-                        <Button type="button" variant="outline" onClick={onClose}>
-                            Cancelar
+                    <div className="flex justify-between items-center">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={async () => {
+                                try {
+                                    setSendingReminder(true)
+                                    await recordatoriosApi.enviar(appointment.id)
+                                    alert('Recordatorio enviado correctamente')
+                                } catch (error: any) {
+                                    alert(error.message || 'Error al enviar recordatorio')
+                                } finally {
+                                    setSendingReminder(false)
+                                }
+                            }}
+                            disabled={sendingReminder || !appointment.paciente?.email}
+                            title={!appointment.paciente?.email ? 'El paciente no tiene email' : ''}
+                        >
+                            <Mail className="h-4 w-4 mr-2" />
+                            {sendingReminder ? 'Enviando...' : 'Recordatorio'}
                         </Button>
-                        <Button type="submit" disabled={loading}>
-                            {loading ? 'Guardando...' : 'Guardar Cambios'}
-                        </Button>
+                        <div className="flex space-x-3">
+                            <Button type="button" variant="outline" onClick={onClose}>
+                                Cancelar
+                            </Button>
+                            <Button type="submit" disabled={loading}>
+                                {loading ? 'Guardando...' : 'Guardar Cambios'}
+                            </Button>
+                        </div>
                     </div>
                 </form>
             </div>
