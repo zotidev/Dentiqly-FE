@@ -20,8 +20,8 @@ import {
   Smile,
   File,
 } from "lucide-react"
-import { pacientesApi } from "../../api"
-import type { Paciente, CrearPacienteData } from "../../types"
+import { pacientesApi, obrasSocialesApi } from "../../api"
+import type { Paciente, CrearPacienteData, ObraSocial } from "../../types"
 import { ClinicalHistorySection } from "./ClinicalHistorySection"
 import { OdontogramSection } from "./OdontogramSection"
 import { PrescriptionsSection } from "./PrescriptionsSection"
@@ -42,10 +42,21 @@ export const PatientsView: React.FC = () => {
   const [modalMode, setModalMode] = useState<"view" | "create" | "edit">("view")
   const [formData, setFormData] = useState<Partial<CrearPacienteData>>({})
   const [activeTab, setActiveTab] = useState<TabType>("info")
+  const [obrasSociales, setObrasSociales] = useState<ObraSocial[]>([])
 
   useEffect(() => {
     fetchPatients()
+    fetchObrasSociales()
   }, [currentPage, searchTerm])
+
+  const fetchObrasSociales = async () => {
+    try {
+      const response = await obrasSocialesApi.listar()
+      setObrasSociales(response || [])
+    } catch (error) {
+      console.error("Error fetching health insurances:", error)
+    }
+  }
 
   const fetchPatients = async () => {
     try {
@@ -303,9 +314,22 @@ export const PatientsView: React.FC = () => {
                       ? "Nuevo Paciente"
                       : "Editar Paciente"}
                 </h3>
-                <button onClick={() => setShowModal(false)}>
-                  <X className="h-5 w-5" />
-                </button>
+                <div className="flex items-center gap-4">
+                  {modalMode === "view" && selectedPatient && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEditPatient(selectedPatient)}
+                      className="hidden sm:flex"
+                    >
+                      <Edit className="h-4 w-4 mr-2" />
+                      Editar Paciente
+                    </Button>
+                  )}
+                  <button onClick={() => setShowModal(false)} className="text-gray-500 hover:text-gray-700">
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
               </div>
 
               {modalMode === "view" && selectedPatient && (
@@ -411,8 +435,16 @@ export const PatientsView: React.FC = () => {
                               <p className="font-medium">{selectedPatient.obraSocial?.nombre || "Sin obra social"}</p>
                             </div>
                             <div>
+                              <p className="text-xs text-gray-500">Nº de Afiliado</p>
+                              <p className="font-medium">{selectedPatient.numero_afiliado || "-"}</p>
+                            </div>
+                            <div>
                               <p className="text-xs text-gray-500">Condición</p>
                               <p className="font-medium">{selectedPatient.condicion}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-gray-500">Condición IVA</p>
+                              <p className="font-medium">{selectedPatient.condicion_iva || "-"}</p>
                             </div>
                             <div>
                               <p className="text-xs text-gray-500">Tipo de Facturación</p>
@@ -429,6 +461,13 @@ export const PatientsView: React.FC = () => {
                               <p className="text-sm bg-gray-50 p-3 rounded">{selectedPatient.informacion_adicional}</p>
                             </div>
                           )}
+
+                          <div className="flex justify-end pt-6 border-t mt-6">
+                            <Button variant="outline" onClick={() => handleEditPatient(selectedPatient)}>
+                              <Edit className="h-4 w-4 mr-2" />
+                              Editar Datos Personales
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     )}
@@ -559,6 +598,86 @@ export const PatientsView: React.FC = () => {
                           type="text"
                           value={formData.recomendado_por || ""}
                           onChange={(e) => setFormData({ ...formData, recomendado_por: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Obra Social</label>
+                        <select
+                          value={formData.obra_social_id || ""}
+                          onChange={(e) => setFormData({ ...formData, obra_social_id: Number(e.target.value) || undefined })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        >
+                          <option value="">Ninguna</option>
+                          {obrasSociales.map((os) => (
+                            <option key={os.id} value={os.id}>
+                              {os.nombre}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Nº de Afiliado</label>
+                        <input
+                          type="text"
+                          value={formData.numero_afiliado || ""}
+                          onChange={(e) => setFormData({ ...formData, numero_afiliado: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Condición IVA</label>
+                        <select
+                          value={formData.condicion_iva || ""}
+                          onChange={(e) => setFormData({ ...formData, condicion_iva: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        >
+                          <option value="">Seleccionar</option>
+                          <option value="Consumidor Final">Consumidor Final</option>
+                          <option value="Monotributista">Monotributista</option>
+                          <option value="Responsable Inscripto">Responsable Inscripto</option>
+                          <option value="Exento">Exento</option>
+                          <option value="Gravado">Gravado</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Condición</label>
+                        <select
+                          value={formData.condicion || ""}
+                          onChange={(e) => setFormData({ ...formData, condicion: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        >
+                          <option value="Activo">Activo</option>
+                          <option value="Inactivo">Inactivo</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Facturación</label>
+                        <select
+                          value={formData.tipo_facturacion || ""}
+                          onChange={(e) => setFormData({ ...formData, tipo_facturacion: e.target.value as any })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        >
+                          <option value="A">Factura A</option>
+                          <option value="B">Factura B</option>
+                          <option value="C">Factura C</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Número de Facturación</label>
+                        <input
+                          type="text"
+                          value={formData.numero_facturacion || ""}
+                          onChange={(e) => setFormData({ ...formData, numero_facturacion: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                      <div className="col-span-2">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Información Adicional</label>
+                        <textarea
+                          value={formData.informacion_adicional || ""}
+                          onChange={(e) => setFormData({ ...formData, informacion_adicional: e.target.value })}
+                          rows={3}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                         />
                       </div>

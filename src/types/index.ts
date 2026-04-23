@@ -55,6 +55,8 @@ export interface Paciente {
   email?: string
   ocupacion?: string
   recomendado_por?: string
+  condicion_iva?: string
+  numero_afiliado?: string
   tipo_facturacion: 'A' | 'B' | 'C'
   numero_facturacion?: string
   etiquetas?: string[]
