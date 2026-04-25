@@ -69,7 +69,7 @@ export const ProfessionalSelection: React.FC<ProfessionalSelectionProps> = ({
               key={professional.id}
               onClick={() => onProfessionalSelect(professional)}
               className={`
-                relative flex flex-col items-center p-10 rounded-[2.5rem] border-2 transition-all duration-500 cursor-pointer text-center
+                relative flex flex-col items-center p-6 sm:p-10 rounded-[2rem] sm:rounded-[2.5rem] border-2 transition-all duration-500 cursor-pointer text-center
                 ${isSelected
                   ? "border-[#026498] bg-blue-50/30 shadow-2xl shadow-blue-900/10 scale-105"
                   : "border-gray-50 bg-white hover:border-blue-100 hover:shadow-xl hover:shadow-gray-100/50 hover:-translate-y-1"
@@ -78,7 +78,7 @@ export const ProfessionalSelection: React.FC<ProfessionalSelectionProps> = ({
             >
               {/* Avatar */}
               <div className={`
-                relative w-32 h-32 rounded-full mb-6 p-1.5 border-2 transition-all duration-500
+                relative w-24 h-24 sm:w-32 sm:h-32 rounded-full mb-4 sm:mb-6 p-1 border-2 transition-all duration-500
                 ${isSelected ? "border-[#026498] rotate-6" : "border-gray-100 group-hover:rotate-6"}
               `}>
                 <div className="w-full h-full rounded-full overflow-hidden bg-gray-50 shadow-inner">
@@ -90,15 +90,15 @@ export const ProfessionalSelection: React.FC<ProfessionalSelectionProps> = ({
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-gray-200">
-                      <User size={48} strokeWidth={1.5} />
+                      <User size={32} className="sm:w-[48px] sm:h-[48px]" strokeWidth={1.5} />
                     </div>
                   )}
                 </div>
                 
                 {/* Selection Indicator */}
                 {isSelected && (
-                  <div className="absolute -top-1 -right-1 w-10 h-10 bg-[#026498] text-white rounded-full flex items-center justify-center shadow-lg border-4 border-white animate-in zoom-in duration-300">
-                    <Check size={18} strokeWidth={4} />
+                  <div className="absolute -top-1 -right-1 w-8 h-8 sm:w-10 sm:h-10 bg-[#026498] text-white rounded-full flex items-center justify-center shadow-lg border-4 border-white animate-in zoom-in duration-300">
+                    <Check size={14} className="sm:w-5 sm:h-5" strokeWidth={4} />
                   </div>
                 )}
               </div>

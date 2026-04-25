@@ -67,7 +67,7 @@ export const ServiceSelection: React.FC<ServiceSelectionProps> = ({ selectedServ
               key={service.id}
               onClick={() => onServiceSelect(service)}
               className={`
-                relative group p-8 rounded-[2.5rem] border-2 transition-all duration-500 cursor-pointer overflow-hidden flex flex-col h-full
+                relative group p-6 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] border-2 transition-all duration-500 cursor-pointer overflow-hidden flex flex-col h-full
                 ${isSelected
                   ? "border-[#026498] bg-blue-50/30 shadow-2xl shadow-blue-900/10 scale-[1.02]"
                   : "border-gray-50 bg-white hover:border-blue-100 hover:shadow-xl hover:shadow-gray-200/50 hover:-translate-y-1"
@@ -75,10 +75,10 @@ export const ServiceSelection: React.FC<ServiceSelectionProps> = ({ selectedServ
               `}
             >
               <div className={`
-                w-14 h-14 rounded-2xl flex items-center justify-center mb-6 transition-all duration-500
+                w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center mb-4 sm:mb-6 transition-all duration-500
                 ${isSelected ? "bg-[#026498] text-white rotate-6" : "bg-blue-50 text-[#026498]"}
               `}>
-                <Icon size={28} />
+                <Icon size={24} className="sm:w-[28px] sm:h-[28px]" />
               </div>
 
               <div className="flex-1 space-y-2">

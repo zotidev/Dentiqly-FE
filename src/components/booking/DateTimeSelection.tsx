@@ -148,65 +148,79 @@ export const DateTimeSelection: React.FC<DateTimeSelectionProps> = ({
   }
 
   return (
-    <div className="space-y-12">
-      <div>
-        <div className="flex items-center gap-4 mb-3">
-          <div className="w-10 h-10 rounded-full bg-[#026498] text-white flex items-center justify-center font-black">3</div>
-          <h2 className="text-2xl font-black text-[#026498]">Elige la fecha y hora</h2>
-        </div>
-        <p className="text-gray-500 font-medium ml-14">Selecciona el día y horario que prefieras.</p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
-        {/* Calendar Column */}
-        <div className="bg-white p-8 rounded-[2.5rem] border border-gray-50 shadow-sm">
-          <div className="flex items-center gap-3 mb-8">
-            <CalendarIcon className="text-[#026498]" size={20} />
-            <h3 className="font-black text-gray-900">Fecha y Hora</h3>
-          </div>
-          {renderCalendar()}
-        </div>
-
-        {/* Time Slots Column */}
-        <div className="space-y-6">
+    <div className="space-y-8 sm:space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <div className="flex flex-col md:grid md:grid-cols-2 gap-8 md:gap-12 items-start">
+        
+        {/* Time Slots Column - On mobile, if date is selected, it goes FIRST */}
+        <div className={`space-y-6 w-full ${selectedDate ? 'order-1 md:order-2' : 'order-2 md:order-2'}`}>
           <h3 className="font-black text-gray-900 flex items-center gap-3">
             <Clock className="text-[#026498]" size={20} />
             Horarios disponibles
           </h3>
           
           {selectedDate ? (
-            loading ? (
-              <div className="grid grid-cols-2 gap-4">
-                {[1, 2, 3, 4, 5, 6].map(i => (
-                  <div key={i} className="h-12 bg-gray-50 rounded-xl animate-pulse" />
-                ))}
-              </div>
-            ) : error ? (
-              <div className="p-8 text-center bg-gray-50 rounded-3xl border border-dashed border-gray-200">
-                <p className="text-gray-400 font-bold">{error}</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 gap-4">
-                {availableSlots.map(time => (
-                  <button
-                    key={time}
-                    onClick={() => onDateTimeSelect(`${selectedDate}T${time}:00`)}
-                    className={`
-                      py-4 rounded-xl font-bold transition-all border-2
-                      ${selectedDateTime?.includes(time) ? "bg-[#026498] text-white border-[#026498] shadow-lg" : "bg-white text-gray-600 border-gray-100 hover:border-blue-100 hover:text-[#026498]"}
-                    `}
-                  >
-                    {time}
-                  </button>
-                ))}
-              </div>
-            )
+            <div className="animate-in slide-in-from-top-4 duration-500">
+              {loading ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+                  {[1, 2, 3, 4, 5, 6].map(i => (
+                    <div key={i} className="h-12 bg-gray-50 rounded-xl animate-pulse" />
+                  ))}
+                </div>
+              ) : error ? (
+                <div className="p-8 text-center bg-gray-50 rounded-3xl border border-dashed border-gray-200">
+                  <p className="text-gray-400 font-bold text-xs">{error}</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+                  {availableSlots.map(time => (
+                    <button
+                      key={time}
+                      onClick={() => onDateTimeSelect(`${selectedDate}T${time}:00`)}
+                      className={`
+                        py-4 rounded-xl font-bold transition-all border-2 text-sm
+                        ${selectedDateTime?.includes(time) ? "bg-[#026498] text-white border-[#026498] shadow-lg" : "bg-white text-gray-600 border-gray-100 hover:border-blue-100 hover:text-[#026498]"}
+                      `}
+                    >
+                      {time}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           ) : (
-            <div className="p-12 text-center bg-gray-50 rounded-[2.5rem] border-2 border-dashed border-gray-100">
-              <Clock className="mx-auto text-gray-200 mb-4" size={48} />
-              <p className="text-gray-400 font-bold text-sm">Selecciona una fecha para ver horarios</p>
+            <div className="p-10 sm:p-12 text-center bg-gray-50 rounded-3xl sm:rounded-[2.5rem] border-2 border-dashed border-gray-100">
+              <Clock className="mx-auto text-gray-200 mb-4" size={32} />
+              <p className="text-gray-400 font-bold text-xs">Selecciona una fecha para ver horarios</p>
             </div>
           )}
+        </div>
+
+        {/* Calendar Column - On mobile, if date is selected, it goes SECOND */}
+        <div className={`w-full ${selectedDate ? 'order-2 md:order-1' : 'order-1 md:order-1'}`}>
+          <div className="bg-white p-6 sm:p-8 rounded-3xl sm:rounded-[2.5rem] border border-gray-50 shadow-sm transition-all duration-500">
+            <div className="flex items-center gap-3 mb-6 sm:mb-8">
+              <CalendarIcon className="text-[#026498]" size={20} />
+              <h3 className="font-black text-gray-900">Fecha del turno</h3>
+            </div>
+            {renderCalendar()}
+
+            {selectedDate && (
+              <div className="mt-8 pt-6 border-t border-gray-50 flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-1">Fecha seleccionada</p>
+                  <p className="text-sm font-black text-[#026498] capitalize">
+                    {new Date(selectedDate + "T00:00:00").toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
+                  </p>
+                </div>
+                <button 
+                  onClick={() => setSelectedDate("")}
+                  className="text-[10px] font-black text-gray-400 hover:text-red-500 uppercase tracking-widest transition-colors"
+                >
+                  Cambiar
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

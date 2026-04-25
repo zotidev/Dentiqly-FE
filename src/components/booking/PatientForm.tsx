@@ -72,10 +72,10 @@ export const PatientForm: React.FC<PatientFormProps> = ({ onPatientData, loading
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <form onSubmit={handleSubmit} className="space-y-12">
+      <form onSubmit={handleSubmit} className="space-y-8 sm:space-y-12">
         {/* Sección 1: Información Personal */}
-        <div className="bg-white p-10 rounded-[2.5rem] border border-gray-50 shadow-sm space-y-8">
-          <h3 className="text-xl font-black text-gray-900 flex items-center gap-3">
+        <div className="bg-white p-6 sm:p-10 rounded-3xl sm:rounded-[2.5rem] border border-gray-50 shadow-sm space-y-6 sm:space-y-8">
+          <h3 className="text-lg sm:text-xl font-black text-gray-900 flex items-center gap-3">
              <User className="text-[#026498]" size={20} />
              Información Personal
           </h3>
@@ -183,8 +183,8 @@ export const PatientForm: React.FC<PatientFormProps> = ({ onPatientData, loading
         </div>
 
         {/* Sección 2: Cobertura Médica */}
-        <div className="bg-white p-10 rounded-[2.5rem] border border-gray-50 shadow-sm space-y-8">
-          <h3 className="text-xl font-black text-gray-900 flex items-center gap-3">
+        <div className="bg-white p-6 sm:p-10 rounded-3xl sm:rounded-[2.5rem] border border-gray-50 shadow-sm space-y-6 sm:space-y-8">
+          <h3 className="text-lg sm:text-xl font-black text-gray-900 flex items-center gap-3">
              <Shield className="text-[#026498]" size={20} />
              Cobertura Médica
           </h3>
@@ -211,8 +211,8 @@ export const PatientForm: React.FC<PatientFormProps> = ({ onPatientData, loading
         </div>
 
         {/* Sección 3: Emergencia y Otros */}
-        <div className="bg-white p-10 rounded-[2.5rem] border border-gray-50 shadow-sm space-y-8">
-          <h3 className="text-xl font-black text-gray-900 flex items-center gap-3">
+        <div className="bg-white p-6 sm:p-10 rounded-3xl sm:rounded-[2.5rem] border border-gray-50 shadow-sm space-y-6 sm:space-y-8">
+          <h3 className="text-lg sm:text-xl font-black text-gray-900 flex items-center gap-3">
              <Heart className="text-[#ef4444]" size={20} />
              Contacto de Emergencia
           </h3>
@@ -249,7 +249,7 @@ export const PatientForm: React.FC<PatientFormProps> = ({ onPatientData, loading
         <button
           type="submit"
           disabled={loading}
-          className="w-full h-20 bg-[#026498] text-white font-black rounded-[1.5rem] text-xl shadow-xl shadow-blue-900/10 hover:bg-[#0c4a6e] transition-all transform hover:-translate-y-1 uppercase tracking-widest disabled:opacity-50"
+          className="w-full h-16 sm:h-20 bg-[#026498] text-white font-black rounded-2xl sm:rounded-[1.5rem] text-lg sm:text-xl shadow-xl shadow-blue-900/10 hover:bg-[#0c4a6e] transition-all transform hover:-translate-y-1 uppercase tracking-widest disabled:opacity-50"
         >
           {loading ? "Cargando..." : "Siguiente Paso"}
         </button>

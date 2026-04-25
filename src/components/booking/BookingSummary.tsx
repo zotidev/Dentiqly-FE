@@ -72,8 +72,8 @@ export const BookingSummary: React.FC<BookingSummaryProps> = ({
   )
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-700">
-      <div className="bg-[#026498] rounded-[2.5rem] shadow-2xl shadow-blue-900/20 p-8 text-white relative overflow-hidden">
+    <div className="space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-right-4 duration-700">
+      <div className="bg-[#026498] rounded-3xl sm:rounded-[2.5rem] shadow-2xl shadow-blue-900/20 p-6 sm:p-8 text-white relative overflow-hidden">
         {/* Decorative background */}
         <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
         

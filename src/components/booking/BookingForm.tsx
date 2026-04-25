@@ -21,7 +21,8 @@ import {
   Instagram,
   Facebook,
   Twitter,
-  Youtube
+  Youtube,
+  ArrowLeft
 } from "lucide-react"
 
 export const BookingForm: React.FC = () => {
@@ -184,24 +185,36 @@ export const BookingForm: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-white font-sans selection:bg-blue-100 selection:text-[#026498]">
-      <div className="max-w-7xl mx-auto px-6 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
           {/* Main Content */}
           <div className="lg:col-span-8">
-            <div className="space-y-6 mb-8">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-[#026498] text-white flex items-center justify-center font-black text-xl shadow-lg shadow-blue-900/20">
+            {/* Back Button */}
+            {step > 1 && (
+              <button 
+                onClick={() => setStep(step - 1)}
+                className="flex items-center gap-2 text-gray-400 hover:text-[#026498] font-black text-[10px] uppercase tracking-widest transition-all mb-6 group px-2 sm:px-0"
+              >
+                <div className="w-6 h-6 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-blue-50 transition-colors">
+                  <ArrowLeft size={12} strokeWidth={3} />
+                </div>
+                Volver
+              </button>
+            )}
+            <div className="space-y-4 sm:space-y-6 mb-6 sm:mb-8 px-2 sm:px-0">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0 rounded-full bg-[#026498] text-white flex items-center justify-center font-black text-lg sm:text-xl shadow-lg shadow-blue-900/20">
                   {step}
                 </div>
                 <div>
-                  <h2 className="text-3xl font-black text-[#026498] leading-tight">
+                  <h2 className="text-xl sm:text-3xl font-black text-[#026498] leading-tight">
                     {step === 1 && "Selecciona el servicio"}
                     {step === 2 && "Elige tu profesional"}
                     {step === 3 && "Elige la fecha y hora"}
                     {step === 4 && "Tus datos personales"}
                     {step === 5 && "Confirma y paga tu seña"}
                   </h2>
-                  <p className="text-gray-400 font-medium tracking-tight">
+                  <p className="text-gray-400 text-xs sm:text-sm font-medium tracking-tight">
                     {step === 1 && "Elige el tratamiento que necesitas."}
                     {step === 2 && "Selecciona el especialista que te atenderá."}
                     {step === 3 && "Selecciona el día y horario que prefieras."}
@@ -212,10 +225,10 @@ export const BookingForm: React.FC = () => {
               </div>
             </div>
 
-            <div className="bg-white rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-gray-50 overflow-hidden">
+            <div className="bg-white rounded-3xl sm:rounded-[2.5rem] shadow-[0_10px_30px_rgba(0,0,0,0.04)] sm:shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-gray-50 overflow-hidden">
               {/* Progress Indicator */}
-              <div className="px-12 py-10 border-b border-gray-50">
-                <div className="flex items-center justify-between relative">
+              <div className="px-4 sm:px-12 py-6 sm:py-10 border-b border-gray-50">
+                <div className="flex items-center justify-between relative max-w-md mx-auto sm:max-w-none">
                   <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-0.5 bg-gray-100"></div>
                   <div 
                     className="absolute left-0 top-1/2 -translate-y-1/2 h-0.5 bg-[#026498] transition-all duration-700" 
@@ -226,17 +239,22 @@ export const BookingForm: React.FC = () => {
                     const Icon = s.icon
                     const isCompleted = step > s.id
                     const isActive = step === s.id
+                    const isAccessible = s.id < step
+
                     return (
-                      <div key={s.id} className="relative z-10 flex flex-col items-center">
+                      <div 
+                        key={s.id} 
+                        className={`relative z-10 flex flex-col items-center ${isAccessible ? 'cursor-pointer group' : ''}`}
+                        onClick={() => { if (isAccessible) setStep(s.id) }}
+                      >
                         <div className={`
-                          w-12 h-12 rounded-full flex items-center justify-center transition-all duration-500
+                          w-8 h-8 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all duration-500
                           ${isCompleted ? "bg-[#026498] text-white" : isActive ? "bg-white border-2 border-[#026498] text-[#026498] shadow-lg scale-110" : "bg-white border-2 border-gray-100 text-gray-300"}
+                          ${isAccessible ? "group-hover:scale-110 group-hover:shadow-md" : ""}
                         `}>
-                          {isCompleted ? <Check size={20} strokeWidth={3} /> : <Icon size={20} />}
+                          {isCompleted ? <Check size={14} strokeWidth={3} className="sm:w-5 sm:h-5" /> : <Icon size={14} className="sm:w-5 sm:h-5" />}
                         </div>
-                        <span className={`mt-3 text-[9px] font-black tracking-widest transition-colors ${isActive || isCompleted ? "text-[#026498]" : "text-gray-300"}`}>
-                          {s.name}
-                        </span>
+                        {/* Labels removed as per request to avoid redundancy with the main header title */}
                       </div>
                     )
                   })}
@@ -244,7 +262,7 @@ export const BookingForm: React.FC = () => {
               </div>
 
               {/* Step Content */}
-              <div className="p-12 min-h-[500px]">
+              <div className="p-6 sm:p-12 min-h-[400px] sm:min-h-[500px]">
                 {step === 1 && <ServiceSelection onServiceSelect={handleServiceSelect} selectedService={selectedService} />}
                 {step === 2 && (
                   <ProfessionalSelection
