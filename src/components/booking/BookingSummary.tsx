@@ -1,15 +1,12 @@
 import React from 'react'
 import { Servicio, Profesional, CrearPacienteData } from '../../types'
-import { dentalColors } from '../../config/colors'
 import { 
   Calendar, 
   Clock, 
   User, 
-  UserCheck, 
   Stethoscope, 
-  CreditCard,
-  ChevronRight,
-  Info
+  Info,
+  Phone
 } from 'lucide-react'
 
 interface BookingSummaryProps {
@@ -34,9 +31,9 @@ export const BookingSummary: React.FC<BookingSummaryProps> = ({
     return {
       date: date.toLocaleDateString('es-ES', {
         weekday: 'long',
-        year: 'numeric',
+        day: 'numeric',
         month: 'long',
-        day: 'numeric'
+        year: 'numeric'
       }),
       time: date.toLocaleTimeString('es-ES', {
         hour: '2-digit',
@@ -58,46 +55,55 @@ export const BookingSummary: React.FC<BookingSummaryProps> = ({
     active: boolean,
     subtitle?: string
   }) => (
-    <div className={`flex items-start space-x-3 transition-all duration-300 ${active ? 'opacity-100 translate-x-0' : 'opacity-40 translate-x-2'}`}>
-      <div className={`p-2 rounded-xl border transition-colors duration-300 ${active ? 'bg-white/20 border-white/30 text-white' : 'bg-white/5 border-white/10 text-blue-200'}`}>
-        <Icon className="w-5 h-5" />
+    <div className={`flex items-start gap-4 transition-all duration-300 ${active ? 'opacity-100' : 'opacity-30'}`}>
+      <div className={`w-10 h-10 rounded-xl flex items-center justify-center border transition-colors ${active ? 'bg-white/10 border-white/20 text-white' : 'bg-white/5 border-white/10 text-white/50'}`}>
+        <Icon size={18} />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-blue-100 text-[10px] uppercase tracking-widest font-bold mb-0.5 opacity-80">{label}</p>
-        <p className={`font-semibold text-base leading-tight truncate ${active ? 'text-white' : 'text-blue-200'}`}>
-          {value || '---'}
+        <p className="text-white/60 text-[10px] font-black tracking-widest uppercase mb-0.5">{label}</p>
+        <p className="font-bold text-white text-sm leading-tight truncate">
+          {value || 'Selecciona un paso'}
         </p>
         {subtitle && active && (
-          <p className="text-blue-100/70 text-xs mt-1 font-medium">{subtitle}</p>
+          <p className="text-white/70 text-xs mt-1 font-medium italic">{subtitle}</p>
         )}
       </div>
     </div>
   )
 
   return (
-    <div className="space-y-6">
-      <div className="bg-[#026498] rounded-3xl shadow-2xl shadow-blue-900/30 p-6 text-white overflow-hidden relative border border-white/10">
-        {/* Decorative elements */}
-        <div className="absolute top-0 right-0 -mt-8 -mr-8 w-32 h-32 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
-        <div className="absolute bottom-0 left-0 -mb-8 -ml-8 w-32 h-32 bg-black/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-700">
+      <div className="bg-[#026498] rounded-[2.5rem] shadow-2xl shadow-blue-900/20 p-8 text-white relative overflow-hidden">
+        {/* Decorative background */}
+        <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
         
         <div className="relative z-10">
           <div className="flex items-center justify-between mb-8">
-            <h3 className="text-xl font-black flex items-center tracking-tight">
-              <span className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center mr-3">
-                <Calendar className="w-5 h-5 text-white" />
-              </span>
+            <h3 className="text-lg font-black tracking-tight flex items-center gap-2">
+              <Calendar size={20} />
               Tu Reserva
             </h3>
-            {step < 5 && (
-              <span className="text-[10px] bg-white/20 px-2 py-1 rounded-full font-bold uppercase tracking-wider backdrop-blur-sm">
-                Paso {step} de 4
-              </span>
-            )}
+            <span className="text-[10px] bg-white/20 px-3 py-1 rounded-full font-black uppercase tracking-wider backdrop-blur-sm">
+              PASO {step} DE 5
+            </span>
           </div>
 
-          <div className="space-y-7">
-            {/* Tratamiento */}
+          {/* Mini Progress Bar */}
+          <div className="mb-10 px-2">
+            <div className="h-1 bg-white/20 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-white transition-all duration-700"
+                style={{ width: `${(step / 5) * 100}%` }}
+              ></div>
+            </div>
+            <div className="flex justify-between mt-2">
+              {[1, 2, 3, 4, 5].map(i => (
+                <div key={i} className={`w-1 h-3 rounded-full transition-colors ${step >= i ? 'bg-white' : 'bg-white/20'}`}></div>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-8">
             <SummaryItem 
               icon={Stethoscope}
               label="Tratamiento"
@@ -106,7 +112,6 @@ export const BookingSummary: React.FC<BookingSummaryProps> = ({
               subtitle={service ? `${service.duracion_estimada} min` : undefined}
             />
 
-            {/* Profesional */}
             <SummaryItem 
               icon={User}
               label="Profesional"
@@ -115,62 +120,42 @@ export const BookingSummary: React.FC<BookingSummaryProps> = ({
               subtitle={professional?.especialidad}
             />
 
-            {/* Fecha y Hora */}
             <SummaryItem 
               icon={Clock}
               label="Fecha y Hora"
-              value={dateTime ? `${formatDateTime(dateTime).date}` : null}
+              value={dateTime ? formatDateTime(dateTime).date : null}
               active={!!dateTime}
               subtitle={dateTime ? `${formatDateTime(dateTime).time} hs` : undefined}
             />
 
-            {/* Paciente */}
-            {(patientData || isAuthenticated) && (
-              <SummaryItem 
-                icon={UserCheck}
-                label="Paciente"
-                value={patientData ? `${patientData.nombre} ${patientData.apellido}` : 'Cargando...'}
-                active={!!patientData}
-                subtitle={patientData?.numero_documento ? `DNI: ${patientData.numero_documento}` : undefined}
-              />
-            )}
+            <SummaryItem 
+              icon={User}
+              label="Paciente"
+              value={patientData ? `${patientData.nombre} ${patientData.apellido}` : (isAuthenticated ? 'Cargando...' : null)}
+              active={!!patientData || isAuthenticated}
+              subtitle={patientData?.numero_documento}
+            />
           </div>
-
-          {/* Valor Total Indicator (Only when everything is selected) */}
-          {service && dateTime && (
-            <div className="mt-10 pt-6 border-t border-white/10 animate-in fade-in slide-in-from-bottom-2 duration-700">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-blue-100 text-[10px] uppercase tracking-widest font-bold opacity-80">Estado de reserva</p>
-                  <p className="text-2xl font-black text-white mt-1">Pendiente</p>
-                </div>
-                <div className="p-3 bg-white/10 rounded-2xl">
-                  <CreditCard className="w-6 h-6 text-white" />
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </div>
 
-      {/* Help Section Card */}
-      <div className="bg-white rounded-3xl shadow-xl shadow-gray-200/50 p-6 border border-gray-100 group hover:border-blue-100 transition-colors duration-300">
-        <div className="flex items-center space-x-4 mb-4">
-          <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-[#026498] group-hover:bg-[#026498] group-hover:text-white transition-all duration-300">
-            <Info className="w-6 h-6" />
-          </div>
-          <div>
-            <h4 className="font-bold text-gray-900">¿Necesitas ayuda?</h4>
-            <p className="text-xs text-gray-500 font-medium">Llámanos o escríbenos</p>
-          </div>
+      {/* Help Section */}
+      <div className="bg-blue-50/50 rounded-[2rem] p-8 border border-blue-100 flex flex-col items-center text-center group hover:bg-white transition-all duration-500 shadow-sm hover:shadow-xl hover:shadow-blue-900/5">
+        <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center text-[#026498] shadow-sm mb-4 group-hover:scale-110 transition-transform">
+          <Info size={28} />
         </div>
+        <h4 className="font-black text-gray-900 mb-1">¿Necesitas ayuda?</h4>
+        <p className="text-xs text-gray-500 font-bold uppercase tracking-widest mb-6">Llámanos o escríbenos</p>
         
-        <div className="space-y-3">
-          <a href="tel:77115716" className="block text-xl font-black text-[#026498] text-center bg-gray-50 py-4 rounded-2xl border border-gray-100 hover:bg-blue-50 hover:border-blue-100 transition-all duration-200">
-            7711-5716
-          </a>
-          <p className="text-[10px] text-center text-gray-400 font-bold uppercase tracking-widest px-2">Lun, Mar, Jue 9-12/14-18 | Mié 9-16 | Vie 10-16:30</p>
-        </div>
+        <a href="tel:77115716" className="w-full flex items-center justify-center gap-3 bg-[#026498] text-white py-4 rounded-xl font-black text-xl hover:bg-[#0c4a6e] transition-colors shadow-lg shadow-blue-900/10">
+          <Phone size={20} />
+          7711-5716
+        </a>
+        
+        <p className="mt-6 text-[9px] text-gray-400 font-bold uppercase tracking-[0.2em] leading-relaxed">
+          Lun, Mar, Jue 9-12 / 14-18 <br />
+          Mié 9-16 | Vie 10-16:30hs
+        </p>
       </div>
     </div>
   )
