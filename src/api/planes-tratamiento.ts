@@ -2,7 +2,7 @@ import { apiClient } from "../lib/api-client"
 import type { PlanTratamiento, CrearPlanTratamientoData } from "../types"
 
 export const planesTratamientoApi = {
-  listar: async (pacienteId: number): Promise<PlanTratamiento[]> => {
+  listar: async (pacienteId: string | number): Promise<PlanTratamiento[]> => {
     return apiClient.get<PlanTratamiento[]>(`/planes-tratamiento?paciente_id=${pacienteId}`)
   },
 

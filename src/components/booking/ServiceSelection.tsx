@@ -5,7 +5,7 @@ import { useEffect, useState } from "react"
 import type { Servicio } from "../../types"
 import { serviciosApi } from "../../api/servicios"
 import { Clock, Plus } from "lucide-react"
-import { ToothIcon, BracesIcon, ImplantIcon, SparklesIcon, CleanIcon, MassageIcon } from "./DentalIcons"
+import { ToothIcon, BracesIcon, ImplantIcon, SparklesIcon, CleanIcon, MassageIcon, LaserIcon, BeautyIcon } from "./DentalIcons"
 
 interface ServiceSelectionProps {
   selectedService: Servicio | null
@@ -20,6 +20,8 @@ const getServiceIcon = (category: string, name: string) => {
   if (cat.includes("estética") || n.includes("blanqueamiento") || n.includes("estética")) return SparklesIcon
   if (cat.includes("implantes") || n.includes("implante") || n.includes("perno")) return ImplantIcon
   if (cat.includes("limpieza") || n.includes("limpieza") || n.includes("profilaxis")) return CleanIcon
+  if (n.includes("cosmeto")) return BeautyIcon
+  if (n.includes("depila")) return LaserIcon
   if (cat.includes("masaje") || n.includes("masaje") || cat.includes("otros")) return MassageIcon
   
   // Default for anything dental related

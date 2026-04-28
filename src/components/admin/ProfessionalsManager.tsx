@@ -33,6 +33,7 @@ export const ProfessionalsManager: React.FC = () => {
     especialidad: "",
     numero_matricula: "",
     color: "#026498",
+    foto_url: "",
   })
 
   const [errors, setErrors] = useState<Partial<Record<keyof CrearProfesionalData, string>>>({})
@@ -100,6 +101,7 @@ export const ProfessionalsManager: React.FC = () => {
       especialidad: professional.especialidad,
       numero_matricula: professional.numero_matricula,
       color: professional.color || "#026498",
+      foto_url: professional.foto_url || "",
     })
     setShowForm(true)
   }
@@ -151,6 +153,7 @@ export const ProfessionalsManager: React.FC = () => {
       especialidad: "",
       numero_matricula: "",
       color: "#026498",
+      foto_url: "",
     })
     setErrors({})
     setEditingProfessional(null)

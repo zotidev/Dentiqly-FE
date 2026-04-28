@@ -2,7 +2,7 @@ import { apiClient } from "../lib/api-client"
 import type { Archivo } from "../types"
 
 export const archivosApi = {
-  listar: async (pacienteId: number): Promise<Archivo[]> => {
+  listar: async (pacienteId: string | number): Promise<Archivo[]> => {
     return apiClient.get<Archivo[]>(`/archivos?paciente_id=${pacienteId}`)
   },
 

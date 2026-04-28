@@ -9,7 +9,7 @@ import { prescripcionesApi } from "../../api"
 import type { Prescripcion, CrearPrescripcionData } from "../../types"
 
 interface PrescriptionsSectionProps {
-  pacienteId: number
+  pacienteId: string | number
 }
 
 export const PrescriptionsSection: React.FC<PrescriptionsSectionProps> = ({ pacienteId }) => {
@@ -61,7 +61,7 @@ export const PrescriptionsSection: React.FC<PrescriptionsSectionProps> = ({ paci
   const handleDelete = async (id: string) => {
     if (window.confirm("¿Estás seguro de eliminar esta prescripción?")) {
       try {
-        await prescripcionesApi.eliminar(Number(id))
+        await prescripcionesApi.eliminar(id as any)
         fetchPrescripciones()
       } catch (error) {
         console.error("Error deleting prescription:", error)
@@ -75,7 +75,7 @@ export const PrescriptionsSection: React.FC<PrescriptionsSectionProps> = ({ paci
       if (modalMode === "create") {
         await prescripcionesApi.crear(formData as CrearPrescripcionData)
       } else if (modalMode === "edit" && selectedPrescripcion) {
-        await prescripcionesApi.actualizar(Number(selectedPrescripcion.id), formData)
+        await prescripcionesApi.actualizar(selectedPrescripcion.id, formData)
       }
       setShowModal(false)
       fetchPrescripciones()

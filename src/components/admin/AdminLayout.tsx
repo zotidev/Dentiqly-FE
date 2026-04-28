@@ -11,7 +11,8 @@ import {
   UserCog,
   FileText,
   Wallet,
-  DollarSign
+  DollarSign,
+  CalendarOff
 } from 'lucide-react'
 
 interface AdminLayoutProps {
@@ -37,6 +38,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
     { id: 'debtors', label: 'Reporte de deudores', icon: FileText },
     { id: 'cashflow', label: 'Flujo de caja', icon: Wallet },
     { id: 'feriados', label: 'Feriados', icon: Calendar },
+    { id: 'ausencias', label: 'Ausencias/Vacaciones', icon: CalendarOff },
     { id: 'settings', label: 'Configuración', icon: Settings },
   ]
 

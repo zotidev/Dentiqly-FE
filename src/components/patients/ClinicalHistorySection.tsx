@@ -9,7 +9,7 @@ import { historialesClinicosApi } from "../../api"
 import type { HistorialClinico, CrearHistorialClinicoData } from "../../types"
 
 interface ClinicalHistorySectionProps {
-  pacienteId: number
+  pacienteId: string | number
 }
 
 export const ClinicalHistorySection: React.FC<ClinicalHistorySectionProps> = ({ pacienteId }) => {
@@ -61,7 +61,7 @@ export const ClinicalHistorySection: React.FC<ClinicalHistorySectionProps> = ({ 
   const handleDelete = async (id: string) => {
     if (window.confirm("¿Estás seguro de eliminar este historial clínico?")) {
       try {
-        await historialesClinicosApi.eliminar(Number(id))
+        await historialesClinicosApi.eliminar(id as any)
         fetchHistoriales()
       } catch (error) {
         console.error("Error deleting clinical history:", error)
@@ -75,7 +75,7 @@ export const ClinicalHistorySection: React.FC<ClinicalHistorySectionProps> = ({ 
       if (modalMode === "create") {
         await historialesClinicosApi.crear(formData as CrearHistorialClinicoData)
       } else if (modalMode === "edit" && selectedHistorial) {
-        await historialesClinicosApi.actualizar(Number(selectedHistorial.id), formData)
+        await historialesClinicosApi.actualizar(selectedHistorial.id, formData)
       }
       setShowModal(false)
       fetchHistoriales()

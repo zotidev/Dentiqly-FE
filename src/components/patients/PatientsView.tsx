@@ -547,15 +547,15 @@ export const PatientsView: React.FC = () => {
                       </div>
                     )}
 
-                    {activeTab === "historia" && <ClinicalHistorySection pacienteId={Number(selectedPatient.id)} />}
+                    {activeTab === "historia" && <ClinicalHistorySection pacienteId={selectedPatient.id} />}
 
-                    {activeTab === "odontograma" && <OdontogramSection pacienteId={Number(selectedPatient.id)} />}
+                    {activeTab === "odontograma" && <OdontogramSection pacienteId={selectedPatient.id} />}
 
-                    {activeTab === "prescripciones" && <PrescriptionsSection pacienteId={Number(selectedPatient.id)} />}
+                    {activeTab === "prescripciones" && <PrescriptionsSection pacienteId={selectedPatient.id} />}
 
-                    {activeTab === "tratamientos" && <TreatmentPlansSection pacienteId={Number(selectedPatient.id)} />}
+                    {activeTab === "tratamientos" && <TreatmentPlansSection pacienteId={selectedPatient.id} />}
 
-                    {activeTab === "archivos" && <FilesSection pacienteId={Number(selectedPatient.id)} />}
+                    {activeTab === "archivos" && <FilesSection pacienteId={selectedPatient.id} />}
 
                     {activeTab === "cuenta_corriente" && <CuentaCorrienteSection pacienteId={selectedPatient.id} />}
                   </div>

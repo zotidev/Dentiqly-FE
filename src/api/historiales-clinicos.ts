@@ -2,7 +2,7 @@ import { apiClient } from "../lib/api-client"
 import type { HistorialClinico, CrearHistorialClinicoData } from "../types"
 
 export const historialesClinicosApi = {
-  listar: async (pacienteId: number): Promise<HistorialClinico[]> => {
+  listar: async (pacienteId: string | number): Promise<HistorialClinico[]> => {
     return apiClient.get<HistorialClinico[]>(`/historiales-clinicos?paciente_id=${pacienteId}`)
   },
 

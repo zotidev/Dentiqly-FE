@@ -281,8 +281,8 @@ export interface Copago {
 }
 
 export interface HistorialClinico {
-  id: string
-  paciente_id: number
+  id: number
+  paciente_id: string
   fecha: string
   motivo_consulta?: string
   enfermedad_actual?: string
@@ -297,7 +297,7 @@ export interface HistorialClinico {
 }
 
 export interface CrearHistorialClinicoData {
-  paciente_id: number
+  paciente_id: string
   fecha: string
   motivo_consulta?: string
   enfermedad_actual?: string
@@ -310,8 +310,8 @@ export interface CrearHistorialClinicoData {
 }
 
 export interface Odontograma {
-  id: string
-  paciente_id: number
+  id: number
+  paciente_id: string
   profesional_id: number
   fecha: string
   dientes_data: Record<string, any>
@@ -322,7 +322,7 @@ export interface Odontograma {
 }
 
 export interface CrearOdontogramaData {
-  paciente_id: number
+  paciente_id: string
   profesional_id: number
   fecha: string
   dientes_data: Record<string, any>
@@ -331,8 +331,8 @@ export interface CrearOdontogramaData {
 }
 
 export interface Prescripcion {
-  id: string
-  paciente_id: number
+  id: number
+  paciente_id: string
   fecha: string
   medicamento: string
   dosis: string
@@ -344,7 +344,7 @@ export interface Prescripcion {
 }
 
 export interface CrearPrescripcionData {
-  paciente_id: number
+  paciente_id: string
   fecha: string
   medicamento: string
   dosis: string
@@ -354,8 +354,8 @@ export interface CrearPrescripcionData {
 }
 
 export interface PlanTratamiento {
-  id: string
-  paciente_id: number
+  id: number
+  paciente_id: string
   fecha_inicio: string
   fecha_fin?: string
   descripcion: string
@@ -367,7 +367,7 @@ export interface PlanTratamiento {
 }
 
 export interface CrearPlanTratamientoData {
-  paciente_id: number
+  paciente_id: string
   fecha_inicio: string
   fecha_fin?: string
   descripcion: string
@@ -377,8 +377,8 @@ export interface CrearPlanTratamientoData {
 }
 
 export interface Archivo {
-  id: string
-  paciente_id: number
+  id: number
+  paciente_id: string
   nombre: string
   tipo: string
   ruta: string

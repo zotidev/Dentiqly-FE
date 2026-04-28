@@ -9,7 +9,7 @@ import { planesTratamientoApi } from "../../api"
 import type { PlanTratamiento, CrearPlanTratamientoData } from "../../types"
 
 interface TreatmentPlansSectionProps {
-  pacienteId: number
+  pacienteId: string | number
 }
 
 export const TreatmentPlansSection: React.FC<TreatmentPlansSectionProps> = ({ pacienteId }) => {
@@ -62,7 +62,7 @@ export const TreatmentPlansSection: React.FC<TreatmentPlansSectionProps> = ({ pa
   const handleDelete = async (id: string) => {
     if (window.confirm("¿Estás seguro de eliminar este plan de tratamiento?")) {
       try {
-        await planesTratamientoApi.eliminar(Number(id))
+        await planesTratamientoApi.eliminar(id as any)
         fetchPlanes()
       } catch (error) {
         console.error("Error deleting treatment plan:", error)
@@ -76,7 +76,7 @@ export const TreatmentPlansSection: React.FC<TreatmentPlansSectionProps> = ({ pa
       if (modalMode === "create") {
         await planesTratamientoApi.crear(formData as CrearPlanTratamientoData)
       } else if (modalMode === "edit" && selectedPlan) {
-        await planesTratamientoApi.actualizar(Number(selectedPlan.id), formData)
+        await planesTratamientoApi.actualizar(selectedPlan.id, formData)
       }
       setShowModal(false)
       fetchPlanes()

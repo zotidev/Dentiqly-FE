@@ -31,7 +31,7 @@ export interface EstadisticasOdontograma {
 }
 
 export const odontogramasApi = {
-  listar: async (pacienteId: number, profesionalId?: number, tipo?: string): Promise<Odontograma[]> => {
+  listar: async (pacienteId: string | number, profesionalId?: number, tipo?: string): Promise<Odontograma[]> => {
     const queryParams = new URLSearchParams()
     queryParams.append("paciente_id", String(pacienteId))
     if (profesionalId) queryParams.append("profesional_id", String(profesionalId))

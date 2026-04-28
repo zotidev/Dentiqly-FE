@@ -117,6 +117,45 @@ export const MassageIcon = ({ size = 24, className = "" }) => (
   </svg>
 );
 
+export const LaserIcon = ({ size = 24, className = "" }) => (
+  <svg 
+    width={size} 
+    height={size} 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round" 
+    className={className}
+  >
+    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+    <path d="M18 8h.01" />
+    <path d="M17 5h.01" />
+    <path d="M20 11h.01" />
+    <path d="M17 11h.01" />
+  </svg>
+);
+
+export const BeautyIcon = ({ size = 24, className = "" }) => (
+  <svg 
+    width={size} 
+    height={size} 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round" 
+    className={className}
+  >
+    <path d="M12 2a7 7 0 0 0-7 7c0 2.3 1.3 4.3 3.3 5.4A10 10 0 0 0 2 22h20a10 10 0 0 0-6.3-7.6c2-1.1 3.3-3.1 3.3-5.4a7 7 0 0 0-7-7Z" />
+    <path d="M8.5 9a3.5 3.5 0 1 0 7 0 3.5 3.5 0 1 0-7 0Z" />
+    <path d="M12 12v2" />
+    <path d="M11 16h2" />
+  </svg>
+);
+
 export const WhatsAppIcon = ({ size = 24, className = "" }) => (
   <svg 
     width={size} 

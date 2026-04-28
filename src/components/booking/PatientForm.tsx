@@ -44,7 +44,26 @@ export const PatientForm: React.FC<PatientFormProps> = ({ onPatientData, loading
       }
     }
     fetchObrasSociales()
+    
+    // Load cached patient data
+    const cached = localStorage.getItem("odaf_patient_data")
+    if (cached) {
+      try {
+        const parsedData = JSON.parse(cached)
+        // No cargamos las observaciones anteriores
+        setFormData(prev => ({ ...prev, ...parsedData, observaciones: "" }))
+      } catch (e) {
+        console.error("Error loading cached patient data:", e)
+      }
+    }
   }, [])
+
+  // Save to cache whenever formData changes (except observaciones)
+  useEffect(() => {
+    const dataToCache = { ...formData }
+    delete dataToCache.observaciones
+    localStorage.setItem("odaf_patient_data", JSON.stringify(dataToCache))
+  }, [formData])
 
   const validateForm = () => {
     const newErrors: Partial<Record<keyof CrearPacienteData, string>> = {}

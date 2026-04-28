@@ -9,7 +9,7 @@ import { archivosApi } from "../../api"
 import type { Archivo } from "../../types"
 
 interface FilesSectionProps {
-  pacienteId: number
+  pacienteId: string | number
 }
 
 export const FilesSection: React.FC<FilesSectionProps> = ({ pacienteId }) => {
@@ -67,7 +67,7 @@ export const FilesSection: React.FC<FilesSectionProps> = ({ pacienteId }) => {
   const handleDelete = async (id: string) => {
     if (window.confirm("¿Estás seguro de eliminar este archivo?")) {
       try {
-        await archivosApi.eliminar(Number(id))
+        await archivosApi.eliminar(id as any)
         fetchArchivos()
       } catch (error) {
         console.error("Error deleting file:", error)
