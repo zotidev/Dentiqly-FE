@@ -1,10 +1,10 @@
 import React from 'react'
 import { Servicio, Profesional, CrearPacienteData } from '../../types'
-import { 
-  Calendar, 
-  Clock, 
-  User, 
-  Stethoscope, 
+import {
+  Calendar,
+  Clock,
+  User,
+  Stethoscope,
   Info,
   Phone
 } from 'lucide-react'
@@ -42,16 +42,16 @@ export const BookingSummary: React.FC<BookingSummaryProps> = ({
     }
   }
 
-  const SummaryItem = ({ 
-    icon: Icon, 
-    label, 
-    value, 
+  const SummaryItem = ({
+    icon: Icon,
+    label,
+    value,
     active,
-    subtitle 
-  }: { 
-    icon: any, 
-    label: string, 
-    value: string | null, 
+    subtitle
+  }: {
+    icon: any,
+    label: string,
+    value: string | null,
     active: boolean,
     subtitle?: string
   }) => (
@@ -76,7 +76,7 @@ export const BookingSummary: React.FC<BookingSummaryProps> = ({
       <div className="bg-[#026498] rounded-3xl sm:rounded-[2.5rem] shadow-2xl shadow-blue-900/20 p-6 sm:p-8 text-white relative overflow-hidden">
         {/* Decorative background */}
         <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
-        
+
         <div className="relative z-10">
           <div className="flex items-center justify-between mb-8">
             <h3 className="text-lg font-black tracking-tight flex items-center gap-2">
@@ -91,7 +91,7 @@ export const BookingSummary: React.FC<BookingSummaryProps> = ({
           {/* Mini Progress Bar */}
           <div className="mb-10 px-2">
             <div className="h-1 bg-white/20 rounded-full overflow-hidden">
-              <div 
+              <div
                 className="h-full bg-white transition-all duration-700"
                 style={{ width: `${(step / 5) * 100}%` }}
               ></div>
@@ -104,7 +104,7 @@ export const BookingSummary: React.FC<BookingSummaryProps> = ({
           </div>
 
           <div className="space-y-8">
-            <SummaryItem 
+            <SummaryItem
               icon={Stethoscope}
               label="Tratamiento"
               value={service?.nombre || null}
@@ -112,7 +112,7 @@ export const BookingSummary: React.FC<BookingSummaryProps> = ({
               subtitle={service ? `${service.duracion_estimada} min` : undefined}
             />
 
-            <SummaryItem 
+            <SummaryItem
               icon={User}
               label="Profesional"
               value={professional ? `${professional.nombre} ${professional.apellido}` : null}
@@ -120,7 +120,7 @@ export const BookingSummary: React.FC<BookingSummaryProps> = ({
               subtitle={professional?.especialidad}
             />
 
-            <SummaryItem 
+            <SummaryItem
               icon={Clock}
               label="Fecha y Hora"
               value={dateTime ? formatDateTime(dateTime).date : null}
@@ -128,7 +128,7 @@ export const BookingSummary: React.FC<BookingSummaryProps> = ({
               subtitle={dateTime ? `${formatDateTime(dateTime).time} hs` : undefined}
             />
 
-            <SummaryItem 
+            <SummaryItem
               icon={User}
               label="Paciente"
               value={patientData ? `${patientData.nombre} ${patientData.apellido}` : (isAuthenticated ? 'Cargando...' : null)}
@@ -146,12 +146,12 @@ export const BookingSummary: React.FC<BookingSummaryProps> = ({
         </div>
         <h4 className="font-black text-gray-900 mb-1">¿Necesitas ayuda?</h4>
         <p className="text-xs text-gray-500 font-bold uppercase tracking-widest mb-6">Llámanos o escríbenos</p>
-        
+
         <a href="tel:77115716" className="w-full flex items-center justify-center gap-3 bg-[#026498] text-white py-4 rounded-xl font-black text-xl hover:bg-[#0c4a6e] transition-colors shadow-lg shadow-blue-900/10">
           <Phone size={20} />
-          7711-5716
+          11 4048-3693
         </a>
-        
+
         <p className="mt-6 text-[9px] text-gray-400 font-bold uppercase tracking-[0.2em] leading-relaxed">
           Lun, Mar, Jue 9-12 / 14-18 <br />
           Mié 9-16 | Vie 10-16:30hs
