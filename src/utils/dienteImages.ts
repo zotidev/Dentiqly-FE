@@ -68,6 +68,7 @@ export const dienteImages: Record<string, any> = {
   '3.8': inferior38,
   
   // Cuadrante 4 - Inferior derecho
+  // Cuadrante 4 - Inferior derecho
   '4.1': inferior41,
   '4.2': inferior42,
   '4.3': inferior43,
@@ -76,6 +77,30 @@ export const dienteImages: Record<string, any> = {
   '4.6': inferior46,
   '4.7': inferior47,
   '4.8': inferior48,
+
+  // Temporarios Superiores (Cuadrantes 5 y 6)
+  '5.1': '/dientes/temporarios/5.1.png',
+  '5.2': '/dientes/temporarios/5.2.png',
+  '5.3': '/dientes/temporarios/5.3.png',
+  '5.4': '/dientes/temporarios/5.4.png',
+  '5.5': '/dientes/temporarios/5.5.png',
+  '6.1': '/dientes/temporarios/6.1.png',
+  '6.2': '/dientes/temporarios/6.2.png',
+  '6.3': '/dientes/temporarios/6.3.png',
+  '6.4': '/dientes/temporarios/6.4.png',
+  '6.5': '/dientes/temporarios/6.5.png',
+
+  // Temporarios Inferiores (Cuadrantes 7 y 8)
+  '7.1': '/dientes/temporarios/7.1.png',
+  '7.2': '/dientes/temporarios/7.2.png',
+  '7.3': '/dientes/temporarios/7.3.png',
+  '7.4': '/dientes/temporarios/7.4.png',
+  '7.5': '/dientes/temporarios/7.5.png',
+  '8.1': '/dientes/temporarios/8.1.png',
+  '8.2': '/dientes/temporarios/8.2.png',
+  '8.3': '/dientes/temporarios/8.3.png',
+  '8.4': '/dientes/temporarios/8.4.png',
+  '8.5': '/dientes/temporarios/8.5.png',
 };
 
 export const getDienteImage = (numero: string): string | null => {
@@ -93,21 +118,23 @@ export const getDienteImageSrc = (numero: string): string => {
 // Función para verificar si un diente es superior
 export const esDienteSuperior = (numero: string): boolean => {
   const primerDigito = parseInt(numero.split('.')[0]);
-  return primerDigito === 1 || primerDigito === 2;
+  return [1, 2, 5, 6].includes(primerDigito);
 };
 
 // Función para verificar si un diente es inferior
 export const esDienteInferior = (numero: string): boolean => {
   const primerDigito = parseInt(numero.split('.')[0]);
-  return primerDigito === 3 || primerDigito === 4;
+  return [3, 4, 7, 8].includes(primerDigito);
 };
 
 // Lista completa de todos los dientes en orden
 export const TODOS_LOS_DIENTES = [
   '1.8', '1.7', '1.6', '1.5', '1.4', '1.3', '1.2', '1.1',
   '2.1', '2.2', '2.3', '2.4', '2.5', '2.6', '2.7', '2.8',
-  '3.1', '3.2', '3.3', '3.4', '3.5', '3.6', '3.7', '3.8',
-  '4.1', '4.2', '4.3', '4.4', '4.5', '4.6', '4.7', '4.8'
+  '5.5', '5.4', '5.3', '5.2', '5.1', '6.1', '6.2', '6.3', '6.4', '6.5',
+  '8.5', '8.4', '8.3', '8.2', '8.1', '7.1', '7.2', '7.3', '7.4', '7.5',
+  '4.8', '4.7', '4.6', '4.5', '4.4', '4.3', '4.2', '4.1',
+  '3.1', '3.2', '3.3', '3.4', '3.5', '3.6', '3.7', '3.8'
 ];
 
 export default dienteImages;

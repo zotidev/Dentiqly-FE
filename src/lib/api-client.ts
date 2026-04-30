@@ -83,13 +83,14 @@ export class ApiClient {
 
   async uploadFile<T>(endpoint: string, file: File, additionalData?: Record<string, any>): Promise<T> {
     const formData = new FormData()
-    formData.append("file", file)
 
     if (additionalData) {
       Object.entries(additionalData).forEach(([key, value]) => {
         formData.append(key, String(value))
       })
     }
+
+    formData.append("file", file)
 
     const headers: HeadersInit = {}
     if (this.token) {
