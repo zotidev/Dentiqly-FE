@@ -31,7 +31,7 @@ export const AusenciasManager: React.FC = () => {
         profesionalesApi.listar({ limit: 100 })
       ]);
       setAusencias(ausenciasData || []);
-      setProfesionales(profesionalesData.profesionales || []);
+      setProfesionales(profesionalesData.data || []);
     } catch (err) {
       console.error('Error loading data:', err);
       setError('Error al cargar los datos');

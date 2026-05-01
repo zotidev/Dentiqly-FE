@@ -72,6 +72,15 @@ export const TreatmentPlansSection: React.FC<TreatmentPlansSectionProps> = ({ pa
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    // Validación de fechas
+    if (formData.fecha_inicio && formData.fecha_fin) {
+      if (new Date(formData.fecha_fin) < new Date(formData.fecha_inicio)) {
+        alert("La fecha de fin no puede ser anterior a la fecha de inicio.")
+        return
+      }
+    }
+
     try {
       if (modalMode === "create") {
         await planesTratamientoApi.crear(formData as CrearPlanTratamientoData)
@@ -80,8 +89,10 @@ export const TreatmentPlansSection: React.FC<TreatmentPlansSectionProps> = ({ pa
       }
       setShowModal(false)
       fetchPlanes()
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error saving treatment plan:", error)
+      const errorMsg = error.response?.data?.errors?.[0]?.msg || error.response?.data?.error || "Error al guardar el plan de tratamiento. Por favor, intente nuevamente."
+      alert(errorMsg)
     }
   }
 

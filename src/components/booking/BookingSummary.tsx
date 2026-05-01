@@ -145,7 +145,7 @@ export const BookingSummary: React.FC<BookingSummaryProps> = ({
           <Info size={28} />
         </div>
         <h4 className="font-black text-gray-900 mb-1">¿Necesitas ayuda?</h4>
-        <p className="text-xs text-gray-500 font-bold uppercase tracking-widest mb-6">Llámanos o escríbenos</p>
+        <p className="text-xs text-gray-500 font-bold uppercase tracking-widest mb-6">escribinos</p>
 
         <a href="tel:77115716" className="w-full flex items-center justify-center gap-3 bg-[#026498] text-white py-4 rounded-xl font-black text-xl hover:bg-[#0c4a6e] transition-colors shadow-lg shadow-blue-900/10">
           <Phone size={20} />

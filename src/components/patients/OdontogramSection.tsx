@@ -4,7 +4,7 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import { Card } from "../ui/Card"
 import { Button } from "../ui/Button"
-import { Plus, Save, X, Calendar, Trash2, Eye } from "lucide-react"
+import { Plus, Save, X, Calendar, Trash2, Eye, ArrowUp, ArrowDown } from "lucide-react"
 import { odontogramasApi } from "../../api/odontogramas"
 import type { DientesData, DatosDiente } from "../../api/odontogramas"
 import type { Odontograma, CrearOdontogramaData } from "../../types"
@@ -64,6 +64,8 @@ const TRATAMIENTOS = [
   { value: "superficie_desgastada", label: "Superficie desgastada" },
   { value: "diastema", label: "Diastema" },
   { value: "supernumerario", label: "Supernumerario" },
+  { value: "erupcion_up", label: "Erupción (Arriba)" },
+  { value: "erupcion_down", label: "Erupción (Abajo)" },
 ]
 
 type EstadoTipo = "buen_estado" | "mal_estado"
@@ -249,7 +251,7 @@ export const OdontogramSection: React.FC<OdontogramSectionProps> = ({ pacienteId
     if (!selectedTratamiento) return
 
     // Solo aplicar si el tratamiento es uno de los generales o si se desea aplicar a todo el diente
-    const tratamientosGenerales = ["ausente", "corona", "implante", "extraccion", "caries", "restauracion"]
+    const tratamientosGenerales = ["ausente", "corona", "implante", "extraccion", "caries", "restauracion", "erupcion_up", "erupcion_down"]
     if (!tratamientosGenerales.includes(selectedTratamiento)) return
 
     setDientesData((prev) => {
@@ -800,6 +802,14 @@ const DienteVisual: React.FC<DienteVisualProps> = ({
 
   return (
     <div className={`relative flex flex-col items-center ${cursorClass}`}>
+      {/* Erupción Arrows */}
+      {(datos as any)?.tratamiento_general?.tratamiento === "erupcion_up" && (
+        <ArrowUp className="w-5 h-5 absolute -top-5" style={{ color: (datos as any)?.tratamiento_general?.estado === "buen_estado" ? ESTADO_COLORS.buen_estado : ESTADO_COLORS.mal_estado }} />
+      )}
+      {(datos as any)?.tratamiento_general?.tratamiento === "erupcion_down" && (
+        <ArrowDown className="w-5 h-5 absolute -top-5" style={{ color: (datos as any)?.tratamiento_general?.estado === "buen_estado" ? ESTADO_COLORS.buen_estado : ESTADO_COLORS.mal_estado }} />
+      )}
+
       {esSuperior ? (
         <>
           {renderToothImage()}

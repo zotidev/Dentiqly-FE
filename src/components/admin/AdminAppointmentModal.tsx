@@ -133,28 +133,60 @@ export const AdminAppointmentModal: React.FC<AdminAppointmentModalProps> = ({ on
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="space-y-4">
                         <div className="bg-gray-50/80 p-5 rounded-2xl border border-gray-100 space-y-4">
-                            <div>
-                                <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Buscar Paciente</label>
-                                <Input
-                                    type="text"
-                                    placeholder="DNI, nombre o apellido..."
-                                    value={searchPaciente}
-                                    onChange={(e) => setSearchPaciente(e.target.value)}
-                                    className="mb-3 h-11"
-                                />
-                                <select
-                                    value={formData.paciente_id}
-                                    onChange={(e) => setFormData({ ...formData, paciente_id: e.target.value })}
-                                    className="w-full border border-gray-200 rounded-xl p-3 h-12 bg-white text-sm focus:ring-2 focus:ring-[#026498] focus:border-transparent outline-none transition-all"
-                                    required
-                                >
-                                    <option value="">Seleccionar paciente</option>
-                                    {pacientes.map((paciente) => (
-                                        <option key={paciente.id} value={paciente.id}>
-                                            {paciente.numero_documento} - {paciente.apellido}, {paciente.nombre}
-                                        </option>
-                                    ))}
-                                </select>
+                            <div className="relative">
+                                <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Paciente *</label>
+                                <div className="relative">
+                                    <Input
+                                        type="text"
+                                        placeholder="Buscar por DNI, nombre o apellido..."
+                                        value={searchPaciente}
+                                        onChange={(e) => {
+                                            setSearchPaciente(e.target.value);
+                                            // Invalida la selección si el usuario borra o cambia el texto
+                                            setFormData({ ...formData, paciente_id: '' });
+                                        }}
+                                        onFocus={() => {
+                                            if (searchPaciente.length > 2) {
+                                                // Trigger search if focus and has text
+                                            }
+                                        }}
+                                        className="h-12 pr-10"
+                                        required
+                                    />
+                                    {formData.paciente_id && (
+                                        <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                            <div className="w-2 h-2 rounded-full bg-green-500" title="Paciente seleccionado" />
+                                        </div>
+                                    )}
+                                </div>
+
+                                {searchPaciente.length > 2 && !formData.paciente_id && pacientes.length > 0 && (
+                                    <div className="absolute z-[60] w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-xl max-h-60 overflow-y-auto">
+                                        {pacientes.map((paciente) => (
+                                            <div
+                                                key={paciente.id}
+                                                className="px-4 py-3 hover:bg-blue-50 cursor-pointer border-b border-gray-50 last:border-none transition-colors"
+                                                onClick={() => {
+                                                    setFormData({ ...formData, paciente_id: paciente.id });
+                                                    setSearchPaciente(`${paciente.numero_documento} - ${paciente.apellido}, ${paciente.nombre}`);
+                                                }}
+                                            >
+                                                <div className="text-sm font-bold text-gray-900">
+                                                    {paciente.apellido}, {paciente.nombre}
+                                                </div>
+                                                <div className="text-xs text-gray-500">
+                                                    DNI: {paciente.numero_documento}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                                
+                                {searchPaciente.length > 2 && !formData.paciente_id && pacientes.length === 0 && (
+                                    <div className="absolute z-[60] w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-xl p-4 text-center text-sm text-gray-500">
+                                        No se encontraron pacientes
+                                    </div>
+                                )}
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

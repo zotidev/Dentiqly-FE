@@ -42,14 +42,14 @@ export const Header: React.FC = () => {
               </p>
             </div>
           </div>
-          
+
           <div className="hidden md:flex items-center space-x-4">
             <div className="text-right">
               <p className={`text-sm font-medium text-[${dentalColors.gray900}]`}>
                 ¿Necesitas ayuda?
               </p>
               <p className={`text-xs text-[${dentalColors.gray600}]`}>
-                Llámanos al +54 11 1234-5678
+                +54 9 11 4048-3693
               </p>
             </div>
           </div>

@@ -125,6 +125,20 @@ export const CalendarView: React.FC = () => {
     }
   }
 
+  const handleDeleteAppointment = async (id: number) => {
+    if (window.confirm('¿Estás seguro de eliminar este turno? Esta acción no se puede deshacer.')) {
+      try {
+        await turnosApi.eliminar(id)
+        setSelectedAppointment(null)
+        fetchAppointments()
+        alert('Turno eliminado correctamente')
+      } catch (error) {
+        console.error('Error deleting appointment:', error)
+        alert('Error al eliminar el turno')
+      }
+    }
+  }
+
   const getAppointmentsForDate = (date: Date) => {
     // Use local date components to avoid timezone shifts
     const year = date.getFullYear()
@@ -599,6 +613,10 @@ export const CalendarView: React.FC = () => {
               </div>
 
               <div className="flex justify-end space-x-3 pt-4">
+                <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={() => handleDeleteAppointment(selectedAppointment.id)}>
+                  Eliminar Turno
+                </Button>
+                <div className="flex-1" />
                 <Button variant="outline" onClick={() => setSelectedAppointment(null)}>
                   Cerrar
                 </Button>
