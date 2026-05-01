@@ -19,6 +19,7 @@ import { turnosApi } from '../../api'
 import type { Turno, Profesional } from '../../types'
 import { EditAppointmentModal } from './EditAppointmentModal'
 import { AdminAppointmentModal } from './AdminAppointmentModal'
+import { AdminBookingModal } from './AdminBookingModal'
 import { profesionalesApi } from '../../api/profesionales'
 
 type ViewType = 'day' | 'week' | 'month'
@@ -46,6 +47,7 @@ export const CalendarView: React.FC = () => {
   const [selectedAppointment, setSelectedAppointment] = useState<Turno | null>(null)
   const [showEditModal, setShowEditModal] = useState(false)
   const [showNewModal, setShowNewModal] = useState(false)
+  const [showBookingModal, setShowBookingModal] = useState(false)
   const [viewType, setViewType] = useState<ViewType>('month')
 
   useEffect(() => {
@@ -454,6 +456,15 @@ export const CalendarView: React.FC = () => {
 
           <div className="flex items-center gap-3">
             <Button
+              onClick={() => setShowBookingModal(true)}
+              size="sm"
+              variant="outline"
+              className="border-[#026498] text-[#026498] hover:bg-blue-50"
+            >
+              <CalendarIcon className="h-4 w-4 mr-1" />
+              <span className="hidden sm:inline">Agregar turno</span>
+            </Button>
+            <Button
               onClick={() => setShowNewModal(true)}
               size="sm"
               className="bg-[#026498]"
@@ -647,6 +658,17 @@ export const CalendarView: React.FC = () => {
             fetchAppointments()
             setShowNewModal(false)
             alert('Turno creado exitosamente')
+          }}
+        />
+      )}
+
+      {showBookingModal && (
+        <AdminBookingModal
+          onClose={() => setShowBookingModal(false)}
+          onSuccess={() => {
+            fetchAppointments()
+            setShowBookingModal(false)
+            alert('Turno agendado exitosamente')
           }}
         />
       )}
