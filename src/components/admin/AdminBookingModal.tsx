@@ -208,6 +208,7 @@ export const AdminBookingModal: React.FC<AdminBookingModalProps> = ({ onClose, o
                   selectedProfessional={selectedProfessional}
                   onDateTimeSelect={handleDateTimeSelect}
                   selectedDateTime={selectedDateTime}
+                  isAdmin={true}
                 />
               )}
               {step === 4 && (

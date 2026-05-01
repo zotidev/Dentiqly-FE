@@ -13,6 +13,7 @@ interface DateTimeSelectionProps {
   selectedDateTime: string | null
   onDateTimeSelect: (dateTime: string) => void
   mesActualBloqueado?: boolean
+  isAdmin?: boolean
 }
 
 export const DateTimeSelection: React.FC<DateTimeSelectionProps> = ({
@@ -21,6 +22,7 @@ export const DateTimeSelection: React.FC<DateTimeSelectionProps> = ({
   selectedDateTime,
   onDateTimeSelect,
   mesActualBloqueado = false,
+  isAdmin = false,
 }) => {
   const [selectedDate, setSelectedDate] = useState<string>("")
   const [availableSlots, setAvailableSlots] = useState<string[]>([])
@@ -85,7 +87,7 @@ export const DateTimeSelection: React.FC<DateTimeSelectionProps> = ({
     setLoading(true)
     setError(null)
     try {
-      const response = await profesionalesApi.obtenerHorariosDisponibles(selectedProfessional!.id, selectedDate)
+      const response = await profesionalesApi.obtenerHorariosDisponibles(selectedProfessional!.id, selectedDate, isAdmin)
       if (response.disponible && response.horarios_disponibles) setAvailableSlots(response.horarios_disponibles)
       else setError(response.mensaje || "No hay horarios disponibles")
     } catch (e) {
