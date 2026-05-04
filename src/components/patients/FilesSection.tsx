@@ -77,22 +77,21 @@ export const FilesSection: React.FC<FilesSectionProps> = ({ pacienteId }) => {
     }
   }
 
+  const getBaseUrl = () => {
+    const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3000/api"
+    return apiUrl
+  }
+
   const handlePreview = (archivo: Archivo) => {
-    const url = `${import.meta.env.VITE_API_URL || "http://localhost:3000"}${archivo.ruta}`
+    const url = `${getBaseUrl()}${archivo.ruta}?inline=true`
     setPreviewUrl(url)
     setPreviewFile(archivo)
   }
 
   const handleDownload = (archivo: Archivo) => {
     // Construct the download URL based on the backend configuration
-    const downloadUrl = `${import.meta.env.VITE_API_URL || "http://localhost:3000"}${archivo.ruta}`
-    // To force download, we can create a temporary anchor
-    const link = document.createElement("a")
-    link.href = downloadUrl
-    link.download = archivo.nombre
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
+    const downloadUrl = `${getBaseUrl()}${archivo.ruta}`
+    window.open(downloadUrl, "_blank")
   }
 
   const getFileIcon = (tipo: string) => {
