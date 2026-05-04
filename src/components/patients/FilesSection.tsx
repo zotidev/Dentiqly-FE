@@ -83,14 +83,18 @@ export const FilesSection: React.FC<FilesSectionProps> = ({ pacienteId }) => {
   }
 
   const handlePreview = (archivo: Archivo) => {
-    const url = `${getBaseUrl()}${archivo.ruta}?inline=true`
+    // If it's a full URL (Cloudinary), use it directly
+    const url = archivo.ruta.startsWith('http') 
+      ? archivo.ruta 
+      : `${getBaseUrl()}${archivo.ruta}${archivo.ruta.includes('?') ? '&' : '?'}inline=true`
     setPreviewUrl(url)
     setPreviewFile(archivo)
   }
 
   const handleDownload = (archivo: Archivo) => {
-    // Construct the download URL based on the backend configuration
-    const downloadUrl = `${getBaseUrl()}${archivo.ruta}`
+    const downloadUrl = archivo.ruta.startsWith('http')
+      ? archivo.ruta
+      : `${getBaseUrl()}${archivo.ruta}`
     window.open(downloadUrl, "_blank")
   }
 
