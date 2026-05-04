@@ -5,6 +5,8 @@ export interface Ausencia {
   profesional_id: number;
   fecha_inicio: string;
   fecha_fin: string;
+  hora_inicio?: string;
+  hora_fin?: string;
   motivo?: string;
   profesional?: {
     id: number;

@@ -251,7 +251,7 @@ export const OdontogramSection: React.FC<OdontogramSectionProps> = ({ pacienteId
     if (!selectedTratamiento) return
 
     // Solo aplicar si el tratamiento es uno de los generales o si se desea aplicar a todo el diente
-    const tratamientosGenerales = ["ausente", "corona", "implante", "extraccion", "caries", "restauracion", "erupcion_up", "erupcion_down"]
+    const tratamientosGenerales = ["ausente", "corona", "implante", "extraccion", "caries", "restauracion", "erupcion_up", "erupcion_down", "extrusion", "intrusion", "tratamiento_endodontico"]
     if (!tratamientosGenerales.includes(selectedTratamiento)) return
 
     setDientesData((prev) => {
@@ -795,6 +795,9 @@ const DienteVisual: React.FC<DienteVisualProps> = ({
               <div className="w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[12px] border-t-gray-700" />
             </div>
           )}
+          {tratamientoGral === "tratamiento_endodontico" && (
+            <div className="w-1 h-12 rounded-full" style={{ backgroundColor: color }} />
+          )}
         </div>
       </div>
     )
@@ -802,11 +805,11 @@ const DienteVisual: React.FC<DienteVisualProps> = ({
 
   return (
     <div className={`relative flex flex-col items-center ${cursorClass}`}>
-      {/* Erupción Arrows */}
-      {(datos as any)?.tratamiento_general?.tratamiento === "erupcion_up" && (
+      {/* Erupción / Extrusión Arrows */}
+      {((datos as any)?.tratamiento_general?.tratamiento === "erupcion_up" || (datos as any)?.tratamiento_general?.tratamiento === "extrusion") && (
         <ArrowUp className="w-5 h-5 absolute -top-5" style={{ color: (datos as any)?.tratamiento_general?.estado === "buen_estado" ? ESTADO_COLORS.buen_estado : ESTADO_COLORS.mal_estado }} />
       )}
-      {(datos as any)?.tratamiento_general?.tratamiento === "erupcion_down" && (
+      {((datos as any)?.tratamiento_general?.tratamiento === "erupcion_down" || (datos as any)?.tratamiento_general?.tratamiento === "intrusion") && (
         <ArrowDown className="w-5 h-5 absolute -top-5" style={{ color: (datos as any)?.tratamiento_general?.estado === "buen_estado" ? ESTADO_COLORS.buen_estado : ESTADO_COLORS.mal_estado }} />
       )}
 

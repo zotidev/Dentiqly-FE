@@ -47,8 +47,18 @@ export const Dashboard: React.FC<{ onNavigateToCalendar?: () => void }> = ({ onN
   useEffect(() => {
     const fetchStats = async () => {
       try {
+        // Calculate date range: 30 days ago to 90 days from now
+        const desde = new Date()
+        desde.setDate(desde.getDate() - 30)
+        const hasta = new Date()
+        hasta.setDate(hasta.getDate() + 90)
+
         const [turnosResponse, profesionalesResponse, serviciosResponse] = await Promise.all([
-          turnosApi.listar({ limit: 1000 }),
+          turnosApi.listar({
+            limit: 5000,
+            fecha_desde: desde.toISOString().split('T')[0],
+            fecha_hasta: hasta.toISOString().split('T')[0]
+          }),
           profesionalesApi.listar({ estado: 'Activo' }),
           serviciosApi.listar()
         ])

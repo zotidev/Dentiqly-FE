@@ -4,7 +4,7 @@ import type React from "react"
 import { useState, useEffect, useRef } from "react"
 import { Card } from "../ui/Card"
 import { Button } from "../ui/Button"
-import { Trash2, Calendar, X, FileText, Download, Upload, File } from "lucide-react"
+import { Trash2, Calendar, X, FileText, Download, Upload, File, Eye } from "lucide-react"
 import { archivosApi } from "../../api"
 import type { Archivo } from "../../types"
 
@@ -19,6 +19,8 @@ export const FilesSection: React.FC<FilesSectionProps> = ({ pacienteId }) => {
   const [showUploadModal, setShowUploadModal] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [descripcion, setDescripcion] = useState("")
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [previewFile, setPreviewFile] = useState<Archivo | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -75,10 +77,22 @@ export const FilesSection: React.FC<FilesSectionProps> = ({ pacienteId }) => {
     }
   }
 
+  const handlePreview = (archivo: Archivo) => {
+    const url = `${import.meta.env.VITE_API_URL || "http://localhost:3000"}${archivo.ruta}`
+    setPreviewUrl(url)
+    setPreviewFile(archivo)
+  }
+
   const handleDownload = (archivo: Archivo) => {
     // Construct the download URL based on the backend configuration
     const downloadUrl = `${import.meta.env.VITE_API_URL || "http://localhost:3000"}${archivo.ruta}`
-    window.open(downloadUrl, "_blank")
+    // To force download, we can create a temporary anchor
+    const link = document.createElement("a")
+    link.href = downloadUrl
+    link.download = archivo.nombre
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
   }
 
   const getFileIcon = (tipo: string) => {
@@ -141,6 +155,11 @@ export const FilesSection: React.FC<FilesSectionProps> = ({ pacienteId }) => {
                   </div>
                 </div>
                 <div className="flex gap-1">
+                  {(archivo.tipo.includes("image") || archivo.tipo.includes("pdf")) && (
+                    <Button variant="outline" size="sm" onClick={() => handlePreview(archivo)} title="Ver">
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                  )}
                   <Button variant="outline" size="sm" onClick={() => handleDownload(archivo)} title="Descargar">
                     <Download className="h-4 w-4" />
                   </Button>
@@ -211,6 +230,46 @@ export const FilesSection: React.FC<FilesSectionProps> = ({ pacienteId }) => {
                 </Button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {/* Preview Modal */}
+      {previewUrl && previewFile && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[60] p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-5xl max-h-[90vh] flex flex-col">
+            <div className="px-6 py-4 border-b flex justify-between items-center">
+              <div className="min-w-0">
+                <h3 className="text-lg font-semibold text-gray-900 truncate">{previewFile.nombre}</h3>
+                <p className="text-xs text-gray-500">{previewFile.descripcion || "Sin descripción"}</p>
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={() => handleDownload(previewFile)}>
+                  <Download className="h-4 w-4 mr-2" />
+                  Descargar
+                </Button>
+                <button
+                  onClick={() => {
+                    setPreviewUrl(null)
+                    setPreviewFile(null)
+                  }}
+                  className="p-1 hover:bg-gray-100 rounded"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+            <div className="flex-1 overflow-auto p-4 flex items-center justify-center bg-gray-100">
+              {previewFile.tipo.includes("image") ? (
+                <img src={previewUrl} alt={previewFile.nombre} className="max-w-full max-h-full object-contain" />
+              ) : previewFile.tipo.includes("pdf") ? (
+                <iframe src={`${previewUrl}#toolbar=0`} className="w-full h-[70vh]" title={previewFile.nombre} />
+              ) : (
+                <div className="text-center p-8">
+                  <FileText className="h-16 w-16 mx-auto text-gray-400 mb-4" />
+                  <p className="text-gray-600">Este tipo de archivo no admite vista previa directa.</p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}

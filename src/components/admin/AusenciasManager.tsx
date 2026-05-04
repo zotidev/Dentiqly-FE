@@ -16,6 +16,8 @@ export const AusenciasManager: React.FC = () => {
     profesional_id: '',
     fecha_inicio: '',
     fecha_fin: '',
+    hora_inicio: '',
+    hora_fin: '',
     motivo: ''
   });
 
@@ -64,11 +66,13 @@ export const AusenciasManager: React.FC = () => {
         profesional_id: Number(formData.profesional_id),
         fecha_inicio: formData.fecha_inicio,
         fecha_fin: formData.fecha_fin,
+        hora_inicio: formData.hora_inicio || null,
+        hora_fin: formData.hora_fin || null,
         motivo: formData.motivo
       });
 
       setIsModalOpen(false);
-      setFormData({ profesional_id: '', fecha_inicio: '', fecha_fin: '', motivo: '' });
+      setFormData({ profesional_id: '', fecha_inicio: '', fecha_fin: '', hora_inicio: '', hora_fin: '', motivo: '' });
       fetchData(); // Reload list
     } catch (err) {
       console.error('Error al crear:', err);
@@ -129,9 +133,11 @@ export const AusenciasManager: React.FC = () => {
                     </td>
                     <td className="px-6 py-4 text-gray-600">
                       {new Date(ausencia.fecha_inicio).toLocaleDateString('es-AR', { timeZone: 'UTC' })}
+                      {ausencia.hora_inicio && <span className="block text-xs font-bold text-blue-600">{ausencia.hora_inicio.substring(0, 5)} hs</span>}
                     </td>
                     <td className="px-6 py-4 text-gray-600">
                       {new Date(ausencia.fecha_fin).toLocaleDateString('es-AR', { timeZone: 'UTC' })}
+                      {ausencia.hora_fin && <span className="block text-xs font-bold text-blue-600">{ausencia.hora_fin.substring(0, 5)} hs</span>}
                     </td>
                     <td className="px-6 py-4">
                       <span className="inline-block px-3 py-1 bg-amber-50 text-amber-700 rounded-lg text-sm font-medium">
@@ -208,6 +214,27 @@ export const AusenciasManager: React.FC = () => {
                     className="w-full px-4 py-3 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-[#026498] text-gray-700 font-medium"
                     required
                     min={formData.fecha_inicio}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Desde hora (Opcional)</label>
+                  <input
+                    type="time"
+                    value={formData.hora_inicio}
+                    onChange={(e) => setFormData({ ...formData, hora_inicio: e.target.value })}
+                    className="w-full px-4 py-3 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-[#026498] text-gray-700 font-medium"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Hasta hora (Opcional)</label>
+                  <input
+                    type="time"
+                    value={formData.hora_fin}
+                    onChange={(e) => setFormData({ ...formData, hora_fin: e.target.value })}
+                    className="w-full px-4 py-3 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-[#026498] text-gray-700 font-medium"
                   />
                 </div>
               </div>

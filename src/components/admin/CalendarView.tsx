@@ -26,11 +26,13 @@ type ViewType = 'day' | 'week' | 'month'
 
 // Status colors mapping
 const STATUS_COLORS = {
+  'Pendiente': '#F59E0B', // Amber
   'Creado': '#3B82F6', // Blue
   'Esperando confirmación': '#EAB308', // Yellow
   'Confirmado por email': '#22C55E', // Green
   'Confirmado por SMS': '#22C55E', // Green
   'Confirmado por Whatsapp': '#22C55E', // Green
+  'Confirmado': '#22C55E', // Green
   'En sala de espera': '#A855F7', // Purple
   'Atendiéndose': '#EC4899', // Pink
   'Atendido': '#06B6D4', // Cyan
@@ -53,7 +55,7 @@ export const CalendarView: React.FC = () => {
   useEffect(() => {
     fetchAppointments()
     fetchProfessionals()
-  }, [currentDate])
+  }, [currentDate, viewType])
 
   const fetchProfessionals = async () => {
     try {
@@ -66,7 +68,38 @@ export const CalendarView: React.FC = () => {
 
   const fetchAppointments = async () => {
     try {
-      const response = await turnosApi.listar({ limit: 1000 })
+      // Calculate date range based on current view with generous buffer
+      let fecha_desde: string
+      let fecha_hasta: string
+      
+      const year = currentDate.getFullYear()
+      const month = currentDate.getMonth()
+      
+      if (viewType === 'day') {
+        // Fetch a week around the day
+        const start = new Date(currentDate)
+        start.setDate(start.getDate() - 3)
+        const end = new Date(currentDate)
+        end.setDate(end.getDate() + 3)
+        fecha_desde = start.toISOString().split('T')[0]
+        fecha_hasta = end.toISOString().split('T')[0]
+      } else if (viewType === 'week') {
+        // Fetch 2 weeks around the current week
+        const start = new Date(currentDate)
+        start.setDate(start.getDate() - start.getDay() - 7)
+        const end = new Date(currentDate)
+        end.setDate(end.getDate() - end.getDay() + 20)
+        fecha_desde = start.toISOString().split('T')[0]
+        fecha_hasta = end.toISOString().split('T')[0]
+      } else {
+        // Month view: fetch prev month + current month + next month
+        const start = new Date(year, month - 1, 1)
+        const end = new Date(year, month + 2, 0)
+        fecha_desde = start.toISOString().split('T')[0]
+        fecha_hasta = end.toISOString().split('T')[0]
+      }
+
+      const response = await turnosApi.listar({ limit: 5000, fecha_desde, fecha_hasta })
       if (response.data) {
         setAppointments(response.data)
       }
