@@ -12,7 +12,9 @@ import {
   FileText,
   Wallet,
   DollarSign,
-  CalendarOff
+  CalendarOff,
+  Shield,
+  Bell,
 } from 'lucide-react'
 
 interface AdminLayoutProps {
@@ -39,6 +41,8 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
     { id: 'cashflow', label: 'Flujo de caja', icon: Wallet },
     { id: 'feriados', label: 'Feriados', icon: Calendar },
     { id: 'ausencias', label: 'Ausencias/Vacaciones', icon: CalendarOff },
+    { id: 'obras-sociales', label: 'Obras Sociales', icon: Shield },
+    { id: 'recordatorios', label: 'Recordatorios', icon: Bell },
     { id: 'settings', label: 'Configuración', icon: Settings },
   ]
 

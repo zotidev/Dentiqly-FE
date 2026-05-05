@@ -101,19 +101,19 @@ export const PatientForm: React.FC<PatientFormProps> = ({ onPatientData, loading
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <Input
-              label="Nombre *"
-              value={formData.nombre}
-              onChange={(e) => handleChange("nombre", e.target.value)}
-              error={errors.nombre}
-              placeholder="Tu nombre"
-              className="rounded-xl border-gray-100 bg-gray-50/30 h-12"
-            />
-            <Input
               label="Apellido *"
               value={formData.apellido}
               onChange={(e) => handleChange("apellido", e.target.value)}
               error={errors.apellido}
               placeholder="Tu apellido"
+              className="rounded-xl border-gray-100 bg-gray-50/30 h-12"
+            />
+            <Input
+              label="Nombre *"
+              value={formData.nombre}
+              onChange={(e) => handleChange("nombre", e.target.value)}
+              error={errors.nombre}
+              placeholder="Tu nombre"
               className="rounded-xl border-gray-100 bg-gray-50/30 h-12"
             />
           </div>

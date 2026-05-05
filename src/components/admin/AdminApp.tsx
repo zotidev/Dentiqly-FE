@@ -5,7 +5,8 @@ import { CalendarView } from './CalendarView'
 import { ProfessionalsManager } from './ProfessionalsManager'
 import { ServicesManager } from './ServicesManager'
 import { PatientsView } from '../patients/PatientsView'
-
+import { ObrasSocialesManager } from './ObrasSocialesManager'
+import { RemindersView } from './RemindersView'
 
 import { LiquidacionesManager } from './LiquidacionesManager'
 import DebtorsReport from './DebtorsReport'
@@ -38,6 +39,10 @@ export const AdminApp: React.FC = () => {
         return <FeriadosManager />
       case 'ausencias':
         return <AusenciasManager />
+      case 'obras-sociales':
+        return <ObrasSocialesManager />
+      case 'recordatorios':
+        return <RemindersView />
       case 'settings':
         return (
           <div className="text-center py-12">

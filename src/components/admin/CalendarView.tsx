@@ -13,7 +13,8 @@ import {
   Mail,
   List,
   LayoutGrid,
-  Plus
+  Plus,
+  Search,
 } from 'lucide-react'
 import { turnosApi } from '../../api'
 import type { Turno, Profesional } from '../../types'
@@ -51,11 +52,37 @@ export const CalendarView: React.FC = () => {
   const [showNewModal, setShowNewModal] = useState(false)
   const [showBookingModal, setShowBookingModal] = useState(false)
   const [viewType, setViewType] = useState<ViewType>('month')
+  const [patientSearch, setPatientSearch] = useState('')
+  const [searchResults, setSearchResults] = useState<Turno[]>([])
+  const [showSearchResults, setShowSearchResults] = useState(false)
 
   useEffect(() => {
     fetchAppointments()
     fetchProfessionals()
   }, [currentDate, viewType])
+
+  // Patient search
+  useEffect(() => {
+    if (patientSearch.trim().length < 2) {
+      setSearchResults([])
+      setShowSearchResults(false)
+      return
+    }
+    const term = patientSearch.toLowerCase()
+    const results = appointments.filter((t) => {
+      const name = `${t.paciente?.apellido || ''} ${t.paciente?.nombre || ''}`.toLowerCase()
+      const dni = t.paciente?.numero_documento || ''
+      return name.includes(term) || dni.includes(term)
+    })
+    // Sort by date ascending
+    results.sort((a, b) => {
+      const d = a.fecha.localeCompare(b.fecha)
+      if (d !== 0) return d
+      return a.hora_inicio.localeCompare(b.hora_inicio)
+    })
+    setSearchResults(results)
+    setShowSearchResults(true)
+  }, [patientSearch, appointments])
 
   const fetchProfessionals = async () => {
     try {
@@ -533,6 +560,93 @@ export const CalendarView: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Patient Search */}
+      <Card className="p-4">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Buscar paciente por nombre o DNI..."
+            value={patientSearch}
+            onChange={(e) => setPatientSearch(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+          {patientSearch && (
+            <button
+              onClick={() => {
+                setPatientSearch('')
+                setShowSearchResults(false)
+              }}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+
+        {showSearchResults && (
+          <div className="mt-3 max-h-[400px] overflow-y-auto">
+            {searchResults.length === 0 ? (
+              <p className="text-sm text-gray-500 py-3 text-center">No se encontraron turnos para ese paciente</p>
+            ) : (
+              <div className="space-y-2">
+                <p className="text-xs text-gray-500 font-medium">
+                  {searchResults.length} turno{searchResults.length !== 1 ? 's' : ''} encontrado{searchResults.length !== 1 ? 's' : ''}
+                </p>
+                {searchResults.map((turno) => {
+                  const statusColor = getStatusColor(turno.estado)
+                  const turnoDate = new Date(turno.fecha + 'T00:00:00')
+                  return (
+                    <div
+                      key={turno.id}
+                      className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                      style={{ borderLeft: `4px solid ${statusColor}` }}
+                      onClick={() => {
+                        setCurrentDate(turnoDate)
+                        setViewType('day')
+                        setPatientSearch('')
+                        setShowSearchResults(false)
+                      }}
+                    >
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <User className="h-4 w-4 text-gray-400" />
+                          <span className="text-sm font-semibold text-gray-900">
+                            {turno.paciente?.apellido}, {turno.paciente?.nombre}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-4 mt-1 text-xs text-gray-500">
+                          <span className="flex items-center gap-1">
+                            <CalendarIcon className="h-3 w-3" />
+                            {turnoDate.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            {turno.hora_inicio} - {turno.hora_fin}
+                          </span>
+                          {turno.profesional && (
+                            <span>{turno.profesional.nombre} {turno.profesional.apellido}</span>
+                          )}
+                        </div>
+                      </div>
+                      <span
+                        className="px-2 py-0.5 text-xs font-semibold rounded-full"
+                        style={{
+                          backgroundColor: `${statusColor}20`,
+                          color: statusColor
+                        }}
+                      >
+                        {turno.estado}
+                      </span>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        )}
+      </Card>
 
       {/* Status Color Legend */}
       <Card className="p-4">

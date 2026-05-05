@@ -7,4 +7,13 @@ export const recordatoriosApi = {
   async enviarMasivo(fecha: string): Promise<{ message: string; enviados: number; errores: number; total: number }> {
     return apiClient.post("/recordatorios/enviar-masivo", { fecha })
   },
+  async preview(data: { turno_id?: number; custom_template?: string }): Promise<{ html: string }> {
+    return apiClient.post("/recordatorios/preview", data)
+  },
+  async obtenerTemplate(): Promise<{ template: string }> {
+    return apiClient.get("/recordatorios/template")
+  },
+  async guardarTemplate(template: string): Promise<{ message: string; template: string }> {
+    return apiClient.put("/recordatorios/template", { template })
+  },
 }

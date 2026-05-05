@@ -9,7 +9,7 @@ export const turnosApi = {
     fecha_hasta?: string
     profesional_id?: number
     estado?: string
-    paciente_id?: number
+    paciente_id?: string
   }): Promise<PaginatedResponse<Turno>> {
     const queryParams = new URLSearchParams()
     if (params?.page) queryParams.append("page", params.page.toString())

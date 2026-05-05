@@ -8,4 +8,13 @@ export const obrasSocialesApi = {
     async getAll(): Promise<ObraSocial[]> {
         return apiClient.get<ObraSocial[]>("/obras-sociales")
     },
+    async crear(data: { nombre: string; plan?: string }): Promise<ObraSocial> {
+        return apiClient.post<ObraSocial>("/obras-sociales", data)
+    },
+    async actualizar(id: number, data: { nombre: string; plan?: string }): Promise<ObraSocial> {
+        return apiClient.put<ObraSocial>(`/obras-sociales/${id}`, data)
+    },
+    async eliminar(id: number): Promise<void> {
+        return apiClient.delete(`/obras-sociales/${id}`)
+    },
 }
