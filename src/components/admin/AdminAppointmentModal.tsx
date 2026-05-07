@@ -37,6 +37,7 @@ export const AdminAppointmentModal: React.FC<AdminAppointmentModalProps> = ({ on
     const [servicios, setServicios] = useState<Servicio[]>([])
     const [searchPaciente, setSearchPaciente] = useState('')
     const [isNewPatient, setIsNewPatient] = useState(false)
+    const [horaFinManual, setHoraFinManual] = useState(false)
 
     useEffect(() => {
         const fetchInitialData = async () => {
@@ -73,8 +74,9 @@ export const AdminAppointmentModal: React.FC<AdminAppointmentModalProps> = ({ on
         return () => clearTimeout(delayDebounceFn)
     }, [searchPaciente])
 
-    // Update end time based on selected service duration
+    // Auto-suggest end time based on service duration ONLY if not manually edited
     useEffect(() => {
+        if (horaFinManual) return // Don't override manual selection
         if (formData.servicio_id && formData.hora_inicio) {
             const servicio = servicios.find(s => s.id === formData.servicio_id)
             if (servicio) {
@@ -87,7 +89,7 @@ export const AdminAppointmentModal: React.FC<AdminAppointmentModalProps> = ({ on
                 setFormData(prev => ({ ...prev, hora_fin: `${endHours}:${endMinutes}` }))
             }
         }
-    }, [formData.servicio_id, formData.hora_inicio, servicios])
+    }, [formData.servicio_id, formData.hora_inicio, servicios, horaFinManual])
 
     const handleNewPatientSubmit = async (data: any) => {
         setLoading(true)
@@ -307,7 +309,10 @@ export const AdminAppointmentModal: React.FC<AdminAppointmentModalProps> = ({ on
                                 <Input
                                     type="time"
                                     value={formData.hora_fin}
-                                    onChange={(e) => setFormData({ ...formData, hora_fin: e.target.value })}
+                                    onChange={(e) => {
+                                        setHoraFinManual(true)
+                                        setFormData({ ...formData, hora_fin: e.target.value })
+                                    }}
                                     required
                                     className="h-11 border-blue-100"
                                 />

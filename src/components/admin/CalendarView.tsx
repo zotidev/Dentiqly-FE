@@ -184,6 +184,68 @@ export const CalendarView: React.FC = () => {
     return days
   }
 
+  const getMinutesSinceStart = (timeStr: string) => {
+    if (!timeStr) return 0
+    const [h, m] = timeStr.split(':').map(Number)
+    return (h * 60 + m) - (8 * 60) // Starting at 08:00
+  }
+
+  const getSlotHeight = 40
+
+  const getAppointmentLayout = (dayAppointments: Turno[]) => {
+    if (dayAppointments.length === 0) return []
+
+    // Sort by start time then duration
+    const sorted = [...dayAppointments].sort((a, b) => {
+      const startA = getMinutesSinceStart(a.hora_inicio)
+      const startB = getMinutesSinceStart(b.hora_inicio)
+      if (startA !== startB) return startA - startB
+      const durA = (getMinutesSinceStart(a.hora_fin) || 0) - startA
+      const durB = (getMinutesSinceStart(b.hora_fin) || 0) - startB
+      return durB - durA
+    })
+
+    const clusters: { appointments: any[], maxColumns: number }[] = []
+    
+    sorted.forEach(appt => {
+      const start = getMinutesSinceStart(appt.hora_inicio)
+      const end = getMinutesSinceStart(appt.hora_fin) || (start + 30)
+      
+      let cluster = clusters.find(c => c.appointments.some(a => {
+        const aStart = getMinutesSinceStart(a.hora_inicio)
+        const aEnd = getMinutesSinceStart(a.hora_fin) || (aStart + 30)
+        return start < aEnd && end > aStart
+      }))
+
+      if (!cluster) {
+        cluster = { appointments: [], maxColumns: 0 }
+        clusters.push(cluster)
+      }
+
+      // Assign column
+      let column = 0
+      while (cluster.appointments.some(a => {
+        if (a.column !== column) return false
+        const aStart = getMinutesSinceStart(a.hora_inicio)
+        const aEnd = getMinutesSinceStart(a.hora_fin) || (aStart + 30)
+        return start < aEnd && end > aStart
+      })) {
+        column++
+      }
+
+      cluster.appointments.push({ ...appt, column })
+      cluster.maxColumns = Math.max(cluster.maxColumns, column + 1)
+    })
+
+    return clusters.flatMap(cluster => cluster.appointments.map(a => ({
+      ...a,
+      top: (getMinutesSinceStart(a.hora_inicio) / 30) * getSlotHeight,
+      height: Math.max(getSlotHeight / 2, (((getMinutesSinceStart(a.hora_fin) || (getMinutesSinceStart(a.hora_inicio) + 30)) - getMinutesSinceStart(a.hora_inicio)) / 30) * getSlotHeight),
+      width: 100 / cluster.maxColumns,
+      left: (a.column * 100) / cluster.maxColumns
+    })))
+  }
+
   const handleQuickConfirm = async (id: number) => {
     try {
       await turnosApi.confirmarPago(id, true)
@@ -333,22 +395,18 @@ export const CalendarView: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto bg-white">
-          {TIME_SLOTS.map((slot, idx) => {
-            const nextSlot = TIME_SLOTS[idx + 1]
-            const appointmentsInSlot = dayAppointments.filter(a => {
-              if (!nextSlot) return a.hora_inicio.startsWith(slot)
-              return a.hora_inicio >= slot && a.hora_inicio < nextSlot
-            })
-            return (
-              <div key={slot} className="grid grid-cols-[100px_1fr] border-b border-gray-50 last:border-b-0 min-h-[40px]">
+        <div className="flex-1 overflow-y-auto bg-white relative">
+          <div className="relative">
+            {/* Grid Lines */}
+            {TIME_SLOTS.map((slot) => (
+              <div key={slot} className="grid grid-cols-[100px_1fr] border-b border-gray-50 h-[40px]">
                 <div className="p-1 text-[10px] font-bold text-gray-400 border-r border-gray-100 text-center flex items-center justify-center bg-gray-50/30">
                   {slot}
                 </div>
                 <div 
-                  className={`p-1 relative group min-h-[40px] cursor-pointer transition-colors ${draggingAppointment ? 'bg-blue-50/10' : 'hover:bg-blue-50/20'}`}
+                  className={`relative group h-[40px] cursor-pointer transition-colors ${draggingAppointment ? 'bg-blue-50/10' : 'hover:bg-blue-50/20'}`}
                   onClick={() => {
-                    setNewAppointmentData({ fecha: dateString, hora_inicio: slot, sobre_turno: appointmentsInSlot.length > 0 })
+                    setNewAppointmentData({ fecha: dateString, hora_inicio: slot, sobre_turno: false })
                     setShowNewModal(true)
                   }}
                   onDragOver={(e) => e.preventDefault()}
@@ -356,50 +414,63 @@ export const CalendarView: React.FC = () => {
                     e.preventDefault()
                     handleDropAppointment(dateString, slot)
                   }}
-                >
-                  <div className="flex flex-row gap-1 h-full">
-                    {appointmentsInSlot.map((appointment) => {
-                      const statusColor = getStatusColor(appointment.estado)
-                      const isLight = ['#F59E0B', '#EAB308', '#22C55E'].includes(statusColor)
-                      return (
-                        <div
-                          key={appointment.id}
-                          draggable
-                          onDragStart={(e) => {
-                            e.dataTransfer.setData('appointmentId', appointment.id.toString())
-                            setDraggingAppointment(appointment)
-                          }}
-                          onDragEnd={() => setDraggingAppointment(null)}
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            setSelectedAppointment(appointment)
-                          }}
-                          className={`flex-1 min-w-[120px] px-2 py-1 rounded shadow-sm text-[10px] cursor-move hover:brightness-95 transition-all border-l-2 overflow-hidden relative flex flex-col justify-center ${draggingAppointment?.id === appointment.id ? 'opacity-40 grayscale scale-95' : ''}`}
-                          style={{
-                            backgroundColor: statusColor,
-                            borderColor: 'rgba(0,0,0,0.1)',
-                            color: isLight ? '#000' : '#FFF'
-                          }}
-                        >
-                          <div className="font-black truncate uppercase leading-none mb-0.5">
-                            {getInitials(appointment.profesional)} - {appointment.paciente?.apellido} {appointment.paciente?.nombre?.charAt(0)}.
-                          </div>
-                          <div className="text-[8px] font-bold opacity-80 leading-none">
-                            {appointment.hora_inicio.substring(0, 5)} - {appointment.servicio?.nombre?.substring(0, 15)}
-                          </div>
+                />
+              </div>
+            ))}
+
+            {/* Absolute Appointments */}
+            <div className="absolute top-0 left-[100px] right-0 bottom-0 pointer-events-none">
+              {getAppointmentLayout(dayAppointments).map((appt) => {
+                const statusColor = getStatusColor(appt.estado)
+                const isLight = ['#F59E0B', '#EAB308', '#22C55E'].includes(statusColor)
+                
+                return (
+                  <div
+                    key={appt.id}
+                    className="absolute p-0.5 pointer-events-auto transition-all"
+                    style={{
+                      top: `${appt.top}px`,
+                      height: `${appt.height}px`,
+                      left: `${appt.left}%`,
+                      width: `${appt.width}%`,
+                    }}
+                  >
+                    <div
+                      draggable
+                      onDragStart={(e) => {
+                        e.dataTransfer.setData('appointmentId', appt.id.toString())
+                        setDraggingAppointment(appt)
+                      }}
+                      onDragEnd={() => setDraggingAppointment(null)}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setSelectedAppointment(appt)
+                      }}
+                      className="h-full w-full rounded-md shadow-md text-[10px] cursor-move hover:brightness-95 transition-all border-l-4 overflow-hidden flex flex-col p-2"
+                      style={{
+                        backgroundColor: statusColor,
+                        borderColor: 'rgba(0,0,0,0.2)',
+                        color: isLight ? '#000' : '#FFF',
+                        boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)'
+                      }}
+                    >
+                      <div className="font-black truncate uppercase leading-tight text-[9px] mb-0.5">
+                        {getInitials(appt.profesional)} - {appt.paciente?.apellido} {appt.paciente?.nombre}
+                      </div>
+                      <div className="text-[8px] font-bold opacity-90 leading-none">
+                        {appt.hora_inicio.substring(0, 5)} - {appt.hora_fin.substring(0, 5)}
+                      </div>
+                      {appt.height > 40 && (
+                        <div className="text-[7px] opacity-80 truncate mt-0.5 font-medium">
+                          {appt.servicio?.nombre}
                         </div>
-                      )
-                    })}
-                  </div>
-                  <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-all z-10 pointer-events-none">
-                    <div className="bg-blue-600 text-white rounded-full p-0.5 shadow-lg">
-                      <Plus size={12} />
+                      )}
                     </div>
                   </div>
-                </div>
-              </div>
-            )
-          })}
+                )
+              })}
+            </div>
+          </div>
         </div>
       </Card>
     )
@@ -434,87 +505,88 @@ export const CalendarView: React.FC = () => {
 
             {/* Grid Body */}
             <div className="relative bg-white flex-1 overflow-y-auto">
-              {TIME_SLOTS.map((slot, idx) => {
-                const nextSlot = TIME_SLOTS[idx + 1]
-                return (
-                  <div key={slot} className="grid grid-cols-[80px_repeat(7,1fr)] border-b border-gray-200 last:border-b-0 min-h-[40px]">
-                    {/* Time column */}
+              <div className="relative">
+                {/* Grid Rows */}
+                {TIME_SLOTS.map((slot) => (
+                  <div key={slot} className="grid grid-cols-[80px_repeat(7,1fr)] border-b border-gray-200 h-[40px]">
                     <div className="p-1 text-[9px] font-bold text-gray-500 border-r-2 border-gray-300 text-center flex items-center justify-center bg-gray-100 font-mono">
                       {slot}
                     </div>
-                    
-                    {/* Days columns */}
-                    {weekDays.map((day, i) => {
-                      const dayAppointments = getAppointmentsForDate(day)
-                      const appointmentsInSlot = dayAppointments.filter(a => {
-                        if (!nextSlot) return a.hora_inicio.startsWith(slot)
-                        return a.hora_inicio >= slot && a.hora_inicio < nextSlot
-                      })
-                      
-                      const y = day.getFullYear()
-                      const m = String(day.getMonth() + 1).padStart(2, '0')
-                      const d = String(day.getDate()).padStart(2, '0')
-                      const dateString = `${y}-${m}-${d}`
-                      
-                      return (
-                        <div 
-                          key={i} 
-                          className={`p-1 border-r-2 border-gray-300 last:border-r-0 relative group transition-colors cursor-pointer ${draggingAppointment ? 'bg-blue-50/20' : 'hover:bg-blue-50/40'} ${i % 2 === 0 ? 'bg-gray-50/50' : 'bg-white'}`}
-                          onClick={() => {
-                            setNewAppointmentData({ fecha: dateString, hora_inicio: slot, sobre_turno: appointmentsInSlot.length > 0 })
-                            setShowNewModal(true)
-                          }}
-                          onDragOver={(e) => e.preventDefault()}
-                          onDrop={(e) => {
-                            e.preventDefault()
-                            handleDropAppointment(dateString, slot)
-                          }}
-                        >
-                          <div className="flex flex-row flex-wrap gap-0.5 h-full min-h-[35px] content-center">
-                            {appointmentsInSlot.map((appointment) => {
-                              const statusColor = getStatusColor(appointment.estado)
-                              const isLight = ['#F59E0B', '#EAB308', '#22C55E'].includes(statusColor)
-                              return (
-                                <div
-                                  key={appointment.id}
-                                  draggable
-                                  onDragStart={(e) => {
-                                    e.dataTransfer.setData('appointmentId', appointment.id.toString())
-                                    setDraggingAppointment(appointment)
-                                  }}
-                                  onDragEnd={() => setDraggingAppointment(null)}
-                                  onClick={(e) => {
-                                    e.stopPropagation()
-                                    setSelectedAppointment(appointment)
-                                  }}
-                                  className={`flex-1 min-w-[30px] max-w-[150px] px-1 py-0.5 rounded shadow-sm text-[8px] cursor-move hover:brightness-95 transition-all border border-black/10 overflow-hidden relative flex flex-col justify-center ${draggingAppointment?.id === appointment.id ? 'opacity-40' : ''}`}
-                                  style={{
-                                    backgroundColor: statusColor,
-                                    color: isLight ? '#000' : '#FFF'
-                                  }}
-                                  title={`${appointment.hora_inicio.substring(0,5)} - ${appointment.paciente?.apellido}`}
-                                >
-                                  <div className="font-black truncate uppercase leading-tight">
-                                    {getInitials(appointment.profesional)} {appointment.paciente?.apellido}
-                                  </div>
-                                  <div className="text-[7px] font-bold opacity-80 truncate">
-                                    {appointment.hora_inicio.substring(0, 5)}
-                                  </div>
-                                </div>
-                              )
-                            })}
-                          </div>
-                          <div className="absolute top-0.5 right-0.5 opacity-0 group-hover:opacity-100 transition-all z-10 pointer-events-none">
-                            <div className="bg-blue-600 text-white rounded-full p-0.5 shadow-lg">
-                              <Plus size={8} />
+                    {weekDays.map((day, i) => (
+                      <div 
+                        key={i} 
+                        className={`border-r-2 border-gray-300 last:border-r-0 relative group transition-colors cursor-pointer ${draggingAppointment ? 'bg-blue-50/20' : 'hover:bg-blue-50/40'} ${i % 2 === 0 ? 'bg-gray-50/50' : 'bg-white'}`}
+                        onClick={() => {
+                          const y = day.getFullYear()
+                          const m = String(day.getMonth() + 1).padStart(2, '0')
+                          const d = String(day.getDate()).padStart(2, '0')
+                          setNewAppointmentData({ fecha: `${y}-${m}-${d}`, hora_inicio: slot, sobre_turno: false })
+                          setShowNewModal(true)
+                        }}
+                        onDragOver={(e) => e.preventDefault()}
+                        onDrop={(e) => {
+                          e.preventDefault()
+                          const y = day.getFullYear()
+                          const m = String(day.getMonth() + 1).padStart(2, '0')
+                          const d = String(day.getDate()).padStart(2, '0')
+                          handleDropAppointment(`${y}-${m}-${d}`, slot)
+                        }}
+                      />
+                    ))}
+                  </div>
+                ))}
+
+                {/* Absolute Appointments for each day column */}
+                <div className="absolute top-0 left-[80px] right-0 bottom-0 pointer-events-none grid grid-cols-7">
+                  {weekDays.map((day, dayIdx) => (
+                    <div key={dayIdx} className="relative h-full border-r-2 border-transparent">
+                      {getAppointmentLayout(getAppointmentsForDate(day)).map((appt) => {
+                        const statusColor = getStatusColor(appt.estado)
+                        const isLight = ['#F59E0B', '#EAB308', '#22C55E'].includes(statusColor)
+                        
+                        return (
+                          <div
+                            key={appt.id}
+                            className="absolute p-0.5 pointer-events-auto transition-all"
+                            style={{
+                              top: `${appt.top}px`,
+                              height: `${appt.height}px`,
+                              left: `${appt.left}%`,
+                              width: `${appt.width}%`,
+                            }}
+                          >
+                            <div
+                              draggable
+                              onDragStart={(e) => {
+                                e.dataTransfer.setData('appointmentId', appt.id.toString())
+                                setDraggingAppointment(appt)
+                              }}
+                              onDragEnd={() => setDraggingAppointment(null)}
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                setSelectedAppointment(appt)
+                              }}
+                              className="h-full w-full rounded shadow-sm text-[8px] cursor-move hover:brightness-95 transition-all border-l-2 overflow-hidden flex flex-col p-1"
+                              style={{
+                                backgroundColor: statusColor,
+                                borderColor: 'rgba(0,0,0,0.1)',
+                                color: isLight ? '#000' : '#FFF',
+                              }}
+                            >
+                              <div className="font-black truncate uppercase leading-tight text-[8px] mb-0.5">
+                                {getInitials(appt.profesional)} {appt.paciente?.apellido} {appt.paciente?.nombre}
+                              </div>
+                              <div className="text-[7px] font-bold opacity-90 leading-none">
+                                {appt.hora_inicio.substring(0, 5)} - {appt.hora_fin.substring(0, 5)}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      )
-                    })}
-                  </div>
-                )
-              })}
+                        )
+                      })}
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -901,7 +973,7 @@ export const CalendarView: React.FC = () => {
 
       {showBookingModal && (
         <AdminBookingModal
-          onClose={() => setShowBookingModal(false)}
+          onClose={() => setShowBookingModal(true)}
           onSuccess={() => {
             fetchAppointments()
             setShowBookingModal(false)
