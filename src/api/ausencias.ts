@@ -8,6 +8,8 @@ export interface Ausencia {
   hora_inicio?: string;
   hora_fin?: string;
   motivo?: string;
+  es_recurrente?: boolean;
+  dia_semana?: number;
   profesional?: {
     id: number;
     nombre: string;

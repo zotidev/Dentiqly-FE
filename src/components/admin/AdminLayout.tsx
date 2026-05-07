@@ -152,8 +152,10 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
       {/* Main content */}
       <div className="flex-1 lg:ml-0 flex flex-col h-screen overflow-hidden">
         {/* Page content */}
-        <main className="flex-1 overflow-hidden p-6">
-          {children}
+        <main className="flex-1 overflow-y-auto p-4 lg:p-6">
+          <div className="min-h-full">
+            {children}
+          </div>
         </main>
       </div>
     </div>

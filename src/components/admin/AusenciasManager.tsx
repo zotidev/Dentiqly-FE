@@ -18,7 +18,9 @@ export const AusenciasManager: React.FC = () => {
     fecha_fin: '',
     hora_inicio: '',
     hora_fin: '',
-    motivo: ''
+    motivo: '',
+    es_recurrente: false,
+    dia_semana: ''
   });
 
   useEffect(() => {
@@ -68,11 +70,13 @@ export const AusenciasManager: React.FC = () => {
         fecha_fin: formData.fecha_fin,
         hora_inicio: formData.hora_inicio || null,
         hora_fin: formData.hora_fin || null,
-        motivo: formData.motivo
+        motivo: formData.motivo,
+        es_recurrente: formData.es_recurrente,
+        dia_semana: formData.es_recurrente ? Number(formData.dia_semana) : null
       });
 
       setIsModalOpen(false);
-      setFormData({ profesional_id: '', fecha_inicio: '', fecha_fin: '', hora_inicio: '', hora_fin: '', motivo: '' });
+      setFormData({ profesional_id: '', fecha_inicio: '', fecha_fin: '', hora_inicio: '', hora_fin: '', motivo: '', es_recurrente: false, dia_semana: '' });
       fetchData(); // Reload list
     } catch (err) {
       console.error('Error al crear:', err);
@@ -136,7 +140,13 @@ export const AusenciasManager: React.FC = () => {
                       {ausencia.hora_inicio && <span className="block text-xs font-bold text-blue-600">{ausencia.hora_inicio.substring(0, 5)} hs</span>}
                     </td>
                     <td className="px-6 py-4 text-gray-600">
-                      {new Date(ausencia.fecha_fin).toLocaleDateString('es-AR', { timeZone: 'UTC' })}
+                      {ausencia.es_recurrente ? (
+                        <span className="font-bold text-blue-600">
+                          Todos los {['Domingos', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábados'][ausencia.dia_semana || 0]}
+                        </span>
+                      ) : (
+                        new Date(ausencia.fecha_fin).toLocaleDateString('es-AR', { timeZone: 'UTC' })
+                      )}
                       {ausencia.hora_fin && <span className="block text-xs font-bold text-blue-600">{ausencia.hora_fin.substring(0, 5)} hs</span>}
                     </td>
                     <td className="px-6 py-4">
@@ -237,6 +247,43 @@ export const AusenciasManager: React.FC = () => {
                     className="w-full px-4 py-3 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-[#026498] text-gray-700 font-medium"
                   />
                 </div>
+              </div>
+
+              <div className="bg-blue-50/50 p-4 rounded-2xl space-y-4 border border-blue-100/50">
+                <div className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    id="es_recurrente"
+                    checked={formData.es_recurrente}
+                    onChange={(e) => setFormData({ ...formData, es_recurrente: e.target.checked })}
+                    className="w-5 h-5 text-[#026498] rounded-md border-gray-300 focus:ring-[#026498]"
+                  />
+                  <label htmlFor="es_recurrente" className="text-sm font-bold text-gray-700">¿Es un bloqueo recurrente?</label>
+                </div>
+
+                {formData.es_recurrente && (
+                  <div>
+                    <label className="block text-xs font-bold text-blue-600 uppercase mb-2">Día de la semana a bloquear</label>
+                    <select
+                      value={formData.dia_semana}
+                      onChange={(e) => setFormData({ ...formData, dia_semana: e.target.value })}
+                      className="w-full px-4 py-2 bg-white border border-blue-100 rounded-xl focus:ring-2 focus:ring-[#026498] text-gray-700 font-medium"
+                      required={formData.es_recurrente}
+                    >
+                      <option value="">Seleccione un día</option>
+                      <option value="1">Lunes</option>
+                      <option value="2">Martes</option>
+                      <option value="3">Miércoles</option>
+                      <option value="4">Jueves</option>
+                      <option value="5">Viernes</option>
+                      <option value="6">Sábado</option>
+                      <option value="0">Domingo</option>
+                    </select>
+                    <p className="mt-2 text-[10px] text-blue-500 italic font-medium">
+                      * El profesional no estará disponible este día entre las fechas seleccionadas.
+                    </p>
+                  </div>
+                )}
               </div>
 
               <div>

@@ -4,7 +4,7 @@ import {
   Calendar,
   Users,
   Clock,
-  DollarSign,
+  Briefcase,
   TrendingUp,
   Activity,
   CheckCircle2
@@ -18,13 +18,12 @@ interface DashboardStats {
   totalProfesionales: number
   totalServicios: number
   turnosPorEstado: Record<string, number>
-  ingresoTotal: number
-  ingresoPendiente: number
+  totalServicios: number
+  turnosPorEstado: Record<string, number>
   turnosRecientes: Turno[]
   turnosPorProf: Record<string, number>
   appointmentTrend: { fecha: string; count: number }[]
-  pagosPendientes: number
-  turnosPendientesPago: Turno[]
+  appointmentTrend: { fecha: string; count: number }[]
 }
 
 export const Dashboard: React.FC<{ onNavigateToCalendar?: () => void }> = ({ onNavigateToCalendar }) => {
@@ -34,13 +33,12 @@ export const Dashboard: React.FC<{ onNavigateToCalendar?: () => void }> = ({ onN
     totalProfesionales: 0,
     totalServicios: 0,
     turnosPorEstado: {},
-    ingresoTotal: 0,
-    ingresoPendiente: 0,
+    totalServicios: 0,
+    turnosPorEstado: {},
     turnosRecientes: [],
     turnosPorProf: {},
     appointmentTrend: [],
-    pagosPendientes: 0,
-    turnosPendientesPago: []
+    appointmentTrend: []
   })
   const [loading, setLoading] = useState(true)
 
@@ -76,21 +74,6 @@ export const Dashboard: React.FC<{ onNavigateToCalendar?: () => void }> = ({ onN
           turnosPorEstado[turno.estado] = (turnosPorEstado[turno.estado] || 0) + 1
         })
 
-        // Revenue calculations - sum from all turnos with precio_final OR service price
-        const ingresoTotal = turnos
-          .filter(t => t.estado === 'Atendido')
-          .reduce((acc, t) => {
-            const precio = Number(t.precio_final) || Number(t.subservicio?.precio) || Number(t.servicio?.precio_base) || 0
-            return acc + precio
-          }, 0)
-
-        const ingresoPendiente = turnos
-          .filter(t => t.estado === 'Pendiente' || t.estado === 'Confirmado por email')
-          .reduce((acc, t) => {
-            const precio = Number(t.precio_final) || Number(t.subservicio?.precio) || Number(t.servicio?.precio_base) || 0
-            return acc + precio
-          }, 0)
-
         // Recent appointments (last 5)
         const turnosRecientes = [...turnos]
           .sort((a, b) => {
@@ -119,25 +102,15 @@ export const Dashboard: React.FC<{ onNavigateToCalendar?: () => void }> = ({ onN
           appointmentTrend.push({ fecha: dateStr, count })
         }
 
-        // Count pending payments
-        const turnosPendientesPago = turnos.filter(
-          t => t.estado === 'Pendiente' && !t.pago_confirmado
-        )
-        const pagosPendientes = turnosPendientesPago.length
-
         setStats({
           totalTurnos: turnos.length,
           turnosHoy,
           totalProfesionales: profesionales.length,
           totalServicios: serviciosResponse.data?.length || 0,
           turnosPorEstado,
-          ingresoTotal,
-          ingresoPendiente,
           turnosRecientes,
           turnosPorProf,
-          appointmentTrend,
-          pagosPendientes,
-          turnosPendientesPago
+          appointmentTrend
         })
       } catch (error) {
         console.error('Error fetching dashboard stats:', error)
@@ -149,23 +122,6 @@ export const Dashboard: React.FC<{ onNavigateToCalendar?: () => void }> = ({ onN
     fetchStats()
   }, [])
 
-  const handleProcessPayment = async (id: number, confirm: boolean) => {
-    try {
-      await turnosApi.confirmarPago(id, confirm)
-      // Update local state to remove processed appointment
-      setStats(prev => ({
-        ...prev,
-        pagosPendientes: prev.pagosPendientes - 1,
-        turnosPendientesPago: prev.turnosPendientesPago.filter(t => t.id !== id),
-        // Update other stats optimistically if needed, or just let them be until refresh
-        turnosHoy: prev.turnosHoy, // Keep as is for now
-      }))
-      // Optionally show success toast
-    } catch (error) {
-      console.error('Error processing payment:', error)
-      alert('Error al procesar el pago')
-    }
-  }
 
   const handleConfirmAll = async () => {
     if (!window.confirm('¿Estás seguro de que quieres confirmar TODOS los turnos pendientes?')) {
@@ -186,13 +142,6 @@ export const Dashboard: React.FC<{ onNavigateToCalendar?: () => void }> = ({ onN
     }
   }
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('es-AR', {
-      style: 'currency',
-      currency: 'ARS',
-      minimumFractionDigits: 2
-    }).format(amount)
-  }
 
   const statCards = [
     {
@@ -210,16 +159,9 @@ export const Dashboard: React.FC<{ onNavigateToCalendar?: () => void }> = ({ onN
       bgColor: '#3B82F610'
     },
     {
-      title: 'Profesionales',
-      value: stats.totalProfesionales,
-      icon: Users,
-      color: '#10B981',
-      bgColor: '#10B98110'
-    },
-    {
-      title: 'Ingresos Total',
-      value: formatCurrency(stats.ingresoTotal),
-      icon: DollarSign,
+      title: 'Servicios',
+      value: stats.totalServicios,
+      icon: Briefcase,
       color: '#F59E0B',
       bgColor: '#F59E0B10'
     }
@@ -262,60 +204,6 @@ export const Dashboard: React.FC<{ onNavigateToCalendar?: () => void }> = ({ onN
         </div>
       </div>
 
-      {/* Pending Payments Alert */}
-      {stats.pagosPendientes > 0 && (
-        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg">
-          <div className="mb-3">
-            <div className="flex items-center">
-              <svg className="h-6 w-6 text-yellow-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-              </svg>
-              <h3 className="text-lg font-medium text-yellow-800">
-                {stats.pagosPendientes} {stats.pagosPendientes === 1 ? 'pago pendiente' : 'pagos pendientes'} de confirmación
-              </h3>
-            </div>
-          </div>
-
-          <div className="mt-4 space-y-3">
-            {stats.turnosPendientesPago.map(turno => (
-              <div key={turno.id} className="bg-white p-4 rounded-md shadow-sm border border-yellow-100 flex flex-col sm:flex-row justify-between items-center gap-4">
-                <div className="flex-1">
-                  <div className="font-medium text-gray-900">
-                    {turno.paciente?.nombre} {turno.paciente?.apellido}
-                  </div>
-                  <div className="text-sm text-gray-500">
-                    {new Date(turno.fecha).toLocaleDateString()} - {turno.hora_inicio} hs
-                  </div>
-                  <div className="text-sm text-gray-500">
-                    Prof: {turno.profesional?.nombre} {turno.profesional?.apellido}
-                  </div>
-                </div>
-
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleProcessPayment(turno.id, true)}
-                    className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded transition-colors flex items-center gap-1"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    Confirmar
-                  </button>
-                  <button
-                    onClick={() => handleProcessPayment(turno.id, false)}
-                    className="px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 text-sm font-medium rounded transition-colors flex items-center gap-1"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                    Rechazar
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Stats cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -344,56 +232,40 @@ export const Dashboard: React.FC<{ onNavigateToCalendar?: () => void }> = ({ onN
         })}
       </div>
 
-      {/* Row 2: Status breakdown and Revenue */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Row 2: Status breakdown */}
+      <div className="grid grid-cols-1 gap-6">
         {/* Turnos por Estado */}
         <Card className="p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
             <Activity className="h-5 w-5 mr-2 text-blue-600" />
-            Turnos por Estado
+            Distribución de Turnos por Estado
           </h3>
-          <div className="space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {Object.entries(stats.turnosPorEstado).map(([estado, count]) => {
               const colors: Record<string, string> = {
                 'Pendiente': 'bg-yellow-500',
                 'Confirmado': 'bg-blue-500',
                 'Atendido': 'bg-green-500',
-                'Cancelado': 'bg-red-500'
+                'Cancelado': 'bg-red-500',
+                'Ausente': 'bg-gray-900'
               }
               const percentage = (count / stats.totalTurnos * 100).toFixed(0)
               return (
-                <div key={estado}>
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm font-medium text-gray-700">{estado}</span>
-                    <span className="text-sm text-gray-600">{count} ({percentage}%)</span>
+                <div key={estado} className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-bold text-gray-700">{estado}</span>
+                    <span className="text-xs font-black text-gray-500">{count}</span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="w-full bg-gray-200 rounded-full h-1.5">
                     <div
-                      className={`${colors[estado] || 'bg-gray-500'} h-2 rounded-full`}
+                      className={`${colors[estado] || 'bg-gray-400'} h-1.5 rounded-full transition-all duration-500`}
                       style={{ width: `${percentage}%` }}
                     ></div>
                   </div>
+                  <p className="text-[10px] text-right mt-1 text-gray-400 font-bold">{percentage}% del total</p>
                 </div>
               )
             })}
-          </div>
-        </Card>
-
-        {/* Revenue Card */}
-        <Card className="p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-            <DollarSign className="h-5 w-5 mr-2 text-green-600" />
-            Ingresos
-          </h3>
-          <div className="space-y-4">
-            <div className="bg-green-50 p-4 rounded-lg">
-              <p className="text-sm text-green-700 font-medium">Ingresos Totales</p>
-              <p className="text-2xl font-bold text-green-900">{formatCurrency(stats.ingresoTotal)}</p>
-            </div>
-            <div className="bg-yellow-50 p-4 rounded-lg">
-              <p className="text-sm text-yellow-700 font-medium">Pendiente de Pago</p>
-              <p className="text-2xl font-bold text-yellow-900">{formatCurrency(stats.ingresoPendiente)}</p>
-            </div>
           </div>
         </Card>
       </div>
