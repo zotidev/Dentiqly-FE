@@ -56,6 +56,7 @@ export const CalendarView: React.FC = () => {
   const [searchResults, setSearchResults] = useState<Turno[]>([])
   const [showSearchResults, setShowSearchResults] = useState(false)
   const [newAppointmentData, setNewAppointmentData] = useState<{ fecha: string, hora_inicio: string, sobre_turno: boolean } | null>(null)
+  const [draggingAppointment, setDraggingAppointment] = useState<Turno | null>(null)
 
   const TIME_SLOTS = []
   for (let h = 8; h <= 20; h++) {
@@ -253,6 +254,36 @@ export const CalendarView: React.FC = () => {
     })
   }
 
+  const handleDropAppointment = async (date: string, slot: string) => {
+    if (!draggingAppointment) return
+
+    try {
+      // Calculate new hora_fin keeping original duration
+      const [h1, m1] = draggingAppointment.hora_inicio.split(':').map(Number)
+      const [h2, m2] = draggingAppointment.hora_fin.split(':').map(Number)
+      const durationMin = (h2 * 60 + m2) - (h1 * 60 + m1)
+
+      const [nh, nm] = slot.split(':').map(Number)
+      const totalMin = nh * 60 + nm + durationMin
+      const nfh = Math.floor(totalMin / 60)
+      const nfm = totalMin % 60
+      const hora_fin = `${String(nfh).padStart(2, '0')}:${String(nfm).padStart(2, '0')}`
+
+      await turnosApi.actualizar(draggingAppointment.id, {
+        fecha: date,
+        hora_inicio: slot,
+        hora_fin
+      })
+      
+      fetchAppointments()
+    } catch (error) {
+      console.error('Error rescheduling appointment:', error)
+      alert('Error al reprogramar el turno')
+    } finally {
+      setDraggingAppointment(null)
+    }
+  }
+
   const goToToday = () => {
     setCurrentDate(new Date())
   }
@@ -315,10 +346,15 @@ export const CalendarView: React.FC = () => {
                   {slot}
                 </div>
                 <div 
-                  className="p-1 relative group min-h-[40px] cursor-pointer hover:bg-blue-50/20 transition-colors"
+                  className={`p-1 relative group min-h-[40px] cursor-pointer transition-colors ${draggingAppointment ? 'bg-blue-50/10' : 'hover:bg-blue-50/20'}`}
                   onClick={() => {
                     setNewAppointmentData({ fecha: dateString, hora_inicio: slot, sobre_turno: appointmentsInSlot.length > 0 })
                     setShowNewModal(true)
+                  }}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => {
+                    e.preventDefault()
+                    handleDropAppointment(dateString, slot)
                   }}
                 >
                   <div className="flex flex-row gap-1 h-full">
@@ -328,11 +364,17 @@ export const CalendarView: React.FC = () => {
                       return (
                         <div
                           key={appointment.id}
+                          draggable
+                          onDragStart={(e) => {
+                            e.dataTransfer.setData('appointmentId', appointment.id.toString())
+                            setDraggingAppointment(appointment)
+                          }}
+                          onDragEnd={() => setDraggingAppointment(null)}
                           onClick={(e) => {
                             e.stopPropagation()
                             setSelectedAppointment(appointment)
                           }}
-                          className="flex-1 min-w-[120px] px-2 py-1 rounded shadow-sm text-[10px] cursor-pointer hover:brightness-95 transition-all border-l-2 overflow-hidden relative flex flex-col justify-center"
+                          className={`flex-1 min-w-[120px] px-2 py-1 rounded shadow-sm text-[10px] cursor-move hover:brightness-95 transition-all border-l-2 overflow-hidden relative flex flex-col justify-center ${draggingAppointment?.id === appointment.id ? 'opacity-40 grayscale scale-95' : ''}`}
                           style={{
                             backgroundColor: statusColor,
                             borderColor: 'rgba(0,0,0,0.1)',
@@ -417,10 +459,15 @@ export const CalendarView: React.FC = () => {
                       return (
                         <div 
                           key={i} 
-                          className={`p-1 border-r-2 border-gray-300 last:border-r-0 relative group transition-colors hover:bg-blue-50/40 cursor-pointer ${i % 2 === 0 ? 'bg-gray-50/50' : 'bg-white'}`}
+                          className={`p-1 border-r-2 border-gray-300 last:border-r-0 relative group transition-colors cursor-pointer ${draggingAppointment ? 'bg-blue-50/20' : 'hover:bg-blue-50/40'} ${i % 2 === 0 ? 'bg-gray-50/50' : 'bg-white'}`}
                           onClick={() => {
                             setNewAppointmentData({ fecha: dateString, hora_inicio: slot, sobre_turno: appointmentsInSlot.length > 0 })
                             setShowNewModal(true)
+                          }}
+                          onDragOver={(e) => e.preventDefault()}
+                          onDrop={(e) => {
+                            e.preventDefault()
+                            handleDropAppointment(dateString, slot)
                           }}
                         >
                           <div className="flex flex-row flex-wrap gap-0.5 h-full min-h-[35px] content-center">
@@ -430,11 +477,17 @@ export const CalendarView: React.FC = () => {
                               return (
                                 <div
                                   key={appointment.id}
+                                  draggable
+                                  onDragStart={(e) => {
+                                    e.dataTransfer.setData('appointmentId', appointment.id.toString())
+                                    setDraggingAppointment(appointment)
+                                  }}
+                                  onDragEnd={() => setDraggingAppointment(null)}
                                   onClick={(e) => {
                                     e.stopPropagation()
                                     setSelectedAppointment(appointment)
                                   }}
-                                  className="flex-1 min-w-[30px] max-w-[150px] px-1 py-0.5 rounded shadow-sm text-[8px] cursor-pointer hover:brightness-95 transition-all border border-black/10 overflow-hidden relative flex flex-col justify-center"
+                                  className={`flex-1 min-w-[30px] max-w-[150px] px-1 py-0.5 rounded shadow-sm text-[8px] cursor-move hover:brightness-95 transition-all border border-black/10 overflow-hidden relative flex flex-col justify-center ${draggingAppointment?.id === appointment.id ? 'opacity-40' : ''}`}
                                   style={{
                                     backgroundColor: statusColor,
                                     color: isLight ? '#000' : '#FFF'
