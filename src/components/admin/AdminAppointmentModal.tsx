@@ -8,19 +8,26 @@ import type { Profesional, Paciente, Servicio } from '../../types'
 interface AdminAppointmentModalProps {
     onClose: () => void
     onCreate: () => void
+    initialData?: Partial<{
+        fecha: string
+        hora_inicio: string
+        hora_fin: string
+        profesional_id: number
+        sobre_turno: boolean
+    }>
 }
 
-export const AdminAppointmentModal: React.FC<AdminAppointmentModalProps> = ({ onClose, onCreate }) => {
+export const AdminAppointmentModal: React.FC<AdminAppointmentModalProps> = ({ onClose, onCreate, initialData }) => {
     const [formData, setFormData] = useState({
         paciente_id: '',
-        profesional_id: 0,
+        profesional_id: initialData?.profesional_id || 0,
         servicio_id: 0,
-        fecha: new Date().toISOString().split('T')[0],
-        hora_inicio: '10:00',
-        hora_fin: '10:30',
+        fecha: initialData?.fecha || new Date().toISOString().split('T')[0],
+        hora_inicio: initialData?.hora_inicio || '10:00',
+        hora_fin: initialData?.hora_fin || '10:30',
         estado: 'Confirmado',
         observaciones: '',
-        sobre_turno: false
+        sobre_turno: initialData?.sobre_turno || false
     })
 
     const [loading, setLoading] = useState(false)

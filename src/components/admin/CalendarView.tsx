@@ -55,6 +55,13 @@ export const CalendarView: React.FC = () => {
   const [patientSearch, setPatientSearch] = useState('')
   const [searchResults, setSearchResults] = useState<Turno[]>([])
   const [showSearchResults, setShowSearchResults] = useState(false)
+  const [newAppointmentData, setNewAppointmentData] = useState<{ fecha: string, hora_inicio: string, sobre_turno: boolean } | null>(null)
+
+  const TIME_SLOTS = []
+  for (let h = 8; h <= 20; h++) {
+    TIME_SLOTS.push(`${String(h).padStart(2, '0')}:00`)
+    TIME_SLOTS.push(`${String(h).padStart(2, '0')}:30`)
+  }
 
   useEffect(() => {
     fetchAppointments()
@@ -210,7 +217,9 @@ export const CalendarView: React.FC = () => {
 
     let filtered = appointments.filter(appointment => {
       if (!appointment.fecha) return false
-      return appointment.fecha === dateString
+      // Match the date string exactly
+      const appointmentDate = appointment.fecha.split('T')[0]
+      return appointmentDate === dateString
     })
 
     // Filter by selected professional if one is selected
@@ -221,6 +230,13 @@ export const CalendarView: React.FC = () => {
     }
 
     return filtered.sort((a, b) => a.hora_inicio.localeCompare(b.hora_inicio))
+  }
+
+  const getInitials = (profesional?: any) => {
+    if (!profesional) return '??'
+    const n = profesional.nombre?.[0] || ''
+    const a = profesional.apellido?.[0] || profesional.apellido?.[1] || ''
+    return (n + a).toUpperCase()
   }
 
   const navigate = (direction: 'prev' | 'next') => {
@@ -265,84 +281,83 @@ export const CalendarView: React.FC = () => {
 
   const renderDayView = () => {
     const dayAppointments = getAppointmentsForDate(currentDate)
+    const year = currentDate.getFullYear()
+    const month = String(currentDate.getMonth() + 1).padStart(2, '0')
+    const day = String(currentDate.getDate()).padStart(2, '0')
+    const dateString = `${year}-${month}-${day}`
 
     return (
-      <Card className="p-6">
-        <div className="space-y-4">
-          {dayAppointments.length === 0 ? (
-            <div className="text-center py-12">
-              <CalendarIcon className="h-16 w-16 mx-auto text-gray-300 mb-4" />
-              <p className="text-gray-500">No hay turnos programados para este día</p>
+      <Card className="overflow-hidden border-none shadow-xl bg-white rounded-2xl flex flex-col h-full">
+        <div className="grid grid-cols-[100px_1fr] bg-gray-100 border-b border-gray-200 sticky top-0 z-20">
+          <div className="p-2 border-r border-gray-200 flex items-center justify-center">
+            <Clock className="h-4 w-4 text-gray-500" />
+          </div>
+          <div className="p-2 text-center bg-blue-50/50">
+            <div className="text-[10px] font-black uppercase tracking-widest text-blue-600">
+              {currentDate.toLocaleDateString('es-ES', { weekday: 'long' })}
             </div>
-          ) : (
-            dayAppointments.map((appointment) => {
-              const statusColor = getStatusColor(appointment.estado)
-              return (
-                <div
-                  key={appointment.id}
-                  onClick={() => setSelectedAppointment(appointment)}
-                  className="p-4 border rounded-lg hover:shadow-md transition-shadow cursor-pointer"
-                  style={{ borderLeft: `4px solid ${statusColor}` }}
+            <div className="text-lg font-black text-[#026498]">
+              {currentDate.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex-1 overflow-y-auto bg-white">
+          {TIME_SLOTS.map((slot, idx) => {
+            const nextSlot = TIME_SLOTS[idx + 1]
+            const appointmentsInSlot = dayAppointments.filter(a => {
+              if (!nextSlot) return a.hora_inicio.startsWith(slot)
+              return a.hora_inicio >= slot && a.hora_inicio < nextSlot
+            })
+            return (
+              <div key={slot} className="grid grid-cols-[100px_1fr] border-b border-gray-50 last:border-b-0 min-h-[40px]">
+                <div className="p-1 text-[10px] font-bold text-gray-400 border-r border-gray-100 text-center flex items-center justify-center bg-gray-50/30">
+                  {slot}
+                </div>
+                <div 
+                  className="p-1 relative group min-h-[40px] cursor-pointer hover:bg-blue-50/20 transition-colors"
+                  onClick={() => {
+                    setNewAppointmentData({ fecha: dateString, hora_inicio: slot, sobre_turno: appointmentsInSlot.length > 0 })
+                    setShowNewModal(true)
+                  }}
                 >
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-4 mb-2">
-                        <div className="flex items-center text-lg font-semibold">
-                          <Clock className="h-5 w-5 mr-2 text-gray-500" />
-                          {appointment.hora_inicio} - {appointment.hora_fin}
-                        </div>
-                        <span
-                          className="px-2 py-1 text-xs font-semibold rounded-full"
-                          style={{
-                            backgroundColor: `${statusColor}20`,
-                            color: statusColor
-                          }}
-                        >
-                          {appointment.estado}
-                        </span>
-                      </div>
-
-                      <div className="space-y-1 text-sm">
-                        <div className="flex items-center text-gray-700">
-                          <User className="h-4 w-4 mr-2" />
-                          <span className="font-medium">
-                            {appointment.paciente?.nombre} {appointment.paciente?.apellido}
-                          </span>
-                        </div>
-
-                        <div className="flex items-center text-gray-600">
-                          <Briefcase className="h-4 w-4 mr-2" />
-                          {appointment.servicio?.nombre}
-                        </div>
-
-                        <div className="flex items-center text-gray-600">
-                          <User className="h-4 w-4 mr-2" />
-                          {appointment.profesional?.nombre} {appointment.profesional?.apellido}
-                        </div>
-                      </div>
-
-                      {/* Quick Confirm Button */}
-                      {appointment.estado === 'Pendiente' && !appointment.pago_confirmado && (
-                        <button
+                  <div className="flex flex-row gap-1 h-full">
+                    {appointmentsInSlot.map((appointment) => {
+                      const statusColor = getStatusColor(appointment.estado)
+                      const isLight = ['#F59E0B', '#EAB308', '#22C55E'].includes(statusColor)
+                      return (
+                        <div
+                          key={appointment.id}
                           onClick={(e) => {
                             e.stopPropagation()
-                            handleQuickConfirm(appointment.id)
+                            setSelectedAppointment(appointment)
                           }}
-                          className="ml-4 px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded transition-colors flex items-center gap-1"
-                          title="Confirmar pago"
+                          className="flex-1 min-w-[120px] px-2 py-1 rounded shadow-sm text-[10px] cursor-pointer hover:brightness-95 transition-all border-l-2 overflow-hidden relative flex flex-col justify-center"
+                          style={{
+                            backgroundColor: statusColor,
+                            borderColor: 'rgba(0,0,0,0.1)',
+                            color: isLight ? '#000' : '#FFF'
+                          }}
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                          </svg>
-                          Confirmar
-                        </button>
-                      )}
+                          <div className="font-black truncate uppercase leading-none mb-0.5">
+                            {getInitials(appointment.profesional)} - {appointment.paciente?.apellido} {appointment.paciente?.nombre?.charAt(0)}.
+                          </div>
+                          <div className="text-[8px] font-bold opacity-80 leading-none">
+                            {appointment.hora_inicio.substring(0, 5)} - {appointment.servicio?.nombre?.substring(0, 15)}
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                  <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-all z-10 pointer-events-none">
+                    <div className="bg-blue-600 text-white rounded-full p-0.5 shadow-lg">
+                      <Plus size={12} />
                     </div>
                   </div>
                 </div>
-              )
-            })
-          )}
+              </div>
+            )
+          })}
         </div>
       </Card>
     )
@@ -352,50 +367,103 @@ export const CalendarView: React.FC = () => {
     const weekDays = getWeekDays(currentDate)
 
     return (
-      <Card>
-        <div className="grid grid-cols-7 gap-px bg-gray-200 rounded-lg overflow-hidden">
-          {weekDays.map((day, index) => {
-            const dayAppointments = getAppointmentsForDate(day)
-            const isToday = day.toDateString() === new Date().toDateString()
-
-            return (
-              <div key={index} className="bg-white min-h-[400px] p-3">
-                <div className={`text-center mb-3 ${isToday ? 'text-blue-600 font-bold' : 'text-gray-700'}`}>
-                  <div className="text-xs font-medium uppercase">
-                    {day.toLocaleDateString('es-ES', { weekday: 'short' })}
-                  </div>
-                  <div className={`text-2xl ${isToday ? 'bg-blue-600 text-white rounded-full w-10 h-10 flex items-center justify-center mx-auto mt-1' : ''}`}>
-                    {day.getDate()}
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  {dayAppointments.map((appointment) => {
-                    const statusColor = getStatusColor(appointment.estado)
-                    return (
-                      <div
-                        key={appointment.id}
-                        onClick={() => setSelectedAppointment(appointment)}
-                        className="p-2 rounded text-xs cursor-pointer hover:opacity-80 transition-opacity"
-                        style={{
-                          backgroundColor: `${statusColor}20`,
-                          borderLeft: `3px solid ${statusColor}`
-                        }}
-                      >
-                        <div className="font-medium">{appointment.hora_inicio}</div>
-                        <div className="truncate opacity-75">
-                          {appointment.paciente?.nombre} {appointment.paciente?.apellido}
-                        </div>
-                        <div className="truncate text-xs opacity-60">
-                          {appointment.servicio?.nombre}
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
+      <Card className="overflow-hidden border-none shadow-2xl bg-white rounded-2xl flex flex-col h-full">
+        <div className="overflow-x-auto flex-1 flex flex-col border rounded-xl shadow-inner bg-gray-50/50">
+          <div className="min-w-[1000px] flex-1 flex flex-col">
+            {/* Header */}
+            <div className="grid grid-cols-[80px_repeat(7,1fr)] bg-gray-100 border-b-2 border-gray-300 sticky top-0 z-20">
+              <div className="p-2 border-r-2 border-gray-300 flex items-center justify-center">
+                <Clock className="h-4 w-4 text-gray-500" />
               </div>
-            )
-          })}
+              {weekDays.map((day, i) => {
+                const isToday = day.toDateString() === new Date().toDateString()
+                return (
+                  <div key={i} className={`p-2 text-center border-r-2 border-gray-300 last:border-r-0 ${isToday ? 'bg-blue-100/50' : i % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}>
+                    <div className={`text-[10px] font-black uppercase tracking-widest ${isToday ? 'text-blue-600' : 'text-gray-500'}`}>
+                      {day.toLocaleDateString('es-ES', { weekday: 'short' })}
+                    </div>
+                    <div className={`text-sm font-black ${isToday ? 'text-[#026498]' : 'text-gray-900'}`}>
+                      {day.getDate()}/{day.getMonth() + 1}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* Grid Body */}
+            <div className="relative bg-white flex-1 overflow-y-auto">
+              {TIME_SLOTS.map((slot, idx) => {
+                const nextSlot = TIME_SLOTS[idx + 1]
+                return (
+                  <div key={slot} className="grid grid-cols-[80px_repeat(7,1fr)] border-b border-gray-200 last:border-b-0 min-h-[40px]">
+                    {/* Time column */}
+                    <div className="p-1 text-[9px] font-bold text-gray-500 border-r-2 border-gray-300 text-center flex items-center justify-center bg-gray-100 font-mono">
+                      {slot}
+                    </div>
+                    
+                    {/* Days columns */}
+                    {weekDays.map((day, i) => {
+                      const dayAppointments = getAppointmentsForDate(day)
+                      const appointmentsInSlot = dayAppointments.filter(a => {
+                        if (!nextSlot) return a.hora_inicio.startsWith(slot)
+                        return a.hora_inicio >= slot && a.hora_inicio < nextSlot
+                      })
+                      
+                      const y = day.getFullYear()
+                      const m = String(day.getMonth() + 1).padStart(2, '0')
+                      const d = String(day.getDate()).padStart(2, '0')
+                      const dateString = `${y}-${m}-${d}`
+                      
+                      return (
+                        <div 
+                          key={i} 
+                          className={`p-1 border-r-2 border-gray-300 last:border-r-0 relative group transition-colors hover:bg-blue-50/40 cursor-pointer ${i % 2 === 0 ? 'bg-gray-50/50' : 'bg-white'}`}
+                          onClick={() => {
+                            setNewAppointmentData({ fecha: dateString, hora_inicio: slot, sobre_turno: appointmentsInSlot.length > 0 })
+                            setShowNewModal(true)
+                          }}
+                        >
+                          <div className="flex flex-row flex-wrap gap-0.5 h-full min-h-[35px] content-center">
+                            {appointmentsInSlot.map((appointment) => {
+                              const statusColor = getStatusColor(appointment.estado)
+                              const isLight = ['#F59E0B', '#EAB308', '#22C55E'].includes(statusColor)
+                              return (
+                                <div
+                                  key={appointment.id}
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    setSelectedAppointment(appointment)
+                                  }}
+                                  className="flex-1 min-w-[30px] max-w-[150px] px-1 py-0.5 rounded shadow-sm text-[8px] cursor-pointer hover:brightness-95 transition-all border border-black/10 overflow-hidden relative flex flex-col justify-center"
+                                  style={{
+                                    backgroundColor: statusColor,
+                                    color: isLight ? '#000' : '#FFF'
+                                  }}
+                                  title={`${appointment.hora_inicio.substring(0,5)} - ${appointment.paciente?.apellido}`}
+                                >
+                                  <div className="font-black truncate uppercase leading-tight">
+                                    {getInitials(appointment.profesional)} {appointment.paciente?.apellido}
+                                  </div>
+                                  <div className="text-[7px] font-bold opacity-80 truncate">
+                                    {appointment.hora_inicio.substring(0, 5)}
+                                  </div>
+                                </div>
+                              )
+                            })}
+                          </div>
+                          <div className="absolute top-0.5 right-0.5 opacity-0 group-hover:opacity-100 transition-all z-10 pointer-events-none">
+                            <div className="bg-blue-600 text-white rounded-full p-0.5 shadow-lg">
+                              <Plus size={8} />
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
         </div>
       </Card>
     )
@@ -472,203 +540,167 @@ export const CalendarView: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h2 className={`text-2xl font-bold text-[${dentalColors.gray900}] capitalize`}>
-            {getViewTitle()}
-          </h2>
-          <p className={`text-[${dentalColors.gray600}]`}>
-            Gestiona los turnos del centro odontológico
-          </p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <div className="flex items-center border rounded-lg">
-            <Button
-              variant={viewType === 'day' ? 'primary' : 'secondary'}
-              size="sm"
-              onClick={() => setViewType('day')}
-              className="rounded-r-none"
-            >
-              <List className="h-4 w-4" />
-              <span className="ml-2 hidden sm:inline">Día</span>
-            </Button>
-            <Button
-              variant={viewType === 'week' ? 'primary' : 'secondary'}
-              size="sm"
-              onClick={() => setViewType('week')}
-              className="rounded-none border-x"
-            >
-              <LayoutGrid className="h-4 w-4" />
-              <span className="ml-2 hidden sm:inline">Semana</span>
-            </Button>
-            <Button
-              variant={viewType === 'month' ? 'primary' : 'secondary'}
-              size="sm"
-              onClick={() => setViewType('month')}
-              className="rounded-l-none"
-            >
-              <CalendarIcon className="h-4 w-4" />
-              <span className="ml-2 hidden sm:inline">Mes</span>
-            </Button>
+    <div className="h-full flex flex-col overflow-hidden">
+      <div className="flex-shrink-0 space-y-4 mb-4">
+        {/* Responsive Header Container */}
+        <div className="flex flex-wrap justify-between items-center gap-4">
+          <div className="flex-shrink-0">
+            <h2 className={`text-lg font-bold text-[${dentalColors.gray900}] capitalize tracking-tight`}>
+              {getViewTitle()}
+            </h2>
+            <p className={`text-[${dentalColors.gray500}] text-[9px] font-medium`}>
+              Gestión de Turnos
+            </p>
           </div>
 
-          <div className="flex items-center gap-3">
-            <Button
-              onClick={() => setShowBookingModal(true)}
-              size="sm"
-              variant="outline"
-              className="border-[#026498] text-[#026498] hover:bg-blue-50"
-            >
-              <CalendarIcon className="h-4 w-4 mr-1" />
-              <span className="hidden sm:inline">Agregar turno</span>
-            </Button>
-            <Button
-              onClick={() => setShowNewModal(true)}
-              size="sm"
-              className="bg-[#026498]"
-            >
-              <Plus className="h-4 w-4 mr-1" />
-              <span className="hidden sm:inline">Agregar sobreturno</span>
-            </Button>
-            {/* Professional Filter */}
-            <select
-              value={selectedProfessionalId ?? ''}
-              onChange={(e) => setSelectedProfessionalId(e.target.value ? Number(e.target.value) : null)}
-              className="px-3 py-2 border border-input rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-            >
-              <option value="">Todos los profesionales</option>
-              {professionals.map((prof) => (
-                <option key={prof.id} value={prof.id}>
-                  {prof.nombre} {prof.apellido}
-                </option>
-              ))}
-            </select>
+          <div className="flex flex-wrap items-center gap-2">
+            {/* View Switcher Group */}
+            <div className="flex items-center bg-white border rounded-lg shadow-sm overflow-hidden h-8">
+              <Button
+                variant={viewType === 'day' ? 'primary' : 'ghost'}
+                size="sm"
+                onClick={() => setViewType('day')}
+                className={`rounded-none border-0 h-full px-2 ${viewType === 'day' ? 'bg-[#026498]' : 'text-gray-500'}`}
+              >
+                <span className="text-[10px] font-bold capitalize">Día</span>
+              </Button>
+              <Button
+                variant={viewType === 'week' ? 'primary' : 'ghost'}
+                size="sm"
+                onClick={() => setViewType('week')}
+                className={`rounded-none border-x h-full px-2 ${viewType === 'week' ? 'bg-[#026498]' : 'text-gray-500'}`}
+              >
+                <span className="text-[10px] font-bold capitalize">Semana</span>
+              </Button>
+              <Button
+                variant={viewType === 'month' ? 'primary' : 'ghost'}
+                size="sm"
+                onClick={() => setViewType('month')}
+                className={`rounded-none border-0 h-full px-2 ${viewType === 'month' ? 'bg-[#026498]' : 'text-gray-500'}`}
+              >
+                <span className="text-[10px] font-bold capitalize">Mes</span>
+              </Button>
+            </div>
 
-            <div className="flex items-center space-x-2">
-              <Button variant="outline" size="sm" onClick={() => navigate('prev')}>
-                <ChevronLeft className="h-4 w-4" />
+            {/* Actions Group */}
+            <div className="flex items-center gap-1">
+              <Button
+                onClick={() => setShowBookingModal(true)}
+                size="sm"
+                variant="outline"
+                className="h-8 border-[#026498] text-[#026498] hover:bg-blue-50 font-bold capitalize text-[10px] px-2"
+              >
+                <Plus className="h-3 w-3 mr-1" />
+                Turno
               </Button>
-              <Button variant="outline" size="sm" onClick={goToToday}>
-                Hoy
+              <Button
+                onClick={() => setShowNewModal(true)}
+                size="sm"
+                className="h-8 bg-[#026498] font-bold capitalize text-[10px] px-2"
+              >
+                <Plus className="h-3 w-3 mr-1" />
+                Sobreturno
               </Button>
-              <Button variant="outline" size="sm" onClick={() => navigate('next')}>
-                <ChevronRight className="h-4 w-4" />
-              </Button>
+            </div>
+
+            {/* Filters & Nav Group */}
+            <div className="flex items-center gap-1">
+              <select
+                value={selectedProfessionalId ?? ''}
+                onChange={(e) => setSelectedProfessionalId(e.target.value ? Number(e.target.value) : null)}
+                className="h-8 px-2 border border-gray-300 rounded-lg text-[10px] font-bold capitalize bg-white"
+              >
+                <option value="">Profesional</option>
+                {professionals.map((prof) => (
+                  <option key={prof.id} value={prof.id}>
+                    {prof.apellido}
+                  </option>
+                ))}
+              </select>
+
+              <div className="flex items-center bg-white border rounded-lg h-8 px-1">
+                <button onClick={() => navigate('prev')} className="p-1 hover:bg-gray-100 rounded">
+                  <ChevronLeft className="h-3 w-3" />
+                </button>
+                <button onClick={goToToday} className="px-2 text-[9px] font-bold capitalize text-[#026498]">
+                  Hoy
+                </button>
+                <button onClick={() => navigate('next')} className="p-1 hover:bg-gray-100 rounded">
+                  <ChevronRight className="h-3 w-3" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-3">
+          {/* Patient Search - Compact */}
+          <div className="w-full sm:w-64">
+            <div className="relative bg-white border rounded-lg px-2 py-1 shadow-sm">
+              <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Buscar paciente..."
+                value={patientSearch}
+                onChange={(e) => setPatientSearch(e.target.value)}
+                onFocus={() => patientSearch.trim().length >= 2 && setShowSearchResults(true)}
+                className="w-full pl-6 pr-2 py-0.5 text-[10px] font-bold border-0 bg-transparent focus:ring-0"
+              />
+              {showSearchResults && searchResults.length > 0 && (
+                <div className="absolute top-full left-0 mt-1 w-full sm:w-80 bg-white border border-gray-200 rounded-lg shadow-xl z-[100] max-h-60 overflow-y-auto overflow-x-hidden no-scrollbar">
+                  <div className="p-1">
+                    {searchResults.map((turno) => (
+                      <div
+                        key={turno.id}
+                        onClick={() => {
+                          setCurrentDate(new Date(turno.fecha + 'T12:00:00')) // Avoid midnight timezone issues
+                          setViewType('day')
+                          setPatientSearch('')
+                          setShowSearchResults(false)
+                          setSelectedAppointment(turno)
+                        }}
+                        className="p-2 hover:bg-blue-50 rounded-md cursor-pointer transition-colors border-b last:border-0"
+                      >
+                        <div className="text-[10px] font-black text-gray-900 uppercase">
+                          {turno.paciente?.apellido} {turno.paciente?.nombre}
+                        </div>
+                        <div className="flex justify-between text-[9px] text-gray-500 font-bold">
+                          <span>{new Date(turno.fecha + 'T12:00:00').toLocaleDateString('es-ES')}</span>
+                          <span>{turno.hora_inicio.substring(0, 5)} hs</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {showSearchResults && searchResults.length === 0 && patientSearch.trim().length >= 2 && (
+                <div className="absolute top-full left-0 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-xl z-[100] p-3 text-center">
+                  <p className="text-[10px] font-bold text-gray-400 italic">No se encontraron turnos</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Status Color Legend - Wrapped */}
+          <div className="flex-1 min-w-0">
+            <div className="flex flex-wrap gap-x-4 gap-y-2 items-center bg-white/50 p-2 rounded-lg border border-gray-200">
+              <span className="text-[10px] font-bold capitalize text-gray-400 border-r pr-3">Legenda</span>
+              {Object.entries(STATUS_COLORS).slice(0, 8).map(([status, color]) => (
+                <div key={status} className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full shadow-sm" style={{ backgroundColor: color }} />
+                  <span className="text-[10px] text-gray-600 font-bold capitalize">{status}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Patient Search */}
-      <Card className="p-4">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Buscar paciente por nombre o DNI..."
-            value={patientSearch}
-            onChange={(e) => setPatientSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-          {patientSearch && (
-            <button
-              onClick={() => {
-                setPatientSearch('')
-                setShowSearchResults(false)
-              }}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-            >
-              ✕
-            </button>
-          )}
-        </div>
-
-        {showSearchResults && (
-          <div className="mt-3 max-h-[400px] overflow-y-auto">
-            {searchResults.length === 0 ? (
-              <p className="text-sm text-gray-500 py-3 text-center">No se encontraron turnos para ese paciente</p>
-            ) : (
-              <div className="space-y-2">
-                <p className="text-xs text-gray-500 font-medium">
-                  {searchResults.length} turno{searchResults.length !== 1 ? 's' : ''} encontrado{searchResults.length !== 1 ? 's' : ''}
-                </p>
-                {searchResults.map((turno) => {
-                  const statusColor = getStatusColor(turno.estado)
-                  const turnoDate = new Date(turno.fecha + 'T00:00:00')
-                  return (
-                    <div
-                      key={turno.id}
-                      className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
-                      style={{ borderLeft: `4px solid ${statusColor}` }}
-                      onClick={() => {
-                        setCurrentDate(turnoDate)
-                        setViewType('day')
-                        setPatientSearch('')
-                        setShowSearchResults(false)
-                      }}
-                    >
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <User className="h-4 w-4 text-gray-400" />
-                          <span className="text-sm font-semibold text-gray-900">
-                            {turno.paciente?.apellido}, {turno.paciente?.nombre}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-4 mt-1 text-xs text-gray-500">
-                          <span className="flex items-center gap-1">
-                            <CalendarIcon className="h-3 w-3" />
-                            {turnoDate.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            {turno.hora_inicio} - {turno.hora_fin}
-                          </span>
-                          {turno.profesional && (
-                            <span>{turno.profesional.nombre} {turno.profesional.apellido}</span>
-                          )}
-                        </div>
-                      </div>
-                      <span
-                        className="px-2 py-0.5 text-xs font-semibold rounded-full"
-                        style={{
-                          backgroundColor: `${statusColor}20`,
-                          color: statusColor
-                        }}
-                      >
-                        {turno.estado}
-                      </span>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
-          </div>
-        )}
-      </Card>
-
-      {/* Status Color Legend */}
-      <Card className="p-4">
-        <div className="flex flex-wrap gap-3 items-center">
-          <span className="text-sm font-medium text-gray-700 mr-2">Estado del turno:</span>
-          {Object.entries(STATUS_COLORS).map(([status, color]) => (
-            <div key={status} className="flex items-center gap-2">
-              <div
-                className="w-4 h-4 rounded"
-                style={{ backgroundColor: color }}
-              />
-              <span className="text-sm text-gray-600">
-                {status}
-              </span>
-            </div>
-          ))}
-        </div>
-      </Card>
-
-      {viewType === 'day' && renderDayView()}
-      {viewType === 'week' && renderWeekView()}
-      {viewType === 'month' && renderMonthView()}
+      <div className="flex-1 overflow-hidden min-h-0">
+        {viewType === 'day' && renderDayView()}
+        {viewType === 'week' && renderWeekView()}
+        {viewType === 'month' && renderMonthView()}
+      </div>
 
       {selectedAppointment && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -800,10 +832,15 @@ export const CalendarView: React.FC = () => {
       
       {showNewModal && (
         <AdminAppointmentModal
-          onClose={() => setShowNewModal(false)}
+          initialData={newAppointmentData || undefined}
+          onClose={() => {
+            setShowNewModal(false)
+            setNewAppointmentData(null)
+          }}
           onCreate={() => {
             fetchAppointments()
             setShowNewModal(false)
+            setNewAppointmentData(null)
             alert('Turno creado exitosamente')
           }}
         />
