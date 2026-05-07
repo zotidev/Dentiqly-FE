@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { Button } from '../ui/Button'
 import { Input } from '../ui/Input'
-import { Plus } from 'lucide-react'
+import { Plus, UserPlus, Search } from 'lucide-react'
+import { PatientForm } from '../booking/PatientForm'
 import { turnosApi, profesionalesApi, pacientesApi, serviciosApi } from '../../api'
 import type { Profesional, Paciente, Servicio } from '../../types'
 
@@ -35,6 +36,7 @@ export const AdminAppointmentModal: React.FC<AdminAppointmentModalProps> = ({ on
     const [pacientes, setPacientes] = useState<Paciente[]>([])
     const [servicios, setServicios] = useState<Servicio[]>([])
     const [searchPaciente, setSearchPaciente] = useState('')
+    const [isNewPatient, setIsNewPatient] = useState(false)
 
     useEffect(() => {
         const fetchInitialData = async () => {
@@ -87,8 +89,35 @@ export const AdminAppointmentModal: React.FC<AdminAppointmentModalProps> = ({ on
         }
     }, [formData.servicio_id, formData.hora_inicio, servicios])
 
+    const handleNewPatientSubmit = async (data: any) => {
+        setLoading(true)
+        try {
+            const newPatient = await pacientesApi.crear(data)
+            await turnosApi.crear({
+                paciente_id: newPatient.id,
+                profesional_id: formData.profesional_id,
+                servicio_id: formData.servicio_id,
+                fecha: formData.fecha,
+                hora_inicio: formData.hora_inicio,
+                hora_fin: formData.hora_fin,
+                estado: formData.estado,
+                observaciones: formData.observaciones,
+                sobre_turno: formData.sobre_turno
+            })
+            onCreate()
+            onClose()
+        } catch (error: any) {
+            console.error('Error creating patient and appointment:', error)
+            alert('Error al crear el paciente o el turno.')
+        } finally {
+            setLoading(false)
+        }
+    }
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
+        if (isNewPatient) return // Handled by PatientForm
+
         setLoading(true)
         
         if (!formData.paciente_id || !formData.profesional_id || !formData.servicio_id) {
@@ -140,61 +169,80 @@ export const AdminAppointmentModal: React.FC<AdminAppointmentModalProps> = ({ on
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="space-y-4">
                         <div className="bg-gray-50/80 p-5 rounded-2xl border border-gray-100 space-y-4">
-                            <div className="relative">
-                                <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Paciente *</label>
+                            <div className="flex items-center justify-between gap-4 mb-2">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Paciente *</label>
+                                <button
+                                    type="button"
+                                    onClick={() => setIsNewPatient(!isNewPatient)}
+                                    className="text-[10px] font-black uppercase tracking-widest text-[#026498] hover:underline flex items-center gap-1"
+                                >
+                                    {isNewPatient ? (
+                                        <><Search size={12} /> Usar Existente</>
+                                    ) : (
+                                        <><UserPlus size={12} /> Paciente Nuevo</>
+                                    )}
+                                </button>
+                            </div>
+
+                            {isNewPatient ? (
+                                <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+                                    <p className="text-[10px] text-amber-600 font-bold mb-4 bg-amber-50 p-2 rounded-lg border border-amber-100">
+                                        * El paciente se registrará automáticamente al guardar el turno.
+                                    </p>
+                                    {/* We will render the form at the bottom if isNewPatient is true, 
+                                        or we can render it here but PatientForm has its own submit button.
+                                        Let's keep it consistent. */}
+                                </div>
+                            ) : (
                                 <div className="relative">
-                                    <Input
-                                        type="text"
-                                        placeholder="Buscar por DNI, nombre o apellido..."
-                                        value={searchPaciente}
-                                        onChange={(e) => {
-                                            setSearchPaciente(e.target.value);
-                                            // Invalida la selección si el usuario borra o cambia el texto
-                                            setFormData({ ...formData, paciente_id: '' });
-                                        }}
-                                        onFocus={() => {
-                                            if (searchPaciente.length > 2) {
-                                                // Trigger search if focus and has text
-                                            }
-                                        }}
-                                        className="h-12 pr-10"
-                                        required
-                                    />
-                                    {formData.paciente_id && (
-                                        <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                                            <div className="w-2 h-2 rounded-full bg-green-500" title="Paciente seleccionado" />
+                                    <div className="relative">
+                                        <Input
+                                            type="text"
+                                            placeholder="Buscar por DNI, nombre o apellido..."
+                                            value={searchPaciente}
+                                            onChange={(e) => {
+                                                setSearchPaciente(e.target.value);
+                                                setFormData({ ...formData, paciente_id: '' });
+                                            }}
+                                            className="h-12 pr-10"
+                                            required={!isNewPatient}
+                                        />
+                                        {formData.paciente_id && (
+                                            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                                <div className="w-2 h-2 rounded-full bg-green-500" title="Paciente seleccionado" />
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {searchPaciente.length > 2 && !formData.paciente_id && pacientes.length > 0 && (
+                                        <div className="absolute z-[60] w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-xl max-h-60 overflow-y-auto">
+                                            {pacientes.map((paciente) => (
+                                                <div
+                                                    key={paciente.id}
+                                                    className="px-4 py-3 hover:bg-blue-50 cursor-pointer border-b border-gray-50 last:border-none transition-colors"
+                                                    onClick={() => {
+                                                        setFormData({ ...formData, paciente_id: paciente.id });
+                                                        setSearchPaciente(`${paciente.numero_documento} - ${paciente.apellido}, ${paciente.nombre}`);
+                                                    }}
+                                                >
+                                                    <div className="text-sm font-bold text-gray-900">
+                                                        {paciente.apellido}, {paciente.nombre}
+                                                    </div>
+                                                    <div className="text-xs text-gray-500">
+                                                        DNI: {paciente.numero_documento}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                    
+                                    {searchPaciente.length > 2 && !formData.paciente_id && pacientes.length === 0 && (
+                                        <div className="absolute z-[60] w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-xl p-4 text-center text-sm text-gray-500">
+                                            No se encontraron pacientes
                                         </div>
                                     )}
                                 </div>
-
-                                {searchPaciente.length > 2 && !formData.paciente_id && pacientes.length > 0 && (
-                                    <div className="absolute z-[60] w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-xl max-h-60 overflow-y-auto">
-                                        {pacientes.map((paciente) => (
-                                            <div
-                                                key={paciente.id}
-                                                className="px-4 py-3 hover:bg-blue-50 cursor-pointer border-b border-gray-50 last:border-none transition-colors"
-                                                onClick={() => {
-                                                    setFormData({ ...formData, paciente_id: paciente.id });
-                                                    setSearchPaciente(`${paciente.numero_documento} - ${paciente.apellido}, ${paciente.nombre}`);
-                                                }}
-                                            >
-                                                <div className="text-sm font-bold text-gray-900">
-                                                    {paciente.apellido}, {paciente.nombre}
-                                                </div>
-                                                <div className="text-xs text-gray-500">
-                                                    DNI: {paciente.numero_documento}
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                                
-                                {searchPaciente.length > 2 && !formData.paciente_id && pacientes.length === 0 && (
-                                    <div className="absolute z-[60] w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-xl p-4 text-center text-sm text-gray-500">
-                                        No se encontraron pacientes
-                                    </div>
-                                )}
-                            </div>
+                            )}
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
@@ -305,23 +353,36 @@ export const AdminAppointmentModal: React.FC<AdminAppointmentModalProps> = ({ on
                         </div>
                     </div>
 
-                    <div className="flex gap-4 pt-4">
-                        <Button 
-                            type="button" 
-                            variant="outline" 
-                            onClick={onClose}
-                            className="flex-1 h-12 rounded-xl font-bold"
-                        >
-                            Cancelar
-                        </Button>
-                        <Button 
-                            type="submit" 
-                            disabled={loading} 
-                            className="flex-1 h-12 rounded-xl bg-[#026498] text-white font-black shadow-lg shadow-blue-900/10 hover:shadow-xl hover:-translate-y-0.5 transition-all"
-                        >
-                            {loading ? 'Guardando...' : 'Agregar Sobreturno'}
-                        </Button>
-                    </div>
+                    {isNewPatient ? (
+                        <div className="border-t border-gray-100 pt-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                            <h4 className="text-sm font-black text-gray-900 mb-6 flex items-center gap-2">
+                                <UserPlus size={16} className="text-[#026498]" />
+                                Formulario de Nuevo Paciente
+                            </h4>
+                            <PatientForm
+                                onPatientData={handleNewPatientSubmit}
+                                loading={loading}
+                            />
+                        </div>
+                    ) : (
+                        <div className="flex gap-4 pt-4">
+                            <Button 
+                                type="button" 
+                                variant="outline" 
+                                onClick={onClose}
+                                className="flex-1 h-12 rounded-xl font-bold"
+                            >
+                                Cancelar
+                            </Button>
+                            <Button 
+                                type="submit" 
+                                disabled={loading} 
+                                className="flex-1 h-12 rounded-xl bg-[#026498] text-white font-black shadow-lg shadow-blue-900/10 hover:shadow-xl hover:-translate-y-0.5 transition-all"
+                            >
+                                {loading ? 'Guardando...' : 'Agregar Sobreturno'}
+                            </Button>
+                        </div>
+                    )}
                 </form>
             </div>
         </div>
