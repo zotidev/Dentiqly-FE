@@ -18,11 +18,8 @@ interface DashboardStats {
   totalProfesionales: number
   totalServicios: number
   turnosPorEstado: Record<string, number>
-  totalServicios: number
-  turnosPorEstado: Record<string, number>
   turnosRecientes: Turno[]
   turnosPorProf: Record<string, number>
-  appointmentTrend: { fecha: string; count: number }[]
   appointmentTrend: { fecha: string; count: number }[]
 }
 
@@ -33,11 +30,8 @@ export const Dashboard: React.FC<{ onNavigateToCalendar?: () => void }> = ({ onN
     totalProfesionales: 0,
     totalServicios: 0,
     turnosPorEstado: {},
-    totalServicios: 0,
-    turnosPorEstado: {},
     turnosRecientes: [],
     turnosPorProf: {},
-    appointmentTrend: [],
     appointmentTrend: []
   })
   const [loading, setLoading] = useState(true)
