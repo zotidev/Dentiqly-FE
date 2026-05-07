@@ -21,6 +21,7 @@ import {
   File,
   Camera,
   Bell,
+  Calendar,
 } from "lucide-react"
 import { pacientesApi, obrasSocialesApi } from "../../api"
 import { apiClient } from "../../lib/api-client"
@@ -32,8 +33,9 @@ import { TreatmentPlansSection } from "./TreatmentPlansSection"
 import { FilesSection } from "./FilesSection"
 import { CuentaCorrienteSection } from "./CuentaCorrienteSection"
 import { RemindersSection } from "./RemindersSection"
+import { TurnosSection } from "./TurnosSection"
 
-type TabType = "info" | "historia" | "odontograma" | "prescripciones" | "tratamientos" | "archivos" | "cuenta_corriente" | "recordatorios"
+type TabType = "info" | "historia" | "odontograma" | "prescripciones" | "tratamientos" | "archivos" | "cuenta_corriente" | "recordatorios" | "turnos"
 
 export const PatientsView: React.FC = () => {
   const [patients, setPatients] = useState<Paciente[]>([])
@@ -184,6 +186,7 @@ export const PatientsView: React.FC = () => {
     { id: "archivos" as TabType, label: "Archivos", icon: File },
     { id: "cuenta_corriente" as TabType, label: "Cuenta Corriente", icon: File },
     { id: "recordatorios" as TabType, label: "Recordatorios", icon: Bell },
+    { id: "turnos" as TabType, label: "Turnos", icon: Calendar },
   ]
 
   return (
@@ -563,6 +566,7 @@ export const PatientsView: React.FC = () => {
                     {activeTab === "cuenta_corriente" && <CuentaCorrienteSection pacienteId={selectedPatient.id} />}
 
                     {activeTab === "recordatorios" && <RemindersSection pacienteId={selectedPatient.id} />}
+                    {activeTab === "turnos" && <TurnosSection pacienteId={selectedPatient.id} />}
                   </div>
                 ) : (
                   <form onSubmit={handleSubmit} className="p-6 space-y-6">
