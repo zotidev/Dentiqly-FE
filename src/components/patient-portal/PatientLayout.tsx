@@ -62,7 +62,7 @@ export const PatientLayout: React.FC = () => {
       >
         <div className="p-6 border-b" style={{ borderColor: dentalColors.gray200 }}>
           <h1 className="text-xl font-bold" style={{ color: dentalColors.primary }}>
-            ODAF
+            Dentiqly
           </h1>
           <p className="text-sm" style={{ color: dentalColors.gray600 }}>
             Portal del Paciente

@@ -181,7 +181,7 @@ export const Dashboard: React.FC<{ onNavigateToCalendar?: () => void }> = ({ onN
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            Panel de Control - ODAF
+            Panel de Control - Dentiqly
           </h2>
           <p className="text-gray-600">
             Resumen de actividad y métricas del centro odontológico

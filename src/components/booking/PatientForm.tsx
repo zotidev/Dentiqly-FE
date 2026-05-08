@@ -46,7 +46,7 @@ export const PatientForm: React.FC<PatientFormProps> = ({ onPatientData, loading
     fetchObrasSociales()
     
     // Load cached patient data
-    const cached = localStorage.getItem("odaf_patient_data")
+    const cached = localStorage.getItem("dentiqly_patient_data")
     if (cached) {
       try {
         const parsedData = JSON.parse(cached)
@@ -62,7 +62,7 @@ export const PatientForm: React.FC<PatientFormProps> = ({ onPatientData, loading
   useEffect(() => {
     const dataToCache = { ...formData }
     delete dataToCache.observaciones
-    localStorage.setItem("odaf_patient_data", JSON.stringify(dataToCache))
+    localStorage.setItem("dentiqly_patient_data", JSON.stringify(dataToCache))
   }, [formData])
 
   const validateForm = () => {

@@ -63,8 +63,8 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
       <div className="lg:hidden h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 sticky top-0 z-[45]">
         <div className="flex items-center gap-3">
           <img
-            src="/assets/odaf-logo.png"
-            alt="ODAF"
+            src="/assets/dentiqly-logo.png"
+            alt="Dentiqly"
             className="h-8 w-auto"
           />
           <span className="text-lg font-black text-[#026498] tracking-tight">Admin</span>
@@ -86,14 +86,14 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
         <div className={`flex items-center justify-between h-16 border-b border-[${dentalColors.gray200}] ${isCollapsed ? 'lg:px-4' : 'px-6'}`}>
           <div className="flex items-center overflow-hidden">
             <img
-              src="/assets/odaf-logo.png"
-              alt="ODAF"
+              src="/assets/dentiqly-logo.png"
+              alt="Dentiqly"
               className={`h-8 w-auto transition-all ${isCollapsed ? 'lg:opacity-0 lg:scale-0 lg:w-0' : 'opacity-100 scale-100'}`}
             />
             {isCollapsed && (
                <img
-               src="/assets/odaf-logo.png"
-               alt="ODAF"
+               src="/assets/dentiqly-logo.png"
+               alt="Dentiqly"
                className="h-8 w-8 object-contain hidden lg:block"
              />
             )}

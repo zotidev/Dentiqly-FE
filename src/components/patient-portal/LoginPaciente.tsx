@@ -40,7 +40,7 @@ export const LoginPaciente: React.FC = () => {
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold" style={{ color: dentalColors.primary }}>
-            Mi Portal ODAF
+            Mi Portal Dentiqly
           </h1>
           <p className="mt-2" style={{ color: dentalColors.gray600 }}>
             Gestioná tus turnos y datos de salud
