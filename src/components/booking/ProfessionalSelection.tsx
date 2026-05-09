@@ -10,16 +10,17 @@ interface ProfessionalSelectionProps {
   selectedService: Servicio | null
   selectedProfessional: Profesional | null
   onProfessionalSelect: (professional: Profesional) => void
+  isAdmin?: boolean
 }
 
 export const ProfessionalSelection: React.FC<ProfessionalSelectionProps> = ({
   selectedService,
   selectedProfessional,
   onProfessionalSelect,
+  isAdmin = false
 }) => {
   const [professionals, setProfessionals] = useState<Profesional[]>([])
   const [loading, setLoading] = useState(true)
-
   useEffect(() => {
     const fetchProfessionals = async () => {
       setLoading(true)
@@ -37,13 +38,28 @@ export const ProfessionalSelection: React.FC<ProfessionalSelectionProps> = ({
       }
     }
 
+    const fetchAllProfessionals = async () => {
+      setLoading(true)
+      try {
+        const { profesionalesApi } = await import("../../api/profesionales")
+        const response = await profesionalesApi.listar({ estado: "Activo", limit: 100 })
+        setProfessionals(response.data)
+      } catch (error) {
+        console.error("Error fetching all professionals:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
     if (selectedService) {
       fetchProfessionals()
+    } else if (isAdmin) {
+      fetchAllProfessionals()
     } else {
       setProfessionals([])
       setLoading(false)
     }
-  }, [selectedService])
+  }, [selectedService, isAdmin])
 
   if (loading) {
     return (
@@ -113,6 +129,17 @@ export const ProfessionalSelection: React.FC<ProfessionalSelectionProps> = ({
           )
         })}
       </div>
+      {professionals.length === 0 && !loading && (
+        <div className="text-center py-12 bg-gray-50 rounded-[2.5rem] border-2 border-dashed border-gray-100">
+          <User className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+          <h4 className="text-lg font-black text-gray-900 mb-2">No se encontraron profesionales</h4>
+          <p className="text-sm text-gray-500 max-w-md mx-auto">
+            {selectedService 
+              ? "Este servicio no tiene profesionales asignados. Por favor, asigne profesionales al servicio desde la sección de Configuración."
+              : "No hay profesionales activos disponibles."}
+          </p>
+        </div>
+      )}
     </div>
   )
 }

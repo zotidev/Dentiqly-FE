@@ -51,7 +51,7 @@ export const Dashboard: React.FC<{ onNavigateToCalendar?: () => void }> = ({ onN
             fecha_desde: desde.toISOString().split('T')[0],
             fecha_hasta: hasta.toISOString().split('T')[0]
           }),
-          profesionalesApi.listar({ estado: 'Activo' }),
+          profesionalesApi.listar({ estado: 'Activo', limit: 100 }),
           serviciosApi.listar()
         ])
 

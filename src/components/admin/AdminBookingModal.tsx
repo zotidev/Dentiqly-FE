@@ -120,28 +120,38 @@ export const AdminBookingModal: React.FC<AdminBookingModalProps> = ({ onClose, o
   ]
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4 sm:p-6">
-      <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4 sm:p-6" onClick={onClose}>
+      <div 
+        className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
-        <div className="px-8 py-6 border-b border-gray-100 flex justify-between items-center bg-white sticky top-0 z-10">
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-full bg-blue-50 text-[#026498] flex items-center justify-center font-black text-lg">
-              {step}
-            </div>
-            <div>
-              <h3 className="text-xl font-black text-[#026498] tracking-tight">
-                {step === 1 && "Seleccionar Servicio"}
-                {step === 2 && "Seleccionar Profesional"}
-                {step === 3 && "Seleccionar Fecha y Hora"}
-                {step === 4 && "Datos del Paciente"}
-              </h3>
-              <p className="text-sm text-gray-400 font-medium">Paso {step} de 4</p>
+        <div className="relative flex-1 overflow-hidden flex flex-col">
+          {/* Header */}
+          <div className="px-8 py-6 border-b border-gray-100 flex justify-between items-center bg-white sticky top-0 z-10">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-full bg-blue-50 text-[#026498] flex items-center justify-center font-black text-lg">
+                {step}
+              </div>
+              <div>
+                <h3 className="text-xl font-black text-[#026498] tracking-tight">
+                  {step === 1 && "Seleccionar Servicio"}
+                  {step === 2 && "Seleccionar Profesional"}
+                  {step === 3 && "Seleccionar Fecha y Hora"}
+                  {step === 4 && "Datos del Paciente"}
+                </h3>
+                <p className="text-sm text-gray-400 font-medium">Paso {step} de 4</p>
+              </div>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-400">
+          
+          <button 
+            type="button"
+            onClick={onClose} 
+            className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-400 hover:text-gray-600 z-20"
+          >
             <X size={24} />
           </button>
-        </div>
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-8">
@@ -200,6 +210,7 @@ export const AdminBookingModal: React.FC<AdminBookingModalProps> = ({ onClose, o
                   selectedService={selectedService}
                   onProfessionalSelect={handleProfessionalSelect}
                   selectedProfessional={selectedProfessional}
+                  isAdmin={true}
                 />
               )}
               {step === 3 && selectedProfessional && (
@@ -352,7 +363,8 @@ export const AdminBookingModal: React.FC<AdminBookingModalProps> = ({ onClose, o
             )}
           </div>
         )}
+          </div>
+        </div>
       </div>
-    </div>
   )
 }

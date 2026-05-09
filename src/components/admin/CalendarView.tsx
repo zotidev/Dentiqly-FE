@@ -94,7 +94,7 @@ export const CalendarView: React.FC = () => {
 
   const fetchProfessionals = async () => {
     try {
-      const response = await profesionalesApi.listar({ estado: 'Activo' })
+      const response = await profesionalesApi.listar({ estado: 'Activo', limit: 100 })
       setProfessionals(response.data)
     } catch (error) {
       console.error('Error fetching professionals:', error)

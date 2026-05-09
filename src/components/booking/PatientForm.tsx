@@ -30,7 +30,21 @@ export const PatientForm: React.FC<PatientFormProps> = ({ onPatientData, loading
     contacto_emergencia: "",
     telefono_emergencia: "",
     observaciones: "",
+    obra_social_nombre_custom: "",
   })
+
+  const COMMON_OBRAS_SOCIALES = [
+    "Particular",
+    "OSDE",
+    "Swiss Medical",
+    "Galeno",
+    "Medicus",
+    "Sancor Salud",
+    "IOMA",
+    "PAMI",
+    "Omint",
+    "Prevención Salud"
+  ];
 
   const [errors, setErrors] = useState<Partial<Record<keyof CrearPacienteData, string>>>({})
 
@@ -87,6 +101,30 @@ export const PatientForm: React.FC<PatientFormProps> = ({ onPatientData, loading
   const handleChange = (field: keyof CrearPacienteData, value: string | number | undefined) => {
     setFormData(prev => ({ ...prev, [field]: value }))
     if (errors[field]) setErrors(prev => ({ ...prev, [field]: undefined }))
+  }
+
+  const handleObraSocialChange = (value: string) => {
+    if (value === "OTRO") {
+      setFormData(prev => ({ 
+        ...prev, 
+        obra_social_id: undefined, 
+        obra_social_nombre_custom: "" 
+      }))
+    } else if (value.startsWith("ID:")) {
+      const id = Number(value.replace("ID:", ""))
+      setFormData(prev => ({ 
+        ...prev, 
+        obra_social_id: id, 
+        obra_social_nombre_custom: undefined 
+      }))
+    } else {
+      // Common one selected
+      setFormData(prev => ({ 
+        ...prev, 
+        obra_social_id: undefined, 
+        obra_social_nombre_custom: value 
+      }))
+    }
   }
 
   return (
@@ -211,22 +249,60 @@ export const PatientForm: React.FC<PatientFormProps> = ({ onPatientData, loading
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <Select
               label="Obra Social"
-              value={formData.obra_social_id?.toString() || ""}
-              onChange={(e) => handleChange("obra_social_id", e.target.value ? Number(e.target.value) : undefined)}
+              value={
+                formData.obra_social_id 
+                  ? `ID:${formData.obra_social_id}` 
+                  : (formData.obra_social_nombre_custom === "" || formData.obra_social_nombre_custom === undefined)
+                    ? "" 
+                    : COMMON_OBRAS_SOCIALES.includes(formData.obra_social_nombre_custom || "")
+                      ? formData.obra_social_nombre_custom
+                      : "OTRO"
+              }
+              onChange={(e) => handleObraSocialChange(e.target.value)}
               options={[
                 { value: "", label: "Seleccione una opción" },
-                ...obrasSociales.map((os) => ({ value: os.id.toString(), label: os.nombre }))
+                ...obrasSociales.map((os) => ({ value: `ID:${os.id}`, label: os.nombre })),
+                ...COMMON_OBRAS_SOCIALES.filter(name => !obrasSociales.some(os => os.nombre === name)).map(name => ({ value: name, label: name })),
+                { value: "OTRO", label: "Otra (especificar)" }
               ]}
               className="rounded-xl border-gray-100 bg-gray-50/30 h-12"
             />
-            <Input
-              label="Número de Afiliado"
-              value={formData.numero_afiliado || ""}
-              onChange={(e) => handleChange("numero_afiliado", e.target.value)}
-              placeholder="0000000000"
-              className="rounded-xl border-gray-100 bg-gray-50/30 h-12"
-            />
+            
+            {/* Si es una obra social común o de la DB, mostramos el número de afiliado al lado */}
+            {(formData.obra_social_id || (formData.obra_social_nombre_custom && COMMON_OBRAS_SOCIALES.includes(formData.obra_social_nombre_custom))) ? (
+              <Input
+                label="Número de Afiliado"
+                value={formData.numero_afiliado || ""}
+                onChange={(e) => handleChange("numero_afiliado", e.target.value)}
+                placeholder="0000000000"
+                className="rounded-xl border-gray-100 bg-gray-50/30 h-12"
+              />
+            ) : formData.obra_social_nombre_custom !== undefined && (
+              /* Si es "OTRO" o el campo custom está vacío (pero no es undefined), mostramos el campo para escribir el nombre */
+              <div className="animate-in fade-in zoom-in duration-300">
+                <Input
+                  label="Especifique Obra Social *"
+                  value={formData.obra_social_nombre_custom || ""}
+                  onChange={(e) => handleChange("obra_social_nombre_custom", e.target.value)}
+                  placeholder="Nombre de su obra social"
+                  className="rounded-xl border-gray-100 bg-gray-50/30 h-12"
+                />
+              </div>
+            )}
           </div>
+
+          {/* Si se mostró el campo de "Especifique", el número de afiliado va abajo */}
+          {(!formData.obra_social_id && formData.obra_social_nombre_custom !== undefined && !COMMON_OBRAS_SOCIALES.includes(formData.obra_social_nombre_custom || "") && formData.obra_social_nombre_custom !== undefined) && (
+            <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+              <Input
+                label="Número de Afiliado"
+                value={formData.numero_afiliado || ""}
+                onChange={(e) => handleChange("numero_afiliado", e.target.value)}
+                placeholder="0000000000"
+                className="rounded-xl border-gray-100 bg-gray-50/30 h-12"
+              />
+            </div>
+          )}
         </div>
 
         {/* Sección 3: Emergencia y Otros */}

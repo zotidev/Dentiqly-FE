@@ -1,8 +1,12 @@
 import { AppRouter } from './components/AppRouter'
+import { Toaster } from './components/ui/toaster'
 
 function App() {
   return (
-    <AppRouter />
+    <>
+      <AppRouter />
+      <Toaster />
+    </>
   )
 }
 

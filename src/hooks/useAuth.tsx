@@ -1,0 +1,66 @@
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { authApi } from '../api/auth';
+import { apiClient } from '../lib/api-client';
+import type { AuthUser, LoginData, SaasRegisterData } from '../types';
+
+interface AuthContextType {
+  user: AuthUser | null;
+  loading: boolean;
+  login: (data: LoginData) => Promise<void>;
+  register: (data: SaasRegisterData) => Promise<void>;
+  logout: () => void;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const initAuth = async () => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          const userData = await authApi.me();
+          setUser(userData);
+        } catch (error) {
+          console.error('Failed to restore session:', error);
+          apiClient.clearToken();
+        }
+      }
+      setLoading(false);
+    };
+
+    initAuth();
+  }, []);
+
+  const login = async (data: LoginData) => {
+    const response = await authApi.login(data);
+    setUser(response.user);
+  };
+
+  const register = async (data: SaasRegisterData) => {
+    const response = await authApi.register(data);
+    setUser(response.user);
+  };
+
+  const logout = () => {
+    authApi.logout();
+    setUser(null);
+  };
+
+  return (
+    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};

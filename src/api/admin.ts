@@ -27,26 +27,26 @@ export const adminApi = {
       return apiClient.post<Profesional>("/profesionales", data)
     },
 
-    async actualizar(id: number, data: Partial<CrearProfesionalData>): Promise<Profesional> {
+    async actualizar(id: string | number, data: Partial<CrearProfesionalData>): Promise<Profesional> {
       return apiClient.put<Profesional>(`/profesionales/${id}`, data)
     },
 
-    async eliminar(id: number): Promise<{ message: string }> {
+    async eliminar(id: string | number): Promise<{ message: string }> {
       return apiClient.delete<{ message: string }>(`/profesionales/${id}`)
     },
 
-    async obtenerServicios(id: number): Promise<{ servicios: Servicio[] }> {
+    async obtenerServicios(id: string | number): Promise<{ servicios: Servicio[] }> {
       return apiClient.get<{ servicios: Servicio[] }>(`/profesionales/${id}/servicios`)
     },
 
-    async asignarServicios(id: number, data: AsignarServicioData): Promise<{ message: string; servicios: Servicio[] }> {
+    async asignarServicios(id: string | number, data: AsignarServicioData): Promise<{ message: string; servicios: Servicio[] }> {
       return apiClient.post<{ message: string; servicios: Servicio[] }>(`/profesionales/${id}/servicios`, data)
     },
 
-    async removerServicio(id: number, servicioId: number): Promise<{ message: string }> {
+    async removerServicio(id: string | number, servicioId: string | number): Promise<{ message: string }> {
       return apiClient.delete<{ message: string }>(`/profesionales/${id}/servicios/${servicioId}`)
     },
-    async subirFoto(id: number, file: File): Promise<{ foto_url: string }> {
+    async subirFoto(id: string | number, file: File): Promise<{ foto_url: string }> {
       const formData = new FormData()
       formData.append("foto", file)
       return apiClient.post<{ foto_url: string }>(`/profesionales/${id}/foto`, formData)
@@ -82,15 +82,15 @@ export const adminApi = {
       return apiClient.post<Servicio>("/servicios", data)
     },
 
-    async actualizar(id: number, data: Partial<CrearServicioData>): Promise<Servicio> {
+    async actualizar(id: string | number, data: Partial<CrearServicioData>): Promise<Servicio> {
       return apiClient.put<Servicio>(`/servicios/${id}`, data)
     },
 
-    async eliminar(id: number): Promise<{ message: string }> {
+    async eliminar(id: string | number): Promise<{ message: string }> {
       return apiClient.delete<{ message: string }>(`/servicios/${id}`)
     },
 
-    async obtenerSubservicios(id: number): Promise<PaginatedResponse<SubServicio>> {
+    async obtenerSubservicios(id: string | number): Promise<PaginatedResponse<SubServicio>> {
       const response = await apiClient.get<{ subservicios: SubServicio[]; pagination: any }>(
         `/servicios/${id}/subservicios`,
       )
@@ -100,7 +100,7 @@ export const adminApi = {
       }
     },
 
-    async obtenerProfesionales(id: number): Promise<{ profesionales: Profesional[] }> {
+    async obtenerProfesionales(id: string | number): Promise<{ profesionales: Profesional[] }> {
       return apiClient.get<{ profesionales: Profesional[] }>(`/servicios/${id}/profesionales`)
     },
   },
@@ -111,11 +111,11 @@ export const adminApi = {
       return apiClient.post<SubServicio>("/servicios/subservicios", data)
     },
 
-    async actualizar(id: number, data: Partial<CrearSubServicioData>): Promise<SubServicio> {
+    async actualizar(id: string | number, data: Partial<CrearSubServicioData>): Promise<SubServicio> {
       return apiClient.put<SubServicio>(`/servicios/subservicios/${id}`, data)
     },
 
-    async eliminar(id: number): Promise<{ message: string }> {
+    async eliminar(id: string | number): Promise<{ message: string }> {
       return apiClient.delete<{ message: string }>(`/servicios/subservicios/${id}`)
     },
   },

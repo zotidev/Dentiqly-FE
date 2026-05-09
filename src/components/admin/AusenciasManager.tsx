@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CalendarOff, Plus, Trash2, User } from 'lucide-react';
+import { CalendarOff, Plus, Trash2, User, X } from 'lucide-react';
 import { ausenciasApi, Ausencia } from '../../api/ausencias';
 import { profesionalesApi } from '../../api/profesionales';
 import type { Profesional } from '../../types';
@@ -178,10 +178,11 @@ export const AusenciasManager: React.FC = () => {
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-2xl font-black text-gray-900">Registrar Ausencia</h3>
               <button 
+                type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-400 hover:text-gray-600"
               >
-                ✕
+                <X size={24} />
               </button>
             </div>
 

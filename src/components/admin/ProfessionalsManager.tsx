@@ -9,6 +9,7 @@ import { Plus, Search, Edit, Trash2, User, Mail, Phone, Award, Award as IdCard, 
 import { adminApi } from "../../api/admin"
 import { ScheduleManager } from "../schedule/ScheduleManager"
 import { ServiceAssignment } from "./ServiceAssignment"
+import { ConfirmationModal } from "../ui/ConfirmationModal"
 import type { Profesional, CrearProfesionalData, HorariosSemanales, Servicio } from "../../types"
 
 type ViewMode = 'list' | 'schedule' | 'services'
@@ -23,6 +24,10 @@ export const ProfessionalsManager: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("")
   const [uploading, setUploading] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState<{ isOpen: boolean; id: string | number | null }>({
+    isOpen: false,
+    id: null
+  })
 
   const [formData, setFormData] = useState<CrearProfesionalData>({
     apellido: "",
@@ -106,14 +111,20 @@ export const ProfessionalsManager: React.FC = () => {
     setShowForm(true)
   }
 
-  const handleDelete = async (id: number) => {
-    if (confirm("¿Estás seguro de que quieres eliminar este profesional?")) {
-      try {
-        await adminApi.profesionales.eliminar(id)
-        fetchProfessionals()
-      } catch (error) {
-        console.error("Error deleting professional:", error)
-      }
+  const handleDeleteClick = (e: React.MouseEvent, id: string | number) => {
+    e.stopPropagation()
+    setConfirmDelete({ isOpen: true, id })
+  }
+
+  const handleConfirmDelete = async () => {
+    if (!confirmDelete.id) return
+
+    try {
+      await adminApi.profesionales.eliminar(confirmDelete.id)
+      fetchProfessionals()
+    } catch (error) {
+      console.error("Error deleting professional:", error)
+      alert("Error al eliminar el profesional")
     }
   }
 
@@ -386,7 +397,7 @@ export const ProfessionalsManager: React.FC = () => {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleDelete(professional.id)}
+                          onClick={(e) => handleDeleteClick(e, professional.id)}
                           className="text-red-600 hover:text-red-700"
                         >
                           <Trash2 className="h-4 w-4" />
@@ -405,10 +416,17 @@ export const ProfessionalsManager: React.FC = () => {
       {showForm && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="px-6 py-4 border-b border-border bg-white sticky top-0 z-10">
+            <div className="px-6 py-4 border-b border-border bg-white sticky top-0 z-10 flex justify-between items-center">
               <h3 className="text-lg font-semibold text-foreground">
                 {editingProfessional ? "Editar Profesional" : "Nuevo Profesional"}
               </h3>
+              <button
+                type="button"
+                onClick={resetForm}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
             </div>
 
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
@@ -576,6 +594,14 @@ export const ProfessionalsManager: React.FC = () => {
           </div>
         </div>
       )}
+
+      <ConfirmationModal
+        isOpen={confirmDelete.isOpen}
+        onClose={() => setConfirmDelete({ isOpen: false, id: null })}
+        onConfirm={handleConfirmDelete}
+        title="Eliminar Profesional"
+        message="¿Estás seguro de que deseas eliminar este profesional? Esta acción no se puede deshacer y afectará a los turnos asignados."
+      />
     </div>
   )
 }

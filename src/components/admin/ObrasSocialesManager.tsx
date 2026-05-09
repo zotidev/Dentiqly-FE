@@ -11,6 +11,7 @@ import {
   Check,
 } from 'lucide-react'
 import { obrasSocialesApi } from '../../api/obras-sociales'
+import { ConfirmationModal } from '../ui/ConfirmationModal'
 import type { ObraSocial } from '../../types'
 
 export const ObrasSocialesManager: React.FC = () => {
@@ -21,6 +22,10 @@ export const ObrasSocialesManager: React.FC = () => {
   const [editingId, setEditingId] = useState<number | null>(null)
   const [formData, setFormData] = useState({ nombre: '', plan: '' })
   const [saving, setSaving] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState<{ isOpen: boolean; id: number | null }>({
+    isOpen: false,
+    id: null
+  })
 
   useEffect(() => {
     fetchObrasSociales()
@@ -50,15 +55,20 @@ export const ObrasSocialesManager: React.FC = () => {
     setShowModal(true)
   }
 
-  const handleDelete = async (id: number) => {
-    if (window.confirm('¿Estás seguro de eliminar esta obra social? Los pacientes asociados perderán esta asignación.')) {
-      try {
-        await obrasSocialesApi.eliminar(id)
-        fetchObrasSociales()
-      } catch (error) {
-        console.error('Error deleting obra social:', error)
-        alert('Error al eliminar la obra social. Puede que tenga pacientes asociados.')
-      }
+  const handleDeleteClick = (e: React.MouseEvent, id: number) => {
+    e.stopPropagation()
+    setConfirmDelete({ isOpen: true, id })
+  }
+
+  const handleConfirmDelete = async () => {
+    if (!confirmDelete.id) return
+
+    try {
+      await obrasSocialesApi.eliminar(confirmDelete.id)
+      fetchObrasSociales()
+    } catch (error) {
+      console.error('Error deleting obra social:', error)
+      alert('Error al eliminar la obra social. Puede que tenga pacientes asociados.')
     }
   }
 
@@ -177,7 +187,7 @@ export const ObrasSocialesManager: React.FC = () => {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleDelete(os.id)}
+                        onClick={(e) => handleDeleteClick(e, os.id)}
                         className="text-red-600 border-red-200 hover:bg-red-50"
                       >
                         <Trash2 className="h-4 w-4" />
@@ -250,6 +260,14 @@ export const ObrasSocialesManager: React.FC = () => {
           </div>
         </div>
       )}
+
+      <ConfirmationModal
+        isOpen={confirmDelete.isOpen}
+        onClose={() => setConfirmDelete({ isOpen: false, id: null })}
+        onConfirm={handleConfirmDelete}
+        title="Eliminar Obra Social"
+        message="¿Estás seguro de eliminar esta obra social? Los pacientes asociados perderán esta asignación. Esta acción no se puede deshacer."
+      />
     </div>
   )
 }

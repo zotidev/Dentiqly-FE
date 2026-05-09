@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Button } from '../ui/Button'
 import { Input } from '../ui/Input'
-import { Plus, UserPlus, Search } from 'lucide-react'
+import { Plus, UserPlus, Search, X } from 'lucide-react'
 import { PatientForm } from '../booking/PatientForm'
 import { turnosApi, profesionalesApi, pacientesApi, serviciosApi } from '../../api'
 import type { Profesional, Paciente, Servicio } from '../../types'
@@ -155,10 +155,11 @@ export const AdminAppointmentModal: React.FC<AdminAppointmentModalProps> = ({ on
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-all duration-500">
             <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-8 my-8 relative animate-in fade-in zoom-in-95 duration-300">
                 <button 
+                    type="button"
                     onClick={onClose}
-                    className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+                    className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-400 hover:text-gray-600"
                 >
-                    <Plus className="w-6 h-6 rotate-45" />
+                    <X className="w-6 h-6" />
                 </button>
 
                 <h3 className="text-2xl font-black mb-6 text-[#026498] flex items-center tracking-tight">

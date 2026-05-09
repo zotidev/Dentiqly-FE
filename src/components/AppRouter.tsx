@@ -1,18 +1,40 @@
 import React from 'react'
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { dentalColors } from '../config/colors'
+import { useAuth } from '../hooks/useAuth'
 
-// Import both apps
+// Import components
 import { BookingForm } from './booking/BookingForm'
 import { AdminApp } from './admin/AdminApp'
 import { PatientApp } from './patient-portal/PatientApp'
 import { LandingPage } from './landing/LandingPage'
+import { LoginPage } from './auth/LoginPage'
+import { RegisterPage } from './auth/RegisterPage'
+
+// Protected Route Component
+const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user, loading } = useAuth()
+  const location = useLocation()
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2563FF]"></div>
+      </div>
+    )
+  }
+
+  if (!user) {
+    return <Navigate to="/login" state={{ from: location }} replace />
+  }
+
+  return <>{children}</>
+}
 
 const BookingLayout: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: dentalColors.gray50 }}>
       <main className="flex-1 py-8">
-        {/* Formulario de reserva */}
         <BookingForm />
       </main>
     </div>
@@ -23,8 +45,20 @@ export const AppRouter: React.FC = () => {
   return (
     <Routes>
       <Route path="/" element={<LandingPage />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
       <Route path="/reserva" element={<BookingLayout />} />
-      <Route path="/admin/*" element={<AdminApp />} />
+      
+      {/* Admin Protected Routes */}
+      <Route 
+        path="/admin/*" 
+        element={
+          <ProtectedRoute>
+            <AdminApp />
+          </ProtectedRoute>
+        } 
+      />
+      
       <Route path="/paciente/*" element={<PatientApp />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

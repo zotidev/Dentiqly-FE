@@ -5,32 +5,32 @@ export const authApi = {
   async login(data: LoginData): Promise<AuthResponse> {
     const response = await apiClient.post<ApiResponse<AuthResponse>>("/auth/login", data)
 
-    if (response.data?.token) {
-      apiClient.setToken(response.data.token)
-      return response.data
+    // El backend devuelve { token, user, ... } directamente o envuelto en data?
+    // Según authController.js devuelve directamente el objeto. 
+    // Pero el apiClient.post espera ApiResponse<T> y devuelve response.data (T).
+    
+    if (response.token) {
+      apiClient.setToken(response.token)
+      return response
     }
 
-    throw new Error("Invalid login response")
+    throw new Error("Respuesta de login inválida")
   },
 
-  async register(data: RegisterData): Promise<AuthResponse> {
-    const response = await apiClient.post<ApiResponse<AuthResponse>>("/auth/register", data)
+  async register(data: SaasRegisterData): Promise<AuthResponse> {
+    const response = await apiClient.post<AuthResponse>("/saas/register", data)
 
-    if (response.data) {
-      return response.data
+    if (response.token) {
+      apiClient.setToken(response.token)
+      return response
     }
 
-    throw new Error("Invalid register response")
+    throw new Error("Error en el registro SaaS")
   },
 
   async me(): Promise<AuthUser> {
-    const response = await apiClient.get<ApiResponse<AuthUser>>("/auth/me")
-
-    if (response.data) {
-      return response.data
-    }
-
-    throw new Error("Invalid user data response")
+    const response = await apiClient.get<AuthUser>("/auth/me")
+    return response
   },
 
   logout() {

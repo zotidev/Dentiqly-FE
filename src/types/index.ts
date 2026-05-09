@@ -16,15 +16,23 @@ export interface PaginatedResponse<T> {
 
 // Auth types
 export interface AuthUser {
-  id: number
+  id: string // UUID
   email: string
   nombre: string
   role?: string
+  clinicaId?: string // UUID del tenant
 }
 
 export interface AuthResponse {
   token: string
   user: AuthUser
+  message?: string
+  tenant?: {
+    id: string
+    nombre: string
+    slug: string
+    subscription_status: string
+  }
 }
 
 export interface LoginData {
@@ -36,6 +44,13 @@ export interface RegisterData {
   email: string
   password: string
   nombre: string
+}
+
+export interface SaasRegisterData {
+  nombre_clinica: string
+  nombre_admin: string
+  email_admin: string
+  password: string
 }
 
 // Paciente types
@@ -62,6 +77,7 @@ export interface Paciente {
   numero_facturacion?: string
   etiquetas?: string[]
   informacion_adicional?: string
+  obra_social_nombre_custom?: string
   createdAt: string
   updatedAt: string
 
@@ -94,6 +110,7 @@ export interface CrearPacienteData {
   contacto_emergencia?: string
   telefono_emergencia?: string
   observaciones?: string
+  obra_social_nombre_custom?: string
 }
 
 // Profesional types

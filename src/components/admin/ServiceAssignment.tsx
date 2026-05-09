@@ -177,16 +177,27 @@ export const ServiceAssignment: React.FC<ServiceAssignmentProps> = ({ profession
 
       {/* Modal para agregar servicios */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-background rounded-xl shadow-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
-            <div className="px-6 py-4 border-b border-border">
-              <h3 className="text-lg font-semibold text-foreground">Asignar Servicios</h3>
-              <p className="text-sm text-muted-foreground mt-1">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setShowAddModal(false)}>
+          <div 
+            className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[85vh] overflow-hidden flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="px-8 py-6 border-b border-gray-100 bg-white">
+              <h3 className="text-xl font-black text-[#026498] tracking-tight">Asignar Servicios</h3>
+              <p className="text-sm text-gray-400 font-medium mt-1">
                 Selecciona los servicios que este profesional puede atender
               </p>
             </div>
+            
+            <button 
+              type="button"
+              onClick={() => setShowAddModal(false)}
+              className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-400 hover:text-gray-600 z-20"
+            >
+              <X size={24} />
+            </button>
 
-            <div className="p-6">
+            <div className="flex-1 overflow-y-auto p-8">
               {availableServices.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <AlertCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
@@ -223,7 +234,7 @@ export const ServiceAssignment: React.FC<ServiceAssignmentProps> = ({ profession
               )}
             </div>
 
-            <div className="px-6 py-4 border-t border-border flex justify-end space-x-3">
+            <div className="px-8 py-6 border-t border-gray-100 flex justify-end space-x-3 bg-gray-50/50">
               <Button
                 variant="outline"
                 onClick={() => {

@@ -24,10 +24,10 @@ export const LandingPage: React.FC = () => {
             </div>
 
             <div className="hidden md:flex items-center space-x-4">
-              <a href="/login" className="text-sm font-medium text-gray-600 hover:text-[#2563FF] transition-colors">Ingresar</a>
-              <button className="bg-[#2563FF] text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-[#1D4ED8] transition-all shadow-md hover:shadow-lg">
-                Agendar demo
-              </button>
+              <Link to="/login" className="text-sm font-medium text-gray-600 hover:text-[#2563FF] transition-colors">Ingresar</Link>
+              <Link to="/register" className="bg-[#2563FF] text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-[#1D4ED8] transition-all shadow-md hover:shadow-lg">
+                Probar gratis
+              </Link>
             </div>
 
             <button className="md:hidden" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
@@ -65,9 +65,9 @@ export const LandingPage: React.FC = () => {
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4 mb-10">
-                <button className="bg-[#2563FF] text-white px-8 py-4 rounded-xl text-base font-semibold hover:bg-[#1D4ED8] transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2">
-                  Agendar una demo
-                </button>
+                <Link to="/register" className="bg-[#2563FF] text-white px-8 py-4 rounded-xl text-base font-semibold hover:bg-[#1D4ED8] transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2">
+                  Comenzar prueba gratuita
+                </Link>
                 <button className="bg-white text-[#2563FF] border border-[#E5E7EB] px-8 py-4 rounded-xl text-base font-semibold hover:bg-gray-50 transition-all flex items-center justify-center gap-2">
                   <PlayCircle className="h-5 w-5" />
                   Ver cómo funciona
@@ -265,9 +265,9 @@ export const LandingPage: React.FC = () => {
                   </li>
                 ))}
               </ul>
-              <button className="w-full bg-[#2563FF] text-white px-6 py-4 rounded-xl text-base font-bold hover:bg-[#1D4ED8] transition-all shadow-md flex justify-center items-center gap-2">
+              <Link to="/register" className="w-full bg-[#2563FF] text-white px-6 py-4 rounded-xl text-base font-bold hover:bg-[#1D4ED8] transition-all shadow-md flex justify-center items-center gap-2">
                 Comenzar ahora <ArrowRight className="h-5 w-5" />
-              </button>
+              </Link>
             </div>
           </div>
         </div>
@@ -315,9 +315,9 @@ export const LandingPage: React.FC = () => {
             <p className="text-blue-100 mb-8 max-w-2xl mx-auto text-lg">
               Comenzá hoy mismo y descubrí cómo Dentiqly puede ayudarte a crecer y organizar tu clínica.
             </p>
-            <button className="bg-white text-[#2563FF] px-8 py-4 rounded-xl text-base font-bold hover:bg-blue-50 transition-all shadow-lg flex items-center justify-center gap-2 mx-auto">
-              Agendar demo gratuita <ArrowRight className="h-5 w-5" />
-            </button>
+            <Link to="/register" className="bg-white text-[#2563FF] px-8 py-4 rounded-xl text-base font-bold hover:bg-blue-50 transition-all shadow-lg flex items-center justify-center gap-2 mx-auto">
+              Probar gratis ahora <ArrowRight className="h-5 w-5" />
+            </Link>
           </div>
         </div>
       </div>

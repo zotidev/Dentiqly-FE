@@ -25,6 +25,7 @@ import {
 } from "lucide-react"
 import { pacientesApi, obrasSocialesApi } from "../../api"
 import { apiClient } from "../../lib/api-client"
+import { ConfirmationModal } from "../ui/ConfirmationModal"
 import type { Paciente, CrearPacienteData, ObraSocial } from "../../types"
 import { ClinicalHistorySection } from "./ClinicalHistorySection"
 import { OdontogramSection } from "./OdontogramSection"
@@ -36,6 +37,22 @@ import { RemindersSection } from "./RemindersSection"
 import { TurnosSection } from "./TurnosSection"
 
 type TabType = "info" | "historia" | "odontograma" | "prescripciones" | "tratamientos" | "archivos" | "cuenta_corriente" | "recordatorios" | "turnos"
+
+const COMMON_OBRAS_SOCIALES = [
+  "Particular",
+  "OSDE",
+  "Swiss Medical",
+  "Galeno",
+  "Medicus",
+  "Sancor Salud",
+  "IOMA",
+  "PAMI",
+  "Omint",
+  "Prevención Salud",
+  "OSECAC",
+  "Union Personal",
+  "Accord Salud"
+];
 
 export const PatientsView: React.FC = () => {
   const [patients, setPatients] = useState<Paciente[]>([])
@@ -50,6 +67,10 @@ export const PatientsView: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>("info")
   const [obrasSociales, setObrasSociales] = useState<ObraSocial[]>([])
   const [uploadingPhoto, setUploadingPhoto] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState<{ isOpen: boolean; id: string | null }>({
+    isOpen: false,
+    id: null
+  })
 
   const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api"
 
@@ -111,14 +132,19 @@ export const PatientsView: React.FC = () => {
     setShowModal(true)
   }
 
-  const handleDeletePatient = async (id: string) => {
-    if (window.confirm("¿Estás seguro de eliminar este paciente?")) {
-      try {
-        await pacientesApi.eliminar(id)
-        fetchPatients()
-      } catch (error) {
-        console.error("Error deleting patient:", error)
-      }
+  const handleDeletePatientClick = (id: string) => {
+    setConfirmDelete({ isOpen: true, id })
+  }
+
+  const handleConfirmDeletePatient = async () => {
+    if (!confirmDelete.id) return
+
+    try {
+      await pacientesApi.eliminar(confirmDelete.id)
+      fetchPatients()
+    } catch (error) {
+      console.error("Error deleting patient:", error)
+      alert("Error al eliminar el paciente")
     }
   }
 
@@ -298,7 +324,7 @@ export const PatientsView: React.FC = () => {
                         size="sm"
                         onClick={(e) => {
                           e.stopPropagation()
-                          handleDeletePatient(patient.id)
+                          handleDeletePatientClick(patient.id)
                         }}
                       >
                         <Trash2 className="h-4 w-4" />
@@ -513,7 +539,9 @@ export const PatientsView: React.FC = () => {
                             </div>
                             <div>
                               <p className="text-xs text-gray-500">Obra Social</p>
-                              <p className="font-medium">{selectedPatient.obraSocial?.nombre || "Sin obra social"}</p>
+                              <p className="font-medium">
+                                {selectedPatient.obra_social_nombre_custom || selectedPatient.obraSocial?.nombre || "Sin obra social"}
+                              </p>
                             </div>
                             <div>
                               <p className="text-xs text-gray-500">Nº de Afiliado</p>
@@ -688,18 +716,57 @@ export const PatientsView: React.FC = () => {
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Obra Social</label>
                         <select
-                          value={formData.obra_social_id || ""}
-                          onChange={(e) => setFormData({ ...formData, obra_social_id: Number(e.target.value) || undefined })}
+                          value={
+                            formData.obra_social_id 
+                              ? `ID:${formData.obra_social_id}` 
+                              : (formData.obra_social_nombre_custom === "" || formData.obra_social_nombre_custom === undefined)
+                                ? "" 
+                                : COMMON_OBRAS_SOCIALES.includes(formData.obra_social_nombre_custom || "")
+                                  ? formData.obra_social_nombre_custom
+                                  : "OTRO"
+                          }
+                          onChange={(val) => {
+                            const value = val.target.value;
+                            if (value === "") {
+                              setFormData({ ...formData, obra_social_id: undefined, obra_social_nombre_custom: "" });
+                            } else if (value === "OTRO") {
+                              setFormData({ ...formData, obra_social_id: undefined, obra_social_nombre_custom: "OTRO_CUSTOM" });
+                            } else if (value.startsWith("ID:")) {
+                              const id = parseInt(value.split(":")[1]);
+                              setFormData({ ...formData, obra_social_id: id, obra_social_nombre_custom: "" });
+                            } else {
+                              // Es una de las comunes
+                              setFormData({ ...formData, obra_social_id: undefined, obra_social_nombre_custom: value });
+                            }
+                          }}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                         >
-                          <option value="">Ninguna</option>
-                          {obrasSociales.map((os) => (
-                            <option key={os.id} value={os.id}>
+                          <option value="">Seleccionar</option>
+                          {COMMON_OBRAS_SOCIALES.map(name => (
+                            <option key={name} value={name}>{name}</option>
+                          ))}
+                          {obrasSociales.filter(os => !COMMON_OBRAS_SOCIALES.includes(os.nombre)).map((os) => (
+                            <option key={os.id} value={`ID:${os.id}`}>
                               {os.nombre}
                             </option>
                           ))}
+                          <option value="OTRO">Otra (especificar)</option>
                         </select>
                       </div>
+
+                      {(formData.obra_social_nombre_custom === "OTRO_CUSTOM" || 
+                        (formData.obra_social_nombre_custom && !COMMON_OBRAS_SOCIALES.includes(formData.obra_social_nombre_custom) && !formData.obra_social_id)) && (
+                        <div className="animate-in fade-in zoom-in duration-300">
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Nombre de Obra Social</label>
+                          <input
+                            type="text"
+                            value={formData.obra_social_nombre_custom === "OTRO_CUSTOM" ? "" : formData.obra_social_nombre_custom}
+                            onChange={(e) => setFormData({ ...formData, obra_social_nombre_custom: e.target.value })}
+                            placeholder="Escribe el nombre aquí..."
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                          />
+                        </div>
+                      )}
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Nº de Afiliado</label>
                         <input
@@ -780,6 +847,14 @@ export const PatientsView: React.FC = () => {
           </div>
         )
       }
+
+      <ConfirmationModal
+        isOpen={confirmDelete.isOpen}
+        onClose={() => setConfirmDelete({ isOpen: false, id: null })}
+        onConfirm={handleConfirmDeletePatient}
+        title="Eliminar Paciente"
+        message="¿Estás seguro de que deseas eliminar este paciente? Se eliminará toda su historia clínica, odontogramas y archivos asociados. Esta acción no se puede deshacer."
+      />
     </div >
   )
 }

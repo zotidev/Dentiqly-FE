@@ -3,8 +3,9 @@ import { Card } from '../ui/Card'
 import { Button } from '../ui/Button'
 import { Input } from '../ui/Input'
 import { dentalColors } from '../../config/colors'
-import { Plus, Search, Edit, Trash2, Briefcase, Clock, DollarSign, Tag } from 'lucide-react'
+import { Plus, Search, Edit, Trash2, Briefcase, Clock, DollarSign, Tag, X } from 'lucide-react'
 import { adminApi } from '../../api/admin'
+import { ConfirmationModal } from '../ui/ConfirmationModal'
 import type { Servicio, CrearServicioData } from '../../types'
 
 export const ServicesManager: React.FC = () => {
@@ -13,6 +14,10 @@ export const ServicesManager: React.FC = () => {
   const [showForm, setShowForm] = useState(false)
   const [editingService, setEditingService] = useState<Servicio | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
+  const [confirmDelete, setConfirmDelete] = useState<{ isOpen: boolean; id: string | number | null }>({
+    isOpen: false,
+    id: null
+  })
 
   const [formData, setFormData] = useState<CrearServicioData>({
     nombre: '',
@@ -108,14 +113,20 @@ export const ServicesManager: React.FC = () => {
     setShowForm(true)
   }
 
-  const handleDelete = async (id: number) => {
-    if (confirm('¿Estás seguro de que quieres eliminar este servicio?')) {
-      try {
-        await adminApi.servicios.eliminar(id)
-        fetchServices()
-      } catch (error) {
-        console.error('Error deleting service:', error)
-      }
+  const handleDeleteClick = (e: React.MouseEvent, id: string | number) => {
+    e.stopPropagation()
+    setConfirmDelete({ isOpen: true, id })
+  }
+
+  const handleConfirmDelete = async () => {
+    if (!confirmDelete.id) return
+
+    try {
+      await adminApi.servicios.eliminar(confirmDelete.id)
+      fetchServices()
+    } catch (error) {
+      console.error('Error deleting service:', error)
+      alert('Error al eliminar el servicio')
     }
   }
 
@@ -202,14 +213,14 @@ export const ServicesManager: React.FC = () => {
                   >
                     <Edit className="h-4 w-4" />
                   </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleDelete(service.id)}
-                    className="text-red-600 hover:text-red-700"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={(e) => handleDeleteClick(e, service.id)}
+                      className="text-red-600 hover:text-red-700"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                 </div>
               </div>
 
@@ -259,10 +270,17 @@ export const ServicesManager: React.FC = () => {
       {showForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className={`px-6 py-4 border-b border-[${dentalColors.gray200}]`}>
+            <div className={`px-6 py-4 border-b border-[${dentalColors.gray200}] flex justify-between items-center bg-white sticky top-0 z-10`}>
               <h3 className={`text-lg font-semibold text-[${dentalColors.gray900}]`}>
                 {editingService ? 'Editar Servicio' : 'Nuevo Servicio'}
               </h3>
+              <button
+                type="button"
+                onClick={resetForm}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
             </div>
             
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
@@ -350,6 +368,14 @@ export const ServicesManager: React.FC = () => {
           </div>
         </div>
       )}
+
+      <ConfirmationModal
+        isOpen={confirmDelete.isOpen}
+        onClose={() => setConfirmDelete({ isOpen: false, id: null })}
+        onConfirm={handleConfirmDelete}
+        title="Eliminar Servicio"
+        message="¿Estás seguro de que deseas eliminar este servicio? Esta acción no se puede deshacer."
+      />
     </div>
   )
 }
