@@ -1,7 +1,8 @@
-import React from 'react'
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import React, { useEffect } from 'react'
+import { Routes, Route, Navigate, useLocation, useParams } from 'react-router-dom'
 import { dentalColors } from '../config/colors'
 import { useAuth } from '../hooks/useAuth'
+import { apiClient } from '../lib/api-client'
 
 // Import components
 import { BookingForm } from './booking/BookingForm'
@@ -31,6 +32,36 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   return <>{children}</>
 }
 
+/**
+ * BookingLayout con slug del tenant.
+ * Setea el tenantSlug en el apiClient para que todas las llamadas
+ * del wizard de booking vayan a /api/public/:slug/
+ */
+const BookingWithSlug: React.FC = () => {
+  const { slug } = useParams<{ slug: string }>()
+
+  useEffect(() => {
+    if (slug) {
+      apiClient.setTenantSlug(slug)
+    }
+    return () => {
+      apiClient.setTenantSlug(null)
+    }
+  }, [slug])
+
+  if (!slug) {
+    return <Navigate to="/" replace />
+  }
+
+  return (
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: dentalColors.gray50 }}>
+      <main className="flex-1 py-8">
+        <BookingForm />
+      </main>
+    </div>
+  )
+}
+
 const BookingLayout: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: dentalColors.gray50 }}>
@@ -47,6 +78,11 @@ export const AppRouter: React.FC = () => {
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+      
+      {/* Booking público por slug de clínica */}
+      <Route path="/booking/:slug" element={<BookingWithSlug />} />
+      
+      {/* Legacy booking sin slug */}
       <Route path="/reserva" element={<BookingLayout />} />
       
       {/* Admin Protected Routes */}

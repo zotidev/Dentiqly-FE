@@ -2,6 +2,7 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api"
 export class ApiClient {
   private baseUrl: string
   private token: string | null = null
+  private tenantSlug: string | null = null
 
   constructor(baseUrl: string = API_BASE_URL) {
     this.baseUrl = baseUrl
@@ -24,6 +25,23 @@ export class ApiClient {
     }
   }
 
+  setTenantSlug(slug: string | null) {
+    this.tenantSlug = slug
+  }
+
+  /**
+   * Resuelve la URL final. Si hay un tenantSlug seteado y NO hay token (ruta pública),
+   * reescribe la URL para usar /api/public/:slug/ en lugar de /api/.
+   */
+  private resolveUrl(endpoint: string): string {
+    if (this.tenantSlug && !this.token) {
+      // Rewrite: /api/servicios -> /api/public/mi-clinica/servicios
+      const base = this.baseUrl.replace(/\/api$/, '')
+      return `${base}/api/public/${this.tenantSlug}${endpoint}`
+    }
+    return `${this.baseUrl}${endpoint}`
+  }
+
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const headers: HeadersInit = {
       ...options.headers,
@@ -38,7 +56,14 @@ export class ApiClient {
       headers["Authorization"] = `Bearer ${this.token}`
     }
 
-    const response = await fetch(`${this.baseUrl}${endpoint}`, {
+    // Si tenemos slug pero también token (caso raro), enviar como header extra
+    if (this.tenantSlug) {
+      headers["x-tenant-slug"] = this.tenantSlug
+    }
+
+    const url = this.resolveUrl(endpoint)
+
+    const response = await fetch(url, {
       ...options,
       headers,
     })
@@ -61,7 +86,7 @@ export class ApiClient {
     return this.request<T>(endpoint, { method: "GET" })
   }
 
-  async post<T>(endpoint: string, data: any, options: Partial<RequestInit> = {}): Promise<T> {
+  async post<T>(endpoint: string, data?: any, options: Partial<RequestInit> = {}): Promise<T> {
     return this.request<T>(endpoint, {
       ...options,
       method: "POST",
@@ -97,7 +122,9 @@ export class ApiClient {
       headers["Authorization"] = `Bearer ${this.token}`
     }
 
-    const response = await fetch(`${this.baseUrl}${endpoint}`, {
+    const url = this.resolveUrl(endpoint)
+
+    const response = await fetch(url, {
       method: "POST",
       headers,
       body: formData,
@@ -113,3 +140,4 @@ export class ApiClient {
 }
 
 export const apiClient = new ApiClient()
+

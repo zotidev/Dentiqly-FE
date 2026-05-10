@@ -61,7 +61,7 @@ export const RegisterPage: React.FC = () => {
           
           <div className="space-y-6 mb-12">
             {[
-              '14 días de prueba gratuita sin compromiso',
+              'Activación en minutos tras suscripción',
               'Setup automático de servicios y configuración',
               'Migración simple de datos',
               'Soporte prioritario durante el onboarding'

@@ -7,7 +7,10 @@ import {
   Briefcase,
   TrendingUp,
   Activity,
-  CheckCircle2
+  CheckCircle2,
+  ExternalLink,
+  Copy,
+  Check
 } from 'lucide-react'
 import { turnosApi, profesionalesApi, serviciosApi } from '../../api'
 import type { Turno } from '../../types'
@@ -23,7 +26,19 @@ interface DashboardStats {
   appointmentTrend: { fecha: string; count: number }[]
 }
 
-export const Dashboard: React.FC<{ onNavigateToCalendar?: () => void }> = ({ onNavigateToCalendar }) => {
+export const Dashboard: React.FC<{ 
+  onNavigateToCalendar?: () => void,
+  slug?: string
+}> = ({ onNavigateToCalendar, slug }) => {
+  const [copied, setCopied] = useState(false)
+  const bookingUrl = slug ? `${window.location.origin}/booking/${slug}` : ''
+
+  const handleCopyLink = () => {
+    if (!bookingUrl) return
+    navigator.clipboard.writeText(bookingUrl)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
   const [stats, setStats] = useState<DashboardStats>({
     totalTurnos: 0,
     turnosHoy: 0,
@@ -197,6 +212,56 @@ export const Dashboard: React.FC<{ onNavigateToCalendar?: () => void }> = ({ onN
           </button>
         </div>
       </div>
+      
+      {/* Booking Link Card */}
+      {slug && (
+        <Card className="p-6 bg-gradient-to-r from-blue-600 to-indigo-700 text-white overflow-hidden relative">
+          <div className="absolute top-0 right-0 p-8 opacity-10">
+            <ExternalLink className="h-24 w-24" />
+          </div>
+          <div className="relative z-10">
+            <h3 className="text-lg font-bold mb-2 flex items-center gap-2">
+              <ExternalLink className="h-5 w-5" />
+              Tu Link de Reservas para Pacientes
+            </h3>
+            <p className="text-blue-100 text-sm mb-4 max-w-2xl">
+              Compartí este link por WhatsApp, Instagram o Facebook para que tus pacientes puedan agendar sus propios turnos de forma automática.
+            </p>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl px-4 py-3 font-mono text-sm flex-1 truncate">
+                {bookingUrl}
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleCopyLink}
+                  className="flex items-center justify-center gap-2 px-6 py-3 bg-white text-blue-700 font-bold rounded-xl hover:bg-blue-50 transition-all shadow-lg active:scale-95"
+                >
+                  {copied ? (
+                    <>
+                      <Check className="h-4 w-4" />
+                      Copiado!
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="h-4 w-4" />
+                      Copiar Link
+                    </>
+                  )}
+                </button>
+                <a
+                  href={bookingUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center p-3 bg-blue-500 text-white border border-blue-400 rounded-xl hover:bg-blue-400 transition-all"
+                  title="Ver página de reservas"
+                >
+                  <ExternalLink className="h-5 w-5" />
+                </a>
+              </div>
+            </div>
+          </div>
+        </Card>
+      )}
 
 
       {/* Stats cards */}
