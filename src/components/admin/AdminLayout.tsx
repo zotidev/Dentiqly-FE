@@ -83,20 +83,13 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
       } lg:translate-x-0 ${isCollapsed ? 'lg:w-20' : 'lg:w-64'} w-72 lg:static lg:inset-0 flex flex-col`}>
 
         {/* Header del sidebar */}
-        <div className={`flex items-center justify-between h-16 border-b border-[${dentalColors.gray200}] ${isCollapsed ? 'lg:px-4' : 'px-6'}`}>
-          <div className="flex items-center overflow-hidden">
+        <div className={`flex items-center h-16 border-b border-[${dentalColors.gray200}] ${isCollapsed ? 'lg:justify-center lg:px-4 justify-between px-6' : 'justify-between px-6'}`}>
+          <div className={`flex items-center overflow-hidden transition-all duration-300 ${isCollapsed ? 'lg:w-0 lg:opacity-0' : 'w-auto opacity-100'}`}>
             <img
               src="/assets/dentiqly-logo.png"
               alt="Dentiqly"
-              className={`h-8 w-auto transition-all ${isCollapsed ? 'lg:opacity-0 lg:scale-0 lg:w-0' : 'opacity-100 scale-100'}`}
+              className="h-8 w-auto"
             />
-            {isCollapsed && (
-               <img
-               src="/assets/dentiqly-logo.png"
-               alt="Dentiqly"
-               className="h-8 w-8 object-contain hidden lg:block"
-             />
-            )}
           </div>
           <div className="flex items-center gap-1">
             <button
