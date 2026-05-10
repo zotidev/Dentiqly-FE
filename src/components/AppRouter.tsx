@@ -11,6 +11,7 @@ import { PatientApp } from './patient-portal/PatientApp'
 import { LandingPage } from './landing/LandingPage'
 import { LoginPage } from './auth/LoginPage'
 import { RegisterPage } from './auth/RegisterPage'
+import { SuperAdminApp } from './superadmin/SuperAdminApp'
 
 // Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -85,9 +86,19 @@ export const AppRouter: React.FC = () => {
       {/* Legacy booking sin slug */}
       <Route path="/reserva" element={<BookingLayout />} />
       
-      {/* Admin Protected Routes */}
+      {/* Super Admin Protected Routes */}
       <Route 
         path="/admin/*" 
+        element={
+          <ProtectedRoute>
+            <SuperAdminApp />
+          </ProtectedRoute>
+        } 
+      />
+
+      {/* Tenant Admin Protected Routes */}
+      <Route 
+        path="/:slug/admin/*" 
         element={
           <ProtectedRoute>
             <AdminApp />

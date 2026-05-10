@@ -67,14 +67,17 @@ const DebtorsReport = () => {
     }, [deudores, currentPage, itemsPerPage]);
 
     return (
-        <div className="space-y-6 p-6">
-            <div className="flex justify-between items-center">
-                <h1 className="text-3xl font-bold tracking-tight text-gray-900">Reporte de deudores</h1>
+        <div className="bg-[#f0f2f5] min-h-screen p-4 sm:p-8 rounded-3xl font-sans space-y-6">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+                <div>
+                  <h1 className="text-3xl font-bold text-gray-900">Reporte de Deudores</h1>
+                  <p className="text-gray-500 mt-1">Control de pacientes con saldo pendiente</p>
+                </div>
             </div>
 
             <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
                 <span>Estas viendo:</span>
-                <Badge variant="secondary" className="rounded-full px-4 font-normal">
+                <Badge variant="secondary" className="rounded-full px-4 font-normal bg-white border border-gray-200">
                     Deudores históricos
                 </Badge>
             </div>

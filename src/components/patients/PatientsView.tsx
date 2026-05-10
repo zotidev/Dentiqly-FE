@@ -2,7 +2,6 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { Card } from "../ui/Card"
 import { Button } from "../ui/Button"
 import {
   Search,
@@ -11,48 +10,17 @@ import {
   Trash2,
   User,
   Phone,
-  FileText,
   X,
   ChevronLeft,
   ChevronRight,
-  ClipboardList,
-  Pill,
-  Smile,
-  File,
   Camera,
-  Bell,
   Calendar,
 } from "lucide-react"
 import { pacientesApi, obrasSocialesApi } from "../../api"
 import { apiClient } from "../../lib/api-client"
 import { ConfirmationModal } from "../ui/ConfirmationModal"
 import type { Paciente, CrearPacienteData, ObraSocial } from "../../types"
-import { ClinicalHistorySection } from "./ClinicalHistorySection"
-import { OdontogramSection } from "./OdontogramSection"
-import { PrescriptionsSection } from "./PrescriptionsSection"
-import { TreatmentPlansSection } from "./TreatmentPlansSection"
-import { FilesSection } from "./FilesSection"
-import { CuentaCorrienteSection } from "./CuentaCorrienteSection"
-import { RemindersSection } from "./RemindersSection"
-import { TurnosSection } from "./TurnosSection"
-
-type TabType = "info" | "historia" | "odontograma" | "prescripciones" | "tratamientos" | "archivos" | "cuenta_corriente" | "recordatorios" | "turnos"
-
-const COMMON_OBRAS_SOCIALES = [
-  "Particular",
-  "OSDE",
-  "Swiss Medical",
-  "Galeno",
-  "Medicus",
-  "Sancor Salud",
-  "IOMA",
-  "PAMI",
-  "Omint",
-  "Prevención Salud",
-  "OSECAC",
-  "Union Personal",
-  "Accord Salud"
-];
+import { PatientDetailView } from "./PatientDetailView"
 
 export const PatientsView: React.FC = () => {
   const [patients, setPatients] = useState<Paciente[]>([])
@@ -64,9 +32,9 @@ export const PatientsView: React.FC = () => {
   const [showModal, setShowModal] = useState(false)
   const [modalMode, setModalMode] = useState<"view" | "create" | "edit">("view")
   const [formData, setFormData] = useState<Partial<CrearPacienteData>>({})
-  const [activeTab, setActiveTab] = useState<TabType>("info")
   const [obrasSociales, setObrasSociales] = useState<ObraSocial[]>([])
   const [uploadingPhoto, setUploadingPhoto] = useState(false)
+  const [viewMode, setViewMode] = useState<"list" | "detail">("list")
   const [confirmDelete, setConfirmDelete] = useState<{ isOpen: boolean; id: string | null }>({
     isOpen: false,
     id: null
@@ -93,10 +61,9 @@ export const PatientsView: React.FC = () => {
       setLoading(true)
       const response = await pacientesApi.listar({
         page: currentPage,
-        limit: 10,
+        limit: 12,
         search: searchTerm || undefined,
       })
-      // La respuesta tiene la estructura { data: [...], pagination: {...} }
       setPatients(response?.data || [])
       setTotalPages(response?.pagination?.totalPages || 1)
     } catch (error) {
@@ -121,15 +88,12 @@ export const PatientsView: React.FC = () => {
     setSelectedPatient(patient)
     setFormData(patient)
     setModalMode("edit")
-    setActiveTab("info")
     setShowModal(true)
   }
 
   const handleViewPatient = (patient: Paciente) => {
     setSelectedPatient(patient)
-    setModalMode("view")
-    setActiveTab("info")
-    setShowModal(true)
+    setViewMode("detail")
   }
 
   const handleDeletePatientClick = (id: string) => {
@@ -142,6 +106,7 @@ export const PatientsView: React.FC = () => {
     try {
       await pacientesApi.eliminar(confirmDelete.id)
       fetchPatients()
+      setConfirmDelete({ isOpen: false, id: null })
     } catch (error) {
       console.error("Error deleting patient:", error)
       alert("Error al eliminar el paciente")
@@ -196,665 +161,314 @@ export const PatientsView: React.FC = () => {
 
   const getPhotoUrl = (patient: Paciente) => {
     if (!patient.foto_url) return null
-    // If it's an absolute URL (Cloudinary, etc.), use as-is
     if (patient.foto_url.startsWith("http")) return patient.foto_url
-    // Otherwise, prepend the API base URL (remove /api suffix)
     const baseUrl = API_BASE_URL.replace(/\/api$/, "")
     return `${baseUrl}/${patient.foto_url.replace(/^src\//, "")}`
   }
 
-  const tabs = [
-    { id: "info" as TabType, label: "Información", icon: User },
-    { id: "historia" as TabType, label: "Historia Clínica", icon: FileText },
-    { id: "odontograma" as TabType, label: "Odontograma", icon: Smile },
-    { id: "prescripciones" as TabType, label: "Prescripciones", icon: Pill },
-    { id: "tratamientos" as TabType, label: "Tratamientos", icon: ClipboardList },
-    { id: "archivos" as TabType, label: "Archivos", icon: File },
-    { id: "cuenta_corriente" as TabType, label: "Cuenta Corriente", icon: File },
-    { id: "recordatorios" as TabType, label: "Recordatorios", icon: Bell },
-    { id: "turnos" as TabType, label: "Turnos", icon: Calendar },
-  ]
+  if (viewMode === "detail" && selectedPatient) {
+    return (
+      <PatientDetailView
+        patient={selectedPatient}
+        onBack={() => setViewMode("list")}
+        onEdit={(p) => {
+          setSelectedPatient(p)
+          setFormData(p)
+          setModalMode("edit")
+          setShowModal(true)
+        }}
+        onPhotoUpload={handlePhotoUpload}
+        uploadingPhoto={uploadingPhoto}
+        getPhotoUrl={getPhotoUrl}
+      />
+    )
+  }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 animate-in fade-in duration-500">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Gestión de Pacientes</h2>
-          <p className="text-gray-600">Gestiona la información de tus pacientes</p>
+          <h2 className="text-3xl font-black text-[#0A0F2D] tracking-tight">Pacientes</h2>
+          <p className="text-gray-500 font-medium">Gestiona tu base de pacientes con un diseño moderno y eficiente</p>
         </div>
-        <Button onClick={handleCreatePatient}>
-          <Plus className="h-4 w-4 mr-2" />
-          Nuevo Paciente
+        <Button 
+          onClick={handleCreatePatient}
+          className="bg-[#2563FF] hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-2xl shadow-lg shadow-blue-500/20 transition-all hover:scale-105"
+        >
+          <Plus className="h-5 w-5 mr-2" />
+          Registrar Paciente
         </Button>
       </div>
 
-      {/* Search Bar */}
-      <Card className="p-4">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Buscar por nombre, DNI, teléfono..."
-            value={searchTerm}
-            onChange={(e) => {
-              setSearchTerm(e.target.value)
-              setCurrentPage(1)
-            }}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
+      {/* Bento Controls */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="p-2 col-span-3 shadow-sm rounded-2xl bg-white flex items-center">
+          <div className="relative w-full">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-300" />
+            <input
+              type="text"
+              placeholder="Buscar por nombre, DNI, teléfono..."
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value)
+                setCurrentPage(1)
+              }}
+              className="w-full pl-12 pr-4 py-3 bg-transparent border-none focus:ring-0 text-sm font-medium placeholder:text-gray-300 text-gray-700"
+            />
+          </div>
         </div>
-      </Card>
-
-      {/* Patients Table */}
-      <Card>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Paciente</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Documento</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Contacto</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Edad</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {loading ? (
-                <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
-                    Cargando...
-                  </td>
-                </tr>
-              ) : !patients || patients.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
-                    No se encontraron pacientes
-                  </td>
-                </tr>
-              ) : (
-                patients.map((patient) => (
-                  <tr key={patient.id} className="hover:bg-gray-50 cursor-pointer">
-                    <td className="px-6 py-4" onClick={() => handleViewPatient(patient)}>
-                      <div className="flex items-center">
-                        <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                          <User className="h-5 w-5 text-blue-600" />
-                        </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">
-                            {patient.apellido}, {patient.nombre}
-                          </div>
-                          <div className="text-sm text-gray-500">{patient.sexo}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm text-gray-900">{patient.tipo_documento}</div>
-                      <div className="text-sm text-gray-500">{patient.numero_documento}</div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm text-gray-900">{patient.telefono || "-"}</div>
-                      <div className="text-sm text-gray-500">{patient.email || "-"}</div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm text-gray-900">{calculateAge(patient.fecha_nacimiento)} años</div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span
-                        className={`px-2 py-1 text-xs font-semibold rounded-full ${patient.condicion === "Activo" ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
-                          }`}
-                      >
-                        {patient.condicion}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-right space-x-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleEditPatient(patient)
-                        }}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleDeletePatientClick(patient.id)
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+        <div className="p-2 shadow-sm rounded-2xl bg-[#0A0F2D] text-white flex items-center justify-center min-h-[60px]">
+          <span className="text-xs font-black uppercase tracking-widest text-blue-400 mr-2">Total</span>
+          <span className="text-xl font-black">{patients.length}</span>
         </div>
+      </div>
 
-        {/* Pagination */}
-        {
-          patients && totalPages > 1 && (
-            <div className="px-6 py-4 border-t flex items-center justify-between">
-              <div className="text-sm text-gray-700">
-                Página {currentPage} de {totalPages}
-              </div>
-              <div className="flex space-x-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-                  disabled={currentPage === 1}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
-                  disabled={currentPage === totalPages}
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          )
-        }
-      </Card>
-
-      {/* Modal */}
-      {
-        showModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl shadow-xl max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-              <div className="sticky top-0 bg-white px-6 py-4 border-b flex justify-between items-center">
-                <h3 className="text-lg font-semibold text-gray-900">
-                  {modalMode === "view"
-                    ? `${selectedPatient?.apellido}, ${selectedPatient?.nombre}`
-                    : modalMode === "create"
-                      ? "Nuevo Paciente"
-                      : "Editar Paciente"}
-                </h3>
-                <div className="flex items-center gap-4">
-                  {modalMode === "view" && selectedPatient && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEditPatient(selectedPatient)}
-                      className="hidden sm:flex"
-                    >
-                      <Edit className="h-4 w-4 mr-2" />
-                      Editar Paciente
-                    </Button>
+      {/* Patients Grid */}
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {[...Array(8)].map((_, i) => (
+            <div key={i} className="h-64 bg-gray-200 animate-pulse rounded-3xl" />
+          ))}
+        </div>
+      ) : !patients || patients.length === 0 ? (
+        <div className="bg-white rounded-3xl p-20 text-center border-2 border-dashed border-gray-100">
+          <div className="h-20 w-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
+            <User className="h-10 w-10 text-gray-300" />
+          </div>
+          <h3 className="text-xl font-bold text-gray-900 mb-2">No se encontraron pacientes</h3>
+          <p className="text-gray-500 mb-8 max-w-sm mx-auto">Prueba con otros términos de búsqueda o registra un nuevo paciente ahora mismo.</p>
+          <Button onClick={handleCreatePatient} variant="outline" className="rounded-2xl border-gray-200">
+            Registrar Paciente
+          </Button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {patients.map((patient) => (
+            <div 
+              key={patient.id} 
+              className="group relative overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 rounded-[2rem] bg-white cursor-pointer hover:-translate-y-1 p-6"
+              onClick={() => handleViewPatient(patient)}
+            >
+              <div className="flex items-start justify-between mb-6">
+                <div className="relative">
+                  {getPhotoUrl(patient) ? (
+                    <img
+                      src={getPhotoUrl(patient)!}
+                      alt={`${patient.nombre} ${patient.apellido}`}
+                      className="h-16 w-16 rounded-2xl object-cover border-2 border-gray-50 group-hover:scale-105 transition-transform"
+                    />
+                  ) : (
+                    <div className="h-16 w-16 rounded-2xl bg-blue-50 flex items-center justify-center border-2 border-gray-50 group-hover:bg-blue-100 transition-colors">
+                      <User className="h-8 w-8 text-blue-300 group-hover:text-blue-500" />
+                    </div>
                   )}
-                  <button onClick={() => setShowModal(false)} className="text-gray-500 hover:text-gray-700">
-                    <X className="h-5 w-5" />
+                  <div className={`absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-white ${patient.condicion === 'Activo' ? 'bg-green-500' : 'bg-gray-400'}`} />
+                </div>
+                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); handleEditPatient(patient); }}
+                    className="p-2 hover:bg-gray-50 rounded-xl text-gray-400 hover:text-blue-600 transition-all"
+                  >
+                    <Edit className="h-4 w-4" />
+                  </button>
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); handleDeletePatientClick(patient.id); }}
+                    className="p-2 hover:bg-red-50 rounded-xl text-gray-400 hover:text-red-600 transition-all"
+                  >
+                    <Trash2 className="h-4 w-4" />
                   </button>
                 </div>
               </div>
 
-              {modalMode === "view" && selectedPatient && (
-                <div className="border-b bg-gray-50">
-                  <div className="flex overflow-x-auto">
-                    {tabs.map((tab) => {
-                      const Icon = tab.icon
-                      return (
-                        <button
-                          key={tab.id}
-                          onClick={() => setActiveTab(tab.id)}
-                          className={`flex items-center gap-2 px-6 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${activeTab === tab.id
-                            ? "border-blue-500 text-blue-600 bg-white"
-                            : "border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-                            }`}
-                        >
-                          <Icon className="h-4 w-4" />
-                          {tab.label}
-                        </button>
-                      )
-                    })}
+              <div>
+                <h3 className="font-bold text-gray-900 text-lg leading-tight group-hover:text-[#2563FF] transition-colors truncate">
+                  {patient.apellido}, {patient.nombre}
+                </h3>
+                <p className="text-sm text-gray-400 font-medium mb-4">{patient.tipo_documento}: {patient.numero_documento}</p>
+              </div>
+
+              <div className="space-y-3 pt-4 border-t border-gray-50">
+                <div className="flex items-center text-xs text-gray-500 font-medium">
+                  <Phone className="h-3 w-3 mr-2 text-gray-300" />
+                  {patient.telefono || "Sin teléfono"}
+                </div>
+                <div className="flex items-center text-xs text-gray-500 font-medium">
+                  <Calendar className="h-3 w-3 mr-2 text-gray-300" />
+                  {calculateAge(patient.fecha_nacimiento)} años · {patient.sexo}
+                </div>
+              </div>
+
+              {/* Decorative bento background */}
+              <div className="absolute -bottom-6 -right-6 h-24 w-24 bg-blue-50/50 rounded-full blur-2xl group-hover:bg-blue-100 transition-colors -z-10" />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Pagination */}
+      {patients && totalPages > 1 && (
+        <div className="flex items-center justify-between bg-white p-4 rounded-2xl shadow-sm border border-gray-50 mt-8">
+          <p className="text-sm font-bold text-gray-500">
+            Página <span className="text-[#0A0F2D]">{currentPage}</span> de {totalPages}
+          </p>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+              className="rounded-xl border-gray-100"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+              disabled={currentPage === totalPages}
+              className="rounded-xl border-gray-100"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Modal para Creación/Edición */}
+      {showModal && (
+        <div className="fixed inset-0 bg-[#0A0F2D]/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in zoom-in duration-300">
+          <div className="bg-white rounded-[2.5rem] shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col border border-white/20">
+            <div className="px-8 py-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+              <h3 className="text-xl font-black text-[#0A0F2D] tracking-tight">
+                {modalMode === "create" ? "Registrar Nuevo Paciente" : "Actualizar Información"}
+              </h3>
+              <button onClick={() => setShowModal(false)} className="p-2 hover:bg-white rounded-xl border border-transparent hover:border-gray-200 transition-all text-gray-400 hover:text-gray-900 group">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-8">
+              <form onSubmit={handleSubmit} className="space-y-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Apellido *</label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.apellido || ""}
+                      onChange={(e) => setFormData({ ...formData, apellido: e.target.value })}
+                      className="w-full px-5 py-3 bg-gray-50 border border-transparent focus:bg-white focus:border-blue-500 rounded-2xl outline-none transition-all font-medium"
+                      placeholder="Apellido del paciente"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Nombre *</label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.nombre || ""}
+                      onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+                      className="w-full px-5 py-3 bg-gray-50 border border-transparent focus:bg-white focus:border-blue-500 rounded-2xl outline-none transition-all font-medium"
+                      placeholder="Nombre del paciente"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Tipo de Documento *</label>
+                    <select
+                      required
+                      value={formData.tipo_documento || ""}
+                      onChange={(e) => setFormData({ ...formData, tipo_documento: e.target.value as any })}
+                      className="w-full px-5 py-3 bg-gray-50 border border-transparent focus:bg-white focus:border-blue-500 rounded-2xl outline-none transition-all font-medium appearance-none"
+                    >
+                      <option value="">Seleccionar</option>
+                      <option value="DNI">DNI</option>
+                      <option value="Pasaporte">Pasaporte</option>
+                      <option value="Cédula">Cédula</option>
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Número de Documento *</label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.numero_documento || ""}
+                      onChange={(e) => setFormData({ ...formData, numero_documento: e.target.value })}
+                      className="w-full px-5 py-3 bg-gray-50 border border-transparent focus:bg-white focus:border-blue-500 rounded-2xl outline-none transition-all font-medium"
+                      placeholder="Ej: 35.123.456"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Fecha de Nacimiento *</label>
+                    <input
+                      type="date"
+                      required
+                      value={formData.fecha_nacimiento || ""}
+                      onChange={(e) => setFormData({ ...formData, fecha_nacimiento: e.target.value })}
+                      className="w-full px-5 py-3 bg-gray-50 border border-transparent focus:bg-white focus:border-blue-500 rounded-2xl outline-none transition-all font-medium"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Sexo *</label>
+                    <select
+                      required
+                      value={formData.sexo || ""}
+                      onChange={(e) => setFormData({ ...formData, sexo: e.target.value as any })}
+                      className="w-full px-5 py-3 bg-gray-50 border border-transparent focus:bg-white focus:border-blue-500 rounded-2xl outline-none transition-all font-medium appearance-none"
+                    >
+                      <option value="">Seleccionar</option>
+                      <option value="Masculino">Masculino</option>
+                      <option value="Femenino">Femenino</option>
+                      <option value="Otro">Otro</option>
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Teléfono</label>
+                    <input
+                      type="tel"
+                      value={formData.telefono || ""}
+                      onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
+                      className="w-full px-5 py-3 bg-gray-50 border border-transparent focus:bg-white focus:border-blue-500 rounded-2xl outline-none transition-all font-medium"
+                      placeholder="Ej: +54 9 11 ..."
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Email</label>
+                    <input
+                      type="email"
+                      value={formData.email || ""}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      className="w-full px-5 py-3 bg-gray-50 border border-transparent focus:bg-white focus:border-blue-500 rounded-2xl outline-none transition-all font-medium"
+                      placeholder="paciente@ejemplo.com"
+                    />
                   </div>
                 </div>
-              )}
 
-              <div className="flex-1 overflow-y-auto">
-                {modalMode === "view" && selectedPatient ? (
-                  <div className="p-6">
-                    {activeTab === "info" && (
-                      <div className="space-y-6">
-                        {/* Foto y Nombre */}
-                        <div className="flex items-start gap-6">
-                          <div className="relative group">
-                            {getPhotoUrl(selectedPatient) ? (
-                              <img
-                                src={getPhotoUrl(selectedPatient)!}
-                                alt={`${selectedPatient.nombre} ${selectedPatient.apellido}`}
-                                className="h-24 w-24 rounded-full object-cover border-2 border-gray-200"
-                              />
-                            ) : (
-                              <div className="h-24 w-24 rounded-full bg-blue-100 flex items-center justify-center border-2 border-gray-200">
-                                <User className="h-12 w-12 text-blue-600" />
-                              </div>
-                            )}
-                            <label className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 rounded-full opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity">
-                              <Camera className="h-6 w-6 text-white" />
-                              <input
-                                type="file"
-                                accept="image/*"
-                                className="hidden"
-                                onChange={(e) => handlePhotoUpload(e, selectedPatient.id)}
-                                disabled={uploadingPhoto}
-                              />
-                            </label>
-                            {uploadingPhoto && (
-                              <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full">
-                                <span className="text-white text-xs">Subiendo...</span>
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex-1">
-                            <h3 className="text-xl font-bold text-gray-900">
-                              {selectedPatient.apellido}, {selectedPatient.nombre}
-                            </h3>
-                            <p className="text-sm text-gray-500">{selectedPatient.tipo_documento} {selectedPatient.numero_documento}</p>
-                            <p className="text-sm text-gray-500 mt-1">
-                              {new Date(selectedPatient.fecha_nacimiento).toLocaleDateString("es-ES")} ({calculateAge(selectedPatient.fecha_nacimiento)} años) · {selectedPatient.sexo}
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* Información Personal */}
-                        <div>
-                          <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
-                            <User className="h-4 w-4 mr-2" />
-                            Información Personal
-                          </h4>
-                          <div className="grid grid-cols-2 gap-4">
-                            <div>
-                              <p className="text-xs text-gray-500">Nombre Completo</p>
-                              <p className="font-medium">
-                                {selectedPatient.apellido}, {selectedPatient.nombre}
-                              </p>
-                            </div>
-                            <div>
-                              <p className="text-xs text-gray-500">Documento</p>
-                              <p className="font-medium">
-                                {selectedPatient.tipo_documento} {selectedPatient.numero_documento}
-                              </p>
-                            </div>
-                            <div>
-                              <p className="text-xs text-gray-500">Fecha de Nacimiento</p>
-                              <p className="font-medium">
-                                {new Date(selectedPatient.fecha_nacimiento).toLocaleDateString("es-ES")} (
-                                {calculateAge(selectedPatient.fecha_nacimiento)} años)
-                              </p>
-                            </div>
-                            <div>
-                              <p className="text-xs text-gray-500">Sexo</p>
-                              <p className="font-medium">{selectedPatient.sexo}</p>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Contacto */}
-                        <div>
-                          <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
-                            <Phone className="h-4 w-4 mr-2" />
-                            Contacto
-                          </h4>
-                          <div className="grid grid-cols-2 gap-4">
-                            <div>
-                              <p className="text-xs text-gray-500">Teléfono</p>
-                              <p className="font-medium">{selectedPatient.telefono || "-"}</p>
-                            </div>
-                            <div>
-                              <p className="text-xs text-gray-500">Email</p>
-                              <p className="font-medium">{selectedPatient.email || "-"}</p>
-                            </div>
-                            <div className="col-span-2">
-                              <p className="text-xs text-gray-500">Dirección</p>
-                              <p className="font-medium">{selectedPatient.direccion || "-"}</p>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Información Adicional */}
-                        <div>
-                          <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
-                            <FileText className="h-4 w-4 mr-2" />
-                            Información Adicional
-                          </h4>
-                          <div className="grid grid-cols-2 gap-4">
-                            <div>
-                              <p className="text-xs text-gray-500">Ocupación</p>
-                              <p className="font-medium">{selectedPatient.ocupacion || "-"}</p>
-                            </div>
-                            <div>
-                              <p className="text-xs text-gray-500">Recomendado por</p>
-                              <p className="font-medium">{selectedPatient.recomendado_por || "-"}</p>
-                            </div>
-                            <div>
-                              <p className="text-xs text-gray-500">Obra Social</p>
-                              <p className="font-medium">
-                                {selectedPatient.obra_social_nombre_custom || selectedPatient.obraSocial?.nombre || "Sin obra social"}
-                              </p>
-                            </div>
-                            <div>
-                              <p className="text-xs text-gray-500">Nº de Afiliado</p>
-                              <p className="font-medium">{selectedPatient.numero_afiliado || "-"}</p>
-                            </div>
-                            <div>
-                              <p className="text-xs text-gray-500">Condición</p>
-                              <p className="font-medium">{selectedPatient.condicion}</p>
-                            </div>
-                            <div>
-                              <p className="text-xs text-gray-500">Condición IVA</p>
-                              <p className="font-medium">{selectedPatient.condicion_iva || "-"}</p>
-                            </div>
-                            <div>
-                              <p className="text-xs text-gray-500">Tipo de Facturación</p>
-                              <p className="font-medium">{selectedPatient.tipo_facturacion}</p>
-                            </div>
-                            <div>
-                              <p className="text-xs text-gray-500">Número de Facturación</p>
-                              <p className="font-medium">{selectedPatient.numero_facturacion || "-"}</p>
-                            </div>
-                          </div>
-                          {selectedPatient.informacion_adicional && (
-                            <div className="mt-4">
-                              <p className="text-xs text-gray-500 mb-1">Información Adicional</p>
-                              <p className="text-sm bg-gray-50 p-3 rounded">{selectedPatient.informacion_adicional}</p>
-                            </div>
-                          )}
-
-                          <div className="flex justify-end pt-6 border-t mt-6">
-                            <Button variant="outline" onClick={() => handleEditPatient(selectedPatient)}>
-                              <Edit className="h-4 w-4 mr-2" />
-                              Editar Datos Personales
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {activeTab === "historia" && <ClinicalHistorySection pacienteId={selectedPatient.id} />}
-
-                    {activeTab === "odontograma" && <OdontogramSection pacienteId={selectedPatient.id} />}
-
-                    {activeTab === "prescripciones" && <PrescriptionsSection pacienteId={selectedPatient.id} />}
-
-                    {activeTab === "tratamientos" && <TreatmentPlansSection pacienteId={selectedPatient.id} />}
-
-                    {activeTab === "archivos" && <FilesSection pacienteId={selectedPatient.id} />}
-
-                    {activeTab === "cuenta_corriente" && <CuentaCorrienteSection pacienteId={selectedPatient.id} />}
-
-                    {activeTab === "recordatorios" && <RemindersSection pacienteId={selectedPatient.id} />}
-                    {activeTab === "turnos" && <TurnosSection pacienteId={selectedPatient.id} />}
-                  </div>
-                ) : (
-                  <form onSubmit={handleSubmit} className="p-6 space-y-6">
-                    {/* Formulario de creación/edición */}
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Apellido *</label>
-                        <input
-                          type="text"
-                          required
-                          value={formData.apellido || ""}
-                          onChange={(e) => setFormData({ ...formData, apellido: e.target.value })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
-                        <input
-                          type="text"
-                          required
-                          value={formData.nombre || ""}
-                          onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Documento *</label>
-                        <select
-                          required
-                          value={formData.tipo_documento || ""}
-                          onChange={(e) => setFormData({ ...formData, tipo_documento: e.target.value as any })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                        >
-                          <option value="">Seleccionar</option>
-                          <option value="DNI">DNI</option>
-                          <option value="Pasaporte">Pasaporte</option>
-                          <option value="Cédula">Cédula</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Número de Documento *</label>
-                        <input
-                          type="text"
-                          required
-                          value={formData.numero_documento || ""}
-                          onChange={(e) => setFormData({ ...formData, numero_documento: e.target.value })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Nacimiento *</label>
-                        <input
-                          type="date"
-                          required
-                          value={formData.fecha_nacimiento || ""}
-                          onChange={(e) => setFormData({ ...formData, fecha_nacimiento: e.target.value })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Sexo *</label>
-                        <select
-                          required
-                          value={formData.sexo || ""}
-                          onChange={(e) => setFormData({ ...formData, sexo: e.target.value as any })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                        >
-                          <option value="">Seleccionar</option>
-                          <option value="Masculino">Masculino</option>
-                          <option value="Femenino">Femenino</option>
-                          <option value="Otro">Otro</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
-                        <input
-                          type="tel"
-                          value={formData.telefono || ""}
-                          onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                        <input
-                          type="email"
-                          value={formData.email || ""}
-                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-                      <div className="col-span-2">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
-                        <input
-                          type="text"
-                          value={formData.direccion || ""}
-                          onChange={(e) => setFormData({ ...formData, direccion: e.target.value })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Ocupación</label>
-                        <input
-                          type="text"
-                          value={formData.ocupacion || ""}
-                          onChange={(e) => setFormData({ ...formData, ocupacion: e.target.value })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Recomendado por</label>
-                        <input
-                          type="text"
-                          value={formData.recomendado_por || ""}
-                          onChange={(e) => setFormData({ ...formData, recomendado_por: e.target.value })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Obra Social</label>
-                        <select
-                          value={
-                            formData.obra_social_id 
-                              ? `ID:${formData.obra_social_id}` 
-                              : (formData.obra_social_nombre_custom === "" || formData.obra_social_nombre_custom === undefined)
-                                ? "" 
-                                : COMMON_OBRAS_SOCIALES.includes(formData.obra_social_nombre_custom || "")
-                                  ? formData.obra_social_nombre_custom
-                                  : "OTRO"
-                          }
-                          onChange={(val) => {
-                            const value = val.target.value;
-                            if (value === "") {
-                              setFormData({ ...formData, obra_social_id: undefined, obra_social_nombre_custom: "" });
-                            } else if (value === "OTRO") {
-                              setFormData({ ...formData, obra_social_id: undefined, obra_social_nombre_custom: "OTRO_CUSTOM" });
-                            } else if (value.startsWith("ID:")) {
-                              const id = parseInt(value.split(":")[1]);
-                              setFormData({ ...formData, obra_social_id: id, obra_social_nombre_custom: "" });
-                            } else {
-                              // Es una de las comunes
-                              setFormData({ ...formData, obra_social_id: undefined, obra_social_nombre_custom: value });
-                            }
-                          }}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                        >
-                          <option value="">Seleccionar</option>
-                          {COMMON_OBRAS_SOCIALES.map(name => (
-                            <option key={name} value={name}>{name}</option>
-                          ))}
-                          {obrasSociales.filter(os => !COMMON_OBRAS_SOCIALES.includes(os.nombre)).map((os) => (
-                            <option key={os.id} value={`ID:${os.id}`}>
-                              {os.nombre}
-                            </option>
-                          ))}
-                          <option value="OTRO">Otra (especificar)</option>
-                        </select>
-                      </div>
-
-                      {(formData.obra_social_nombre_custom === "OTRO_CUSTOM" || 
-                        (formData.obra_social_nombre_custom && !COMMON_OBRAS_SOCIALES.includes(formData.obra_social_nombre_custom) && !formData.obra_social_id)) && (
-                        <div className="animate-in fade-in zoom-in duration-300">
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Nombre de Obra Social</label>
-                          <input
-                            type="text"
-                            value={formData.obra_social_nombre_custom === "OTRO_CUSTOM" ? "" : formData.obra_social_nombre_custom}
-                            onChange={(e) => setFormData({ ...formData, obra_social_nombre_custom: e.target.value })}
-                            placeholder="Escribe el nombre aquí..."
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                          />
-                        </div>
-                      )}
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Nº de Afiliado</label>
-                        <input
-                          type="text"
-                          value={formData.numero_afiliado || ""}
-                          onChange={(e) => setFormData({ ...formData, numero_afiliado: e.target.value })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Condición IVA</label>
-                        <select
-                          value={formData.condicion_iva || ""}
-                          onChange={(e) => setFormData({ ...formData, condicion_iva: e.target.value })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                        >
-                          <option value="">Seleccionar</option>
-                          <option value="Consumidor Final">Consumidor Final</option>
-                          <option value="Monotributista">Monotributista</option>
-                          <option value="Responsable Inscripto">Responsable Inscripto</option>
-                          <option value="Exento">Exento</option>
-                          <option value="Gravado">Gravado</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Condición</label>
-                        <select
-                          value={formData.condicion || ""}
-                          onChange={(e) => setFormData({ ...formData, condicion: e.target.value })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                        >
-                          <option value="Activo">Activo</option>
-                          <option value="Inactivo">Inactivo</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Facturación</label>
-                        <select
-                          value={formData.tipo_facturacion || ""}
-                          onChange={(e) => setFormData({ ...formData, tipo_facturacion: e.target.value as any })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                        >
-                          <option value="A">Factura A</option>
-                          <option value="B">Factura B</option>
-                          <option value="C">Factura C</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Número de Facturación</label>
-                        <input
-                          type="text"
-                          value={formData.numero_facturacion || ""}
-                          onChange={(e) => setFormData({ ...formData, numero_facturacion: e.target.value })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-                      <div className="col-span-2">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Información Adicional</label>
-                        <textarea
-                          value={formData.informacion_adicional || ""}
-                          onChange={(e) => setFormData({ ...formData, informacion_adicional: e.target.value })}
-                          rows={3}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="flex justify-end space-x-3 pt-4 border-t">
-                      <Button type="button" variant="outline" onClick={() => setShowModal(false)}>
-                        Cancelar
-                      </Button>
-                      <Button type="submit">{modalMode === "create" ? "Crear Paciente" : "Guardar Cambios"}</Button>
-                    </div>
-                  </form>
-                )}
-              </div>
+                <div className="flex justify-end gap-3 pt-8 border-t border-gray-100">
+                  <Button type="button" variant="outline" onClick={() => setShowModal(false)} className="rounded-2xl px-8 border-gray-200">
+                    Cancelar
+                  </Button>
+                  <Button type="submit" className="bg-[#2563FF] hover:bg-blue-700 text-white font-bold py-3 px-10 rounded-2xl shadow-lg shadow-blue-500/20 transition-all">
+                    {modalMode === "create" ? "Registrar Paciente" : "Guardar Cambios"}
+                  </Button>
+                </div>
+              </form>
             </div>
           </div>
-        )
-      }
+        </div>
+      )}
 
+      {/* Confirmation Modal */}
       <ConfirmationModal
         isOpen={confirmDelete.isOpen}
         onClose={() => setConfirmDelete({ isOpen: false, id: null })}
         onConfirm={handleConfirmDeletePatient}
-        title="Eliminar Paciente"
-        message="¿Estás seguro de que deseas eliminar este paciente? Se eliminará toda su historia clínica, odontogramas y archivos asociados. Esta acción no se puede deshacer."
+        title="¿Eliminar Paciente?"
+        description="Esta acción es irreversible y se eliminará todo el historial médico relacionado."
+        confirmText="Sí, Eliminar"
+        cancelText="No, Mantener"
+        variant="danger"
       />
-    </div >
+    </div>
   )
 }

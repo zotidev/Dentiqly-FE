@@ -23,12 +23,16 @@ export const RegisterPage: React.FC = () => {
     setLoading(true);
 
     try {
-      await register(formData);
+      const response = await register(formData);
       toast({
         title: "¡Bienvenido a Dentiqly!",
         description: "Tu clínica ha sido registrada exitosamente. Ya puedes empezar a trabajar.",
       });
-      navigate('/admin');
+      if (response.tenant?.slug) {
+        navigate(`/${response.tenant.slug}/admin`);
+      } else {
+        navigate('/admin');
+      }
     } catch (error: any) {
       toast({
         title: "Error al registrarse",

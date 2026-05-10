@@ -6,8 +6,8 @@ import type { AuthUser, LoginData, SaasRegisterData } from '../types';
 interface AuthContextType {
   user: AuthUser | null;
   loading: boolean;
-  login: (data: LoginData) => Promise<void>;
-  register: (data: SaasRegisterData) => Promise<void>;
+  login: (data: LoginData) => Promise<any>;
+  register: (data: SaasRegisterData) => Promise<any>;
   logout: () => void;
 }
 
@@ -38,11 +38,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (data: LoginData) => {
     const response = await authApi.login(data);
     setUser(response.user);
+    return response;
   };
 
   const register = async (data: SaasRegisterData) => {
     const response = await authApi.register(data);
     setUser(response.user);
+    return response;
   };
 
   const logout = () => {

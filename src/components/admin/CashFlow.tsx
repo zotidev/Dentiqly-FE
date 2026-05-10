@@ -55,25 +55,21 @@ export default function CashFlow() {
     }, [movimientos, currentPage, itemsPerPage]);
 
     return (
-        <div className="space-y-6">
-            <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold text-gray-800">Flujo de Caja</h2>
-                <div className="flex gap-2">
-                    <Button
-                        onClick={() => handleOpenModal('Ingreso')}
-                        className="bg-green-600 hover:bg-green-700 text-white"
-                    >
-                        <Plus className="w-4 h-4 mr-2" />
+        <div className="bg-[#f0f2f5] min-h-screen p-4 sm:p-8 rounded-3xl font-sans space-y-6">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+                <div>
+                  <h1 className="text-3xl font-bold text-gray-900">Flujo de Caja</h1>
+                  <p className="text-gray-500 mt-1">Gestión de ingresos y egresos de la clínica</p>
+                </div>
+                <div className="flex flex-wrap items-center gap-3">
+                    <button onClick={() => handleOpenModal('Ingreso')} className="flex items-center gap-2 px-6 py-2 bg-green-600 text-white rounded-full font-medium hover:bg-green-700 transition shadow-md shadow-green-500/20">
+                        <Plus className="w-4 h-4" />
                         Registrar Ingreso
-                    </Button>
-                    <Button
-                        onClick={() => handleOpenModal('Egreso')}
-                        variant="outline"
-                        className="border-red-200 text-red-700 hover:bg-red-50"
-                    >
-                        <Minus className="w-4 h-4 mr-2" />
+                    </button>
+                    <button onClick={() => handleOpenModal('Egreso')} className="flex items-center gap-2 px-6 py-2 bg-white border border-red-200 text-red-700 rounded-full font-medium hover:bg-red-50 transition shadow-sm">
+                        <Minus className="w-4 h-4" />
                         Registrar Extracción o Deuda
-                    </Button>
+                    </button>
                 </div>
             </div>
 

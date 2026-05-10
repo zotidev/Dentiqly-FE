@@ -87,19 +87,17 @@ export const AusenciasManager: React.FC = () => {
   if (loading) return <div className="p-8 text-center text-gray-500">Cargando ausencias...</div>;
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="bg-[#f0f2f5] min-h-screen p-4 sm:p-8 rounded-3xl font-sans space-y-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <div>
-          <h2 className="text-2xl font-black text-gray-900 tracking-tight">Ausencias y Vacaciones</h2>
+          <h1 className="text-3xl font-bold text-gray-900">Ausencias y Vacaciones</h1>
           <p className="text-gray-500 mt-1">Gestione los días no laborables de sus profesionales</p>
         </div>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 bg-[#026498] text-white px-6 py-3 rounded-2xl hover:bg-[#0c4a6e] transition-all font-bold shadow-lg shadow-blue-900/10"
-        >
-          <Plus size={20} />
-          <span>Registrar Ausencia</span>
-        </button>
+        <div className="flex flex-wrap items-center gap-3">
+          <button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 px-6 py-2 bg-[#2563FF] text-white rounded-full font-medium hover:bg-blue-700 transition shadow-md shadow-blue-500/20">
+            <Plus className="w-4 h-4" /> Registrar Ausencia
+          </button>
+        </div>
       </div>
 
       {error && (

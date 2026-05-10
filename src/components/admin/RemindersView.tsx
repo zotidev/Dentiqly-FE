@@ -193,33 +193,23 @@ export const RemindersView: React.FC = () => {
   const templateChanged = templateText !== savedTemplate
 
   return (
-    <div className="space-y-6">
+    <div className="bg-[#f0f2f5] min-h-screen p-4 sm:p-8 rounded-3xl font-sans space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <Bell className="h-6 w-6 text-[#026498]" />
+          <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
+            <Bell className="h-8 w-8 text-[#2563FF]" />
             Recordatorios
-          </h2>
-          <p className="text-gray-600">Envía recordatorios de turno a los pacientes por email</p>
+          </h1>
+          <p className="text-gray-500 mt-1">Envía recordatorios de turno a los pacientes por email</p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            onClick={() => handlePreview()}
-            className="border-[#026498] text-[#026498] hover:bg-blue-50"
-          >
-            <Eye className="h-4 w-4 mr-2" />
-            Ver email de ejemplo
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => setShowTemplateEditor(!showTemplateEditor)}
-            className={showTemplateEditor ? 'bg-blue-50 border-[#026498] text-[#026498]' : ''}
-          >
-            <Settings className="h-4 w-4 mr-2" />
-            Configurar mensaje
-          </Button>
+        <div className="flex flex-wrap items-center gap-3">
+          <button onClick={() => handlePreview()} className="flex items-center gap-2 px-6 py-2 bg-white border border-gray-200 text-gray-700 rounded-full font-medium hover:bg-gray-50 transition shadow-sm">
+            <Eye className="w-4 h-4" /> Ver email de ejemplo
+          </button>
+          <button onClick={() => setShowTemplateEditor(!showTemplateEditor)} className={`flex items-center gap-2 px-6 py-2 rounded-full font-medium transition shadow-sm border ${showTemplateEditor ? 'bg-blue-50 border-[#2563FF] text-[#2563FF]' : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'}`}>
+            <Settings className="w-4 h-4" /> Configurar mensaje
+          </button>
         </div>
       </div>
 

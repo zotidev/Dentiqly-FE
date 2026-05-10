@@ -21,12 +21,17 @@ export const LoginPage: React.FC = () => {
     setLoading(true);
 
     try {
-      await login(formData);
+      const response = await login(formData);
       toast({
         title: "¡Bienvenido de nuevo!",
         description: "Sesión iniciada correctamente.",
       });
-      navigate('/admin');
+      // Redirect to /:slug/admin if it's a clinic, otherwise fallback to /admin for superadmin
+      if (response.clinica?.slug) {
+        navigate(`/${response.clinica.slug}/admin`);
+      } else {
+        navigate('/admin');
+      }
     } catch (error: any) {
       toast({
         title: "Error de acceso",

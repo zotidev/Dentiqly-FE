@@ -244,18 +244,19 @@ export const ProfessionalsManager: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="bg-[#f0f2f5] min-h-screen p-4 sm:p-8 rounded-3xl font-sans space-y-6">
       {/* Header con acciones */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <div>
-          <h2 className="text-2xl font-bold text-foreground">Gestión de Profesionales</h2>
-          <p className="text-muted-foreground">Administra los profesionales del centro odontológico</p>
+          <h1 className="text-3xl font-bold text-gray-900">Gestión de Profesionales</h1>
+          <p className="text-gray-500 mt-1">Administra los profesionales del centro odontológico</p>
         </div>
 
-        <Button onClick={() => setShowForm(true)} className="flex items-center">
-          <Plus className="h-4 w-4 mr-2" />
-          Nuevo Profesional
-        </Button>
+        <div className="flex flex-wrap items-center gap-3">
+          <button onClick={() => setShowForm(true)} className="flex items-center gap-2 px-6 py-2 bg-[#2563FF] text-white rounded-full font-medium hover:bg-blue-700 transition shadow-md shadow-blue-500/20">
+            <Plus className="w-4 h-4" /> Nuevo Profesional
+          </button>
+        </div>
       </div>
 
       {/* Filtros */}

@@ -107,16 +107,17 @@ export function LiquidacionesManager() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center bg-white p-4 rounded-lg shadow-sm border">
-        <h2 className="text-2xl font-light text-gray-800">Liquidaciones</h2>
-        <Button
-          onClick={() => setShowCreateDialog(true)}
-          variant="outline"
-          className="uppercase text-xs tracking-wider font-medium"
-        >
-          Nueva Liquidación
-        </Button>
+    <div className="bg-[#f0f2f5] min-h-screen p-4 sm:p-8 rounded-3xl font-sans space-y-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Liquidaciones</h1>
+          <p className="text-gray-500 mt-1">Gestión de liquidaciones a profesionales</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
+          <button onClick={() => setShowCreateDialog(true)} className="flex items-center gap-2 px-6 py-2 bg-[#2563FF] text-white rounded-full font-medium hover:bg-blue-700 transition shadow-md shadow-blue-500/20">
+            Nueva Liquidación
+          </button>
+        </div>
       </div>
 
       <Card>

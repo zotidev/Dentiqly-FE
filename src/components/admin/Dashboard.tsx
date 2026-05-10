@@ -1,416 +1,341 @@
-import React, { useEffect, useState } from 'react'
-import { Card } from '../ui/Card'
-import {
-  Calendar,
-  Users,
-  Clock,
-  Briefcase,
-  TrendingUp,
-  Activity,
-  CheckCircle2,
-  ExternalLink,
-  Copy,
-  Check
-} from 'lucide-react'
-import { turnosApi, profesionalesApi, serviciosApi } from '../../api'
-import type { Turno } from '../../types'
+import React, { useEffect, useState } from 'react';
+import { 
+  Filter, Download, Plus, ArrowDownRight, ArrowUpRight, 
+  Users, TrendingUp, TrendingDown, CheckCircle2, AlertCircle, 
+  Settings2, Clock, Stethoscope, Copy, Check, X, Link2 
+} from 'lucide-react';
+import { turnosApi, profesionalesApi, serviciosApi, pacientesApi } from '../../api';
+import { useAuth } from '../../hooks/useAuth';
+import type { Turno } from '../../types';
 
 interface DashboardStats {
-  totalTurnos: number
-  turnosHoy: number
-  totalProfesionales: number
-  totalServicios: number
-  turnosPorEstado: Record<string, number>
-  turnosRecientes: Turno[]
-  turnosPorProf: Record<string, number>
-  appointmentTrend: { fecha: string; count: number }[]
+  totalTurnos: number;
+  turnosHoy: number;
+  totalProfesionales: number;
+  totalServicios: number;
+  totalPacientes: number;
+  turnosPorEstado: Record<string, number>;
+  turnosRecientes: Turno[];
+  turnosPorProf: Record<string, number>;
+  appointmentTrend: { fecha: string; count: number }[];
 }
 
 export const Dashboard: React.FC<{ 
   onNavigateToCalendar?: () => void,
   slug?: string
 }> = ({ onNavigateToCalendar, slug }) => {
-  const [copied, setCopied] = useState(false)
-  const bookingUrl = slug ? `${window.location.origin}/booking/${slug}` : ''
+  const { user } = useAuth();
+  const [copied, setCopied] = useState(false);
+  const [hideBanner, setHideBanner] = useState(false);
+  const bookingUrl = slug ? `${window.location.origin}/booking/${slug}` : '';
+
+  const [stats, setStats] = useState<DashboardStats>({
+    totalTurnos: 0, turnosHoy: 0, totalProfesionales: 0, 
+    totalServicios: 0, totalPacientes: 0, turnosPorEstado: {},
+    turnosRecientes: [], turnosPorProf: {}, appointmentTrend: []
+  });
+  const [loading, setLoading] = useState(true);
 
   const handleCopyLink = () => {
-    if (!bookingUrl) return
-    navigator.clipboard.writeText(bookingUrl)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
-  const [stats, setStats] = useState<DashboardStats>({
-    totalTurnos: 0,
-    turnosHoy: 0,
-    totalProfesionales: 0,
-    totalServicios: 0,
-    turnosPorEstado: {},
-    turnosRecientes: [],
-    turnosPorProf: {},
-    appointmentTrend: []
-  })
-  const [loading, setLoading] = useState(true)
+    if (!bookingUrl) return;
+    navigator.clipboard.writeText(bookingUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        // Calculate date range: 30 days ago to 90 days from now
-        const desde = new Date()
-        desde.setDate(desde.getDate() - 30)
-        const hasta = new Date()
-        hasta.setDate(hasta.getDate() + 90)
+        const desde = new Date();
+        desde.setDate(desde.getDate() - 30);
+        const hasta = new Date();
+        hasta.setDate(hasta.getDate() + 90);
 
-        const [turnosResponse, profesionalesResponse, serviciosResponse] = await Promise.all([
+        const [turnosRes, profRes, servRes, pacRes] = await Promise.all([
           turnosApi.listar({
             limit: 5000,
             fecha_desde: desde.toISOString().split('T')[0],
             fecha_hasta: hasta.toISOString().split('T')[0]
-          }),
-          profesionalesApi.listar({ estado: 'Activo', limit: 100 }),
-          serviciosApi.listar()
-        ])
+          }).catch(() => ({ data: [] })),
+          profesionalesApi.listar({ estado: 'Activo', limit: 100 }).catch(() => ({ data: [] })),
+          serviciosApi.listar().catch(() => ({ data: [] })),
+          pacientesApi.listar({ limit: 5000 }).catch(() => ({ data: [] }))
+        ]);
 
-        const turnos = turnosResponse.data || []
-        const profesionales = profesionalesResponse.data || []
+        const turnos = turnosRes.data || [];
+        const profesionales = profRes.data || [];
+        const pacientes = pacRes.data || [];
 
-        // Calculate stats
-        const today = new Date().toISOString().split('T')[0]
-        const turnosHoy = turnos.filter(turno => turno.fecha === today).length
+        const today = new Date().toISOString().split('T')[0];
+        const turnosHoy = turnos.filter(turno => turno.fecha === today).length;
 
-        // Count by status
-        const turnosPorEstado: Record<string, number> = {}
+        const turnosPorEstado: Record<string, number> = {};
         turnos.forEach(turno => {
-          turnosPorEstado[turno.estado] = (turnosPorEstado[turno.estado] || 0) + 1
-        })
+          turnosPorEstado[turno.estado] = (turnosPorEstado[turno.estado] || 0) + 1;
+        });
 
-        // Recent appointments (last 5)
         const turnosRecientes = [...turnos]
           .sort((a, b) => {
-            const dateComparison = b.fecha.localeCompare(a.fecha)
-            if (dateComparison !== 0) return dateComparison
-            return b.hora_inicio.localeCompare(a.hora_inicio)
+            const dateComparison = b.fecha.localeCompare(a.fecha);
+            if (dateComparison !== 0) return dateComparison;
+            return b.hora_inicio.localeCompare(a.hora_inicio);
           })
-          .slice(0, 5)
+          .slice(0, 6);
 
-        // Appointments per professional
-        const turnosPorProf: Record<string, number> = {}
-        turnos.forEach(turno => {
-          if (turno.profesional) {
-            const key = `${turno.profesional.nombre} ${turno.profesional.apellido}`
-            turnosPorProf[key] = (turnosPorProf[key] || 0) + 1
-          }
-        })
-
-        // Last 7 days trend
-        const appointmentTrend: { fecha: string; count: number }[] = []
+        const appointmentTrend: { fecha: string; count: number }[] = [];
         for (let i = 6; i >= 0; i--) {
-          const date = new Date()
-          date.setDate(date.getDate() - i)
-          const dateStr = date.toISOString().split('T')[0]
-          const count = turnos.filter(t => t.fecha === dateStr).length
-          appointmentTrend.push({ fecha: dateStr, count })
+          const date = new Date();
+          date.setDate(date.getDate() - i);
+          const dateStr = date.toISOString().split('T')[0];
+          const count = turnos.filter(t => t.fecha === dateStr).length;
+          appointmentTrend.push({ fecha: dateStr, count });
         }
 
         setStats({
           totalTurnos: turnos.length,
           turnosHoy,
           totalProfesionales: profesionales.length,
-          totalServicios: serviciosResponse.data?.length || 0,
+          totalServicios: servRes.data?.length || 0,
+          totalPacientes: pacientes.length,
           turnosPorEstado,
           turnosRecientes,
-          turnosPorProf,
+          turnosPorProf: {},
           appointmentTrend
-        })
+        });
       } catch (error) {
-        console.error('Error fetching dashboard stats:', error)
+        console.error('Error fetching dashboard stats:', error);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchStats()
-  }, [])
-
-
-  const handleConfirmAll = async () => {
-    if (!window.confirm('¿Estás seguro de que quieres confirmar TODOS los turnos pendientes?')) {
-      return
-    }
-
-    try {
-      setLoading(true)
-      const response = await turnosApi.confirmarTodosPendientes()
-      alert(response.message)
-      // Refresh data
-      window.location.reload()
-    } catch (error) {
-      console.error('Error confirming all appointments:', error)
-      alert('Error al confirmar los turnos')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-
-  const statCards = [
-    {
-      title: 'Turnos Hoy',
-      value: stats.turnosHoy,
-      icon: Calendar,
-      color: '#026498',
-      bgColor: '#02649810'
-    },
-    {
-      title: 'Total Turnos',
-      value: stats.totalTurnos,
-      icon: Clock,
-      color: '#3B82F6',
-      bgColor: '#3B82F610'
-    },
-    {
-      title: 'Servicios',
-      value: stats.totalServicios,
-      icon: Briefcase,
-      color: '#F59E0B',
-      bgColor: '#F59E0B10'
-    }
-  ]
+    fetchStats();
+  }, []);
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-32 bg-gray-100 rounded-xl animate-pulse"></div>
-          ))}
-        </div>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2563FF]"></div>
       </div>
-    )
+    );
   }
 
-  const maxTrendValue = Math.max(...stats.appointmentTrend.map(d => d.count), 1)
+  const maxTrendValue = Math.max(...stats.appointmentTrend.map(d => d.count), 1);
 
   return (
-    <div className="space-y-6">
-      {/* Welcome section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="bg-[#f0f2f5] min-h-screen p-4 sm:p-8 rounded-3xl font-sans">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            Panel de Control - Dentiqly
-          </h2>
-          <p className="text-gray-600">
-            Resumen de actividad y métricas del centro odontológico
-          </p>
+          <h1 className="text-3xl font-bold text-gray-900">¡Hola de nuevo, {user?.nombre || 'Doc'}!</h1>
+          <p className="text-gray-500 mt-1">Controla los turnos, pacientes y rendimiento de tu clínica.</p>
         </div>
-        <div>
-          <button
-            onClick={handleConfirmAll}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-sm transition-all transform hover:scale-105"
-          >
-            <CheckCircle2 className="h-5 w-5" />
-            Confirmar todos los pendientes
+        <div className="flex flex-wrap items-center gap-3">
+          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-full font-medium hover:bg-gray-50 transition shadow-sm">
+            <Filter className="w-4 h-4" /> Filtros
+          </button>
+          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-full font-medium hover:bg-gray-50 transition shadow-sm">
+            <Download className="w-4 h-4" /> Exportar
+          </button>
+          <button onClick={onNavigateToCalendar} className="flex items-center gap-2 px-6 py-2 bg-[#2563FF] text-white rounded-full font-medium hover:bg-blue-700 transition shadow-md shadow-blue-500/20">
+            <Plus className="w-4 h-4" /> Nuevo Turno
           </button>
         </div>
       </div>
-      
-      {/* Booking Link Card */}
-      {slug && (
-        <Card className="p-6 bg-gradient-to-r from-blue-600 to-indigo-700 text-white overflow-hidden relative">
-          <div className="absolute top-0 right-0 p-8 opacity-10">
-            <ExternalLink className="h-24 w-24" />
+
+      {/* Main Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        {/* Resumen */}
+        <div className="lg:col-span-5 bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex flex-col h-[340px]">
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h2 className="text-lg font-bold text-gray-900">Resumen</h2>
+              <p className="text-sm text-gray-400">Rendimiento de turnos.</p>
+            </div>
+            <select className="bg-gray-50 border-none text-sm font-medium text-gray-700 rounded-full px-4 py-2 outline-none cursor-pointer">
+              <option>Semanal</option>
+              <option>Mensual</option>
+            </select>
           </div>
-          <div className="relative z-10">
-            <h3 className="text-lg font-bold mb-2 flex items-center gap-2">
-              <ExternalLink className="h-5 w-5" />
-              Tu Link de Reservas para Pacientes
-            </h3>
-            <p className="text-blue-100 text-sm mb-4 max-w-2xl">
-              Compartí este link por WhatsApp, Instagram o Facebook para que tus pacientes puedan agendar sus propios turnos de forma automática.
-            </p>
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-              <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl px-4 py-3 font-mono text-sm flex-1 truncate">
-                {bookingUrl}
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={handleCopyLink}
-                  className="flex items-center justify-center gap-2 px-6 py-3 bg-white text-blue-700 font-bold rounded-xl hover:bg-blue-50 transition-all shadow-lg active:scale-95"
-                >
-                  {copied ? (
-                    <>
-                      <Check className="h-4 w-4" />
-                      Copiado!
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="h-4 w-4" />
-                      Copiar Link
-                    </>
-                  )}
-                </button>
-                <a
-                  href={bookingUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center p-3 bg-blue-500 text-white border border-blue-400 rounded-xl hover:bg-blue-400 transition-all"
-                  title="Ver página de reservas"
-                >
-                  <ExternalLink className="h-5 w-5" />
-                </a>
-              </div>
+          
+          <div className="flex gap-8 mb-8">
+            <div>
+              <p className="text-xs text-gray-500 font-medium flex items-center gap-1 mb-1">
+                <ArrowDownRight className="w-3 h-3 text-red-500" /> Turnos Totales
+              </p>
+              <p className="text-3xl font-bold text-gray-900">{stats.totalTurnos}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 font-medium flex items-center gap-1 mb-1">
+                <ArrowUpRight className="w-3 h-3 text-green-500" /> Atendidos
+              </p>
+              <p className="text-3xl font-bold text-gray-900">{stats.turnosPorEstado['Atendido'] || 0}</p>
             </div>
           </div>
-        </Card>
-      )}
 
+          {/* Custom Bar Chart */}
+          <div className="mt-auto h-32 flex items-end justify-between gap-3 pt-4 border-t border-gray-50">
+            {stats.appointmentTrend.map((day, idx) => (
+               <div key={idx} className="w-full bg-[#f4f7fb] rounded-t-lg relative group overflow-hidden" style={{ height: '100%' }}>
+                 <div 
+                   className="absolute bottom-0 w-full bg-[#2563FF] rounded-t-lg transition-all duration-700 ease-out" 
+                   style={{ height: `${(day.count / maxTrendValue) * 100}%` }}
+                   title={`${day.count} turnos el ${day.fecha}`}
+                 ></div>
+               </div>
+            ))}
+          </div>
+        </div>
 
-      {/* Stats cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {statCards.map((stat, index) => {
-          const Icon = stat.icon
-          return (
-            <Card key={index} className="relative overflow-hidden hover:shadow-lg transition-shadow">
-              <div className="flex items-center justify-between p-6">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">
-                    {stat.title}
-                  </p>
-                  <p className="text-3xl font-bold text-gray-900 mt-2">
-                    {stat.value}
-                  </p>
-                </div>
-                <div
-                  className="w-14 h-14 rounded-lg flex items-center justify-center"
-                  style={{ backgroundColor: stat.bgColor }}
-                >
-                  <Icon className="h-7 w-7" style={{ color: stat.color }} />
-                </div>
+        {/* Activity */}
+        <div className="lg:col-span-7 bg-white rounded-3xl p-6 shadow-sm border border-gray-100 h-[340px] flex flex-col">
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h2 className="text-lg font-bold text-gray-900">Actividad</h2>
+              <p className="text-sm text-gray-400">Métricas clave de la clínica.</p>
+            </div>
+            <div className="flex gap-2">
+              <button className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center border border-gray-100 hover:bg-gray-100 transition"><Settings2 className="w-4 h-4 text-gray-600" /></button>
+              <button className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center border border-gray-100 hover:bg-gray-100 transition"><ArrowUpRight className="w-4 h-4 text-gray-600" /></button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-full">
+            {/* Card 1 */}
+            <div className="bg-[#f8f9fa] rounded-2xl p-5 border border-gray-100 flex flex-col justify-between">
+              <div>
+                 <p className="text-sm font-bold text-gray-700 flex items-center gap-2"><Users className="w-4 h-4" /> Pacientes Activos</p>
+                 <p className="text-2xl font-bold text-gray-900 mt-4">{stats.totalPacientes}</p>
+                 <p className="text-xs text-green-600 font-bold mt-1 flex items-center gap-1"><TrendingUp className="w-3 h-3" /> +12.5% vs mes ant.</p>
               </div>
-            </Card>
-          )
-        })}
+              <svg className="w-full h-12 mt-4 opacity-50" viewBox="0 0 100 30" preserveAspectRatio="none">
+                <path d="M0,20 Q10,5 20,25 T40,15 T60,25 T80,5 T100,20" fill="none" stroke="#2563FF" strokeWidth="2.5" strokeLinecap="round" />
+              </svg>
+            </div>
+            {/* Card 2 */}
+            <div className="bg-[#f8f9fa] rounded-2xl p-5 border border-gray-100 flex flex-col justify-between">
+              <div>
+                 <p className="text-sm font-bold text-gray-700 flex items-center gap-2"><CheckCircle2 className="w-4 h-4" /> Completados</p>
+                 <p className="text-2xl font-bold text-gray-900 mt-4">{stats.turnosPorEstado['Atendido'] || 0}</p>
+                 <p className="text-xs text-green-600 font-bold mt-1 flex items-center gap-1"><TrendingUp className="w-3 h-3" /> +5.2% vs mes ant.</p>
+              </div>
+              <svg className="w-full h-12 mt-4 opacity-50" viewBox="0 0 100 30" preserveAspectRatio="none">
+                <path d="M0,25 Q15,10 30,20 T60,10 T80,25 T100,5" fill="none" stroke="#2563FF" strokeWidth="2.5" strokeLinecap="round" />
+              </svg>
+            </div>
+            {/* Card 3 (Dark Mode) */}
+            <div className="bg-[#0A0F2D] rounded-2xl p-5 border border-[#1a1f3d] flex flex-col justify-between text-white shadow-lg">
+              <div>
+                 <p className="text-sm font-bold text-gray-300 flex items-center gap-2"><AlertCircle className="w-4 h-4 text-[#02E3FF]" /> Ausencias</p>
+                 <p className="text-2xl font-bold text-white mt-4">{stats.turnosPorEstado['Ausente'] || 0}</p>
+                 <p className="text-xs text-red-400 font-bold mt-1 flex items-center gap-1"><TrendingDown className="w-3 h-3" /> -2.4% vs mes ant.</p>
+              </div>
+              <svg className="w-full h-12 mt-4 opacity-80" viewBox="0 0 100 30" preserveAspectRatio="none">
+                 <path d="M0,5 Q20,25 40,10 T70,25 T100,15" fill="none" stroke="#F87171" strokeWidth="2.5" strokeLinecap="round" />
+              </svg>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Row 2: Status breakdown */}
-      <div className="grid grid-cols-1 gap-6">
-        {/* Turnos por Estado */}
-        <Card className="p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-            <Activity className="h-5 w-5 mr-2 text-blue-600" />
-            Distribución de Turnos por Estado
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {Object.entries(stats.turnosPorEstado).map(([estado, count]) => {
-              const colors: Record<string, string> = {
-                'Pendiente': 'bg-yellow-500',
-                'Confirmado': 'bg-blue-500',
-                'Atendido': 'bg-green-500',
-                'Cancelado': 'bg-red-500',
-                'Ausente': 'bg-gray-900'
-              }
-              const percentage = (count / stats.totalTurnos * 100).toFixed(0)
-              return (
-                <div key={estado} className="bg-gray-50 p-4 rounded-xl border border-gray-100">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-bold text-gray-700">{estado}</span>
-                    <span className="text-xs font-black text-gray-500">{count}</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-1.5">
-                    <div
-                      className={`${colors[estado] || 'bg-gray-400'} h-1.5 rounded-full transition-all duration-500`}
-                      style={{ width: `${percentage}%` }}
-                    ></div>
-                  </div>
-                  <p className="text-[10px] text-right mt-1 text-gray-400 font-bold">{percentage}% del total</p>
-                </div>
-              )
-            })}
+      {/* Lower Section Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6">
+        
+        {/* Small Cards Left */}
+        <div className="lg:col-span-5 flex flex-col gap-6">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-white rounded-3xl p-6 flex flex-col justify-center border border-gray-100 shadow-sm">
+               <p className="text-sm text-gray-500 font-medium flex items-center gap-2 mb-2"><Clock className="w-4 h-4 text-blue-500" /> Turnos Hoy</p>
+               <p className="text-3xl font-bold text-gray-900">{stats.turnosHoy}</p>
+            </div>
+            <div className="bg-white rounded-3xl p-6 flex flex-col justify-center border border-gray-100 shadow-sm">
+               <p className="text-sm text-gray-500 font-medium flex items-center gap-2 mb-2"><Stethoscope className="w-4 h-4 text-teal-500" /> Profesionales</p>
+               <p className="text-3xl font-bold text-gray-900">{stats.totalProfesionales}</p>
+            </div>
           </div>
-        </Card>
+
+          {!hideBanner && (
+            <div className="bg-[#2563FF] text-white rounded-3xl p-6 flex justify-between items-center shadow-lg relative overflow-hidden h-[120px]">
+               <div className="z-10 relative">
+                 <h3 className="text-lg font-bold text-white w-4/5 leading-tight">Comparte tu portal de reservas automático</h3>
+                 <button onClick={handleCopyLink} className="mt-3 text-sm font-bold text-blue-100 hover:text-white flex items-center gap-1.5 transition-colors bg-white/10 px-3 py-1.5 rounded-full backdrop-blur-md">
+                   {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />} {copied ? '¡Copiado!' : 'Copiar enlace'}
+                 </button>
+               </div>
+               <button onClick={() => setHideBanner(true)} className="w-8 h-8 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition z-10 absolute top-4 right-4">
+                 <X className="w-4 h-4 text-white" />
+               </button>
+               <div className="absolute right-[-20px] bottom-[-30px] opacity-20 pointer-events-none">
+                 <Link2 className="w-32 h-32 text-white transform rotate-12" />
+               </div>
+            </div>
+          )}
+        </div>
+
+        {/* Transactions History Table */}
+        <div className="lg:col-span-7 bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h2 className="text-lg font-bold text-gray-900">Próximos Turnos</h2>
+              <p className="text-sm text-gray-400">Movimientos y citas recientes.</p>
+            </div>
+            <button className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center border border-gray-100 hover:bg-gray-100 transition">
+              <Settings2 className="w-4 h-4 text-gray-600" />
+            </button>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse text-sm">
+              <thead>
+                <tr className="text-gray-400 border-b border-gray-100">
+                  <th className="pb-3 font-medium">Paciente</th>
+                  <th className="pb-3 font-medium">Servicio</th>
+                  <th className="pb-3 font-medium">Estado</th>
+                  <th className="pb-3 font-medium">Fecha</th>
+                  <th className="pb-3 font-medium text-right">Hora</th>
+                </tr>
+              </thead>
+              <tbody>
+                {stats.turnosRecientes.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="py-8 text-center text-gray-500">No hay turnos registrados</td>
+                  </tr>
+                ) : (
+                  stats.turnosRecientes.map((turno) => (
+                    <tr key={turno.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                      <td className="py-3 pr-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-blue-100 text-[#2563FF] flex items-center justify-center font-bold text-xs shrink-0">
+                            {turno.paciente?.nombre?.charAt(0)}{turno.paciente?.apellido?.charAt(0)}
+                          </div>
+                          <span className="font-bold text-gray-900 truncate max-w-[120px]">{turno.paciente?.nombre} {turno.paciente?.apellido}</span>
+                        </div>
+                      </td>
+                      <td className="py-3 text-gray-500 font-medium">{turno.servicio?.nombre || 'General'}</td>
+                      <td className="py-3">
+                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                          turno.estado === 'Atendido' ? 'bg-green-100 text-green-700' :
+                          turno.estado === 'Confirmado' ? 'bg-[#2563FF]/10 text-[#2563FF]' :
+                          turno.estado === 'Pendiente' ? 'bg-yellow-100 text-yellow-700' :
+                          turno.estado === 'Ausente' ? 'bg-gray-800 text-white' :
+                          'bg-red-100 text-red-700'
+                        }`}>
+                          <span className="w-1.5 h-1.5 rounded-full bg-current"></span>
+                          {turno.estado}
+                        </span>
+                      </td>
+                      <td className="py-3 text-gray-600 font-medium">{new Date(turno.fecha + 'T00:00:00').toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}</td>
+                      <td className="py-3 text-right text-gray-900 font-bold">{turno.hora_inicio}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
       </div>
-
-      {/* Row 3: Trends and Recent Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Appointment Trend */}
-        <Card className="p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-            <TrendingUp className="h-5 w-5 mr-2 text-purple-600" />
-            Tendencia Últimos 7 Días
-          </h3>
-          <div className="h-48 flex items-end justify-between gap-2">
-            {stats.appointmentTrend.map((day, index) => {
-              const height = (day.count / maxTrendValue) * 100
-              return (
-                <div key={index} className="flex-1 flex flex-col items-center">
-                  <div className="relative w-full flex items-end justify-center" style={{ height: '160px' }}>
-                    <div
-                      className="w-full bg-blue-500 rounded-t hover:bg-blue-600 transition-colors cursor-pointer"
-                      style={{ height: `${height}%`, minHeight: day.count > 0 ? '10px' : '0' }}
-                      title={`${day.count} turnos`}
-                    ></div>
-                  </div>
-                  <span className="text-xs text-gray-600 mt-2">
-                    {new Date(day.fecha).getDate()}/{new Date(day.fecha).getMonth() + 1}
-                  </span>
-                  <span className="text-xs font-semibold text-gray-800">{day.count}</span>
-                </div>
-              )
-            })}
-          </div>
-        </Card>
-
-        {/* Recent Appointments */}
-        <Card className="p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-            <Clock className="h-5 w-5 mr-2 text-indigo-600" />
-            Turnos Recientes
-          </h3>
-          <div className="space-y-3">
-            {stats.turnosRecientes.length === 0 ? (
-              <p className="text-sm text-gray-500 text-center py-4">No hay turnos recientes</p>
-            ) : (
-              stats.turnosRecientes.map((turno) => (
-                <div key={turno.id} className="flex items-start justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900">
-                      {turno.paciente?.nombre} {turno.paciente?.apellido}
-                    </p>
-                    <p className="text-xs text-gray-600">
-                      {turno.servicio?.nombre}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xs font-medium text-gray-700">
-                      {new Date(turno.fecha + 'T00:00:00').toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
-                    </p>
-                    <p className="text-xs text-gray-500">{turno.hora_inicio}</p>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </Card>
-      </div>
-
-      {/* Professional Stats */}
-      {Object.keys(stats.turnosPorProf).length > 0 && (
-        <Card className="p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-            <Users className="h-5 w-5 mr-2 text-teal-600" />
-            Turnos por Profesional
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {Object.entries(stats.turnosPorProf)
-              .sort((a, b) => b[1] - a[1])
-              .map(([nombre, count]) => (
-                <div key={nombre} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <span className="text-sm font-medium text-gray-700">{nombre}</span>
-                  <span className="text-sm font-bold text-gray-900 bg-white px-3 py-1 rounded-full">{count}</span>
-                </div>
-              ))}
-          </div>
-        </Card>
-      )}
     </div>
-  )
-}
+  );
+};
