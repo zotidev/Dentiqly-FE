@@ -53,92 +53,102 @@ export const EditAppointmentModal: React.FC<EditAppointmentModalProps> = ({ appo
     }
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
-                <h3 className="text-lg font-semibold mb-4">Editar Turno</h3>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <div>
-                        <label className="block text-sm font-medium mb-1">Paciente</label>
-                        <Input
-                            type="text"
-                            value={`${appointment.paciente?.apellido || ''}, ${appointment.paciente?.nombre || ''}`}
-                            disabled
-                            className="bg-gray-100"
-                        />
-                    </div>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full p-8 border border-gray-100">
+                <h3 className="text-2xl font-bold mb-6 text-gray-900">Editar Turno</h3>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                            <label className="block text-sm font-bold text-gray-700">Paciente</label>
+                            <Input
+                                type="text"
+                                value={`${appointment.paciente?.apellido || ''}, ${appointment.paciente?.nombre || ''}`}
+                                disabled
+                                className="bg-gray-50 border-gray-200 text-gray-500 font-medium"
+                            />
+                        </div>
 
-                    <div>
-                        <label className="block text-sm font-medium mb-1">Profesional</label>
-                        <select
-                            value={formData.profesional_id}
-                            onChange={(e) => setFormData({ ...formData, profesional_id: parseInt(e.target.value) })}
-                            className="w-full border rounded-md p-2"
-                            required
-                        >
-                            <option value="">Seleccionar profesional</option>
-                            {profesionales.map((prof) => (
-                                <option key={prof.id} value={prof.id}>
-                                    {prof.apellido}, {prof.nombre} - {prof.especialidad}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+                        <div className="space-y-2">
+                            <label className="block text-sm font-bold text-gray-700">Profesional</label>
+                            <select
+                                value={formData.profesional_id}
+                                onChange={(e) => setFormData({ ...formData, profesional_id: parseInt(e.target.value) })}
+                                className="w-full border-gray-200 rounded-xl p-3 bg-white shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all font-medium text-gray-700"
+                                required
+                            >
+                                <option value="">Seleccionar profesional</option>
+                                {profesionales.map((prof) => (
+                                    <option key={prof.id} value={prof.id}>
+                                        {prof.apellido}, {prof.nombre}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
 
-                    <div>
-                        <label className="block text-sm font-medium mb-1">Fecha</label>
-                        <Input
-                            type="date"
-                            value={formData.fecha}
-                            onChange={(e) => setFormData({ ...formData, fecha: e.target.value })}
-                            required
-                        />
+                        <div className="space-y-2">
+                            <label className="block text-sm font-bold text-gray-700">Fecha</label>
+                            <Input
+                                type="date"
+                                value={formData.fecha}
+                                onChange={(e) => setFormData({ ...formData, fecha: e.target.value })}
+                                required
+                            />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <label className="block text-sm font-bold text-gray-700">Hora Inicio</label>
+                                <Input
+                                    type="time"
+                                    value={formData.hora_inicio}
+                                    onChange={(e) => setFormData({ ...formData, hora_inicio: e.target.value })}
+                                    required
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="block text-sm font-bold text-gray-700">Hora Fin</label>
+                                <Input
+                                    type="time"
+                                    value={formData.hora_fin}
+                                    onChange={(e) => setFormData({ ...formData, hora_fin: e.target.value })}
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="block text-sm font-bold text-gray-700">Estado</label>
+                            <select
+                                value={formData.estado}
+                                onChange={(e) => setFormData({ ...formData, estado: e.target.value })}
+                                className="w-full border-gray-200 rounded-xl p-3 bg-white shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all font-medium text-gray-700"
+                            >
+                                <option value="Creado">Creado</option>
+                                <option value="Esperando confirmación">Esperando confirmación</option>
+                                <option value="Confirmado por email">Confirmado por email</option>
+                                <option value="Confirmado por SMS">Confirmado por SMS</option>
+                                <option value="Confirmado por Whatsapp">Confirmado por Whatsapp</option>
+                                <option value="Confirmado">Confirmado</option>
+                                <option value="En sala de espera">En sala de espera</option>
+                                <option value="Atendiéndose">Atendiéndose</option>
+                                <option value="Atendido">Atendido</option>
+                                <option value="Cancelado">Cancelado</option>
+                                <option value="Ausente">Ausente</option>
+                            </select>
+                        </div>
+
+                        <div className="space-y-2 md:col-span-2">
+                            <label className="block text-sm font-bold text-gray-700">Observaciones</label>
+                            <textarea
+                                value={formData.observaciones}
+                                onChange={(e) => setFormData({ ...formData, observaciones: e.target.value })}
+                                className="w-full border-gray-200 rounded-xl p-3 bg-white shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all font-medium text-gray-700 h-28 resize-none"
+                                placeholder="Agregar notas sobre el turno..."
+                            />
+                        </div>
                     </div>
-                    <div>
-                        <label className="block text-sm font-medium mb-1">Hora Inicio</label>
-                        <Input
-                            type="time"
-                            value={formData.hora_inicio}
-                            onChange={(e) => setFormData({ ...formData, hora_inicio: e.target.value })}
-                            required
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium mb-1">Hora Fin</label>
-                        <Input
-                            type="time"
-                            value={formData.hora_fin}
-                            onChange={(e) => setFormData({ ...formData, hora_fin: e.target.value })}
-                            required
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium mb-1">Estado</label>
-                        <select
-                            value={formData.estado}
-                            onChange={(e) => setFormData({ ...formData, estado: e.target.value })}
-                            className="w-full border rounded-md p-2"
-                        >
-                            <option value="Creado">Creado</option>
-                            <option value="Esperando confirmación">Esperando confirmación</option>
-                            <option value="Confirmado por email">Confirmado por email</option>
-                            <option value="Confirmado por SMS">Confirmado por SMS</option>
-                            <option value="Confirmado por Whatsapp">Confirmado por Whatsapp</option>
-                            <option value="En sala de espera">En sala de espera</option>
-                            <option value="Atendiéndose">Atendiéndose</option>
-                            <option value="Atendido">Atendido</option>
-                            <option value="Cancelado">Cancelado</option>
-                            <option value="Ausente">Ausente</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium mb-1">Observaciones</label>
-                        <textarea
-                            value={formData.observaciones}
-                            onChange={(e) => setFormData({ ...formData, observaciones: e.target.value })}
-                            className="w-full border rounded-md p-2 h-24"
-                        />
-                    </div>
-                    <div className="flex justify-between items-center">
+                    
+                    <div className="flex justify-between items-center pt-6 mt-6 border-t border-gray-100">
                         <Button
                             type="button"
                             variant="outline"
@@ -155,16 +165,17 @@ export const EditAppointmentModal: React.FC<EditAppointmentModalProps> = ({ appo
                             }}
                             disabled={sendingReminder || !appointment.paciente?.email}
                             title={!appointment.paciente?.email ? 'El paciente no tiene email' : ''}
+                            className="rounded-xl border-blue-200 text-blue-600 hover:bg-blue-50 font-bold shadow-sm"
                         >
                             <Mail className="h-4 w-4 mr-2" />
-                            {sendingReminder ? 'Enviando...' : 'Recordatorio'}
+                            {sendingReminder ? 'Enviando...' : 'Enviar Recordatorio'}
                         </Button>
-                        <div className="flex space-x-3">
-                            <Button type="button" variant="outline" onClick={onClose}>
+                        <div className="flex gap-3">
+                            <Button type="button" variant="outline" onClick={onClose} className="rounded-xl font-bold shadow-sm">
                                 Cancelar
                             </Button>
-                            <Button type="submit" disabled={loading}>
-                                {loading ? 'Guardando...' : 'Guardar Cambios'}
+                            <Button type="submit" disabled={loading} className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-sm px-6">
+                                {loading ? 'Guardando...' : 'Guardar'}
                             </Button>
                         </div>
                     </div>

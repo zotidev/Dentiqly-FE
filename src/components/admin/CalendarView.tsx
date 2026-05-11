@@ -16,14 +16,56 @@ import {
   Plus,
   Search,
   Download,
-  Filter
+  Filter,
+  CheckCircle2,
+  XCircle,
+  Check,
+  Hourglass
 } from 'lucide-react'
-import { turnosApi } from '../../api'
+import { turnosApi, adminApi } from '../../api'
 import type { Turno, Profesional } from '../../types'
 import { EditAppointmentModal } from './EditAppointmentModal'
 import { AdminAppointmentModal } from './AdminAppointmentModal'
 import { AdminBookingModal } from './AdminBookingModal'
 import { profesionalesApi } from '../../api/profesionales'
+
+const PROF_COLORS = [
+  '#F472B6', // pink-400
+  '#60A5FA', // blue-400
+  '#34D399', // emerald-400
+  '#A78BFA', // violet-400
+  '#FBBF24', // amber-400
+  '#F87171', // red-400
+  '#2DD4BF', // teal-400
+  '#818CF8', // indigo-400
+]
+
+const getProfColor = (id?: number) => {
+  if (!id) return '#9CA3AF'
+  return PROF_COLORS[id % PROF_COLORS.length]
+}
+
+const getStatusIcon = (estado: string) => {
+  switch (estado) {
+    case 'Atendido':
+      return <CheckCircle2 className="w-3 h-3 text-[#22C55E]" fill="white" />
+    case 'Cancelado':
+    case 'Ausente':
+      return <XCircle className="w-3 h-3 text-[#EF4444]" fill="white" />
+    case 'Pendiente':
+    case 'Esperando confirmación':
+      return <Hourglass className="w-3 h-3 text-[#F59E0B]" />
+    case 'Confirmado':
+    case 'Confirmado por email':
+    case 'Confirmado por SMS':
+    case 'Confirmado por Whatsapp':
+      // "Si está confirmado simplemente debe aparecer y ya"
+      return null
+    default:
+      return null
+  }
+}
+
 
 type ViewType = 'day' | 'week' | 'month'
 
@@ -48,6 +90,8 @@ export const CalendarView: React.FC = () => {
   const [appointments, setAppointments] = useState<Turno[]>([])
   const [professionals, setProfessionals] = useState<Profesional[]>([])
   const [selectedProfessionalId, setSelectedProfessionalId] = useState<number | null>(null)
+  const [selectedServiceId, setSelectedServiceId] = useState<number | null>(null)
+  const [servicios, setServicios] = useState<any[]>([])
 
   const [selectedAppointment, setSelectedAppointment] = useState<Turno | null>(null)
   const [showEditModal, setShowEditModal] = useState(false)
@@ -69,6 +113,7 @@ export const CalendarView: React.FC = () => {
   useEffect(() => {
     fetchAppointments()
     fetchProfessionals()
+    fetchServicios()
   }, [currentDate, viewType])
 
   // Patient search
@@ -93,6 +138,15 @@ export const CalendarView: React.FC = () => {
     setSearchResults(results)
     setShowSearchResults(true)
   }, [patientSearch, appointments])
+
+  const fetchServicios = async () => {
+    try {
+      const response = await adminApi.servicios.listar({ limit: 100 })
+      setServicios(response.data || [])
+    } catch (error) {
+      console.error('Error fetching services:', error)
+    }
+  }
 
   const fetchProfessionals = async () => {
     try {
@@ -294,6 +348,12 @@ export const CalendarView: React.FC = () => {
       )
     }
 
+    if (selectedServiceId !== null) {
+      filtered = filtered.filter(appointment =>
+        appointment.servicio_id === selectedServiceId
+      )
+    }
+
     return filtered.sort((a, b) => a.hora_inicio.localeCompare(b.hora_inicio))
   }
 
@@ -423,8 +483,8 @@ export const CalendarView: React.FC = () => {
             {/* Absolute Appointments */}
             <div className="absolute top-0 left-[100px] right-0 bottom-0 pointer-events-none">
               {getAppointmentLayout(dayAppointments).map((appt) => {
-                const statusColor = getStatusColor(appt.estado)
-                const isLight = ['#F59E0B', '#EAB308', '#22C55E', '#06B6D4'].includes(statusColor)
+                const profColor = getProfColor(appt.profesional_id)
+                const statusIcon = getStatusIcon(appt.estado)
                 
                 return (
                   <div
@@ -448,21 +508,27 @@ export const CalendarView: React.FC = () => {
                         e.stopPropagation()
                         setSelectedAppointment(appt)
                       }}
-                      className="h-full w-full rounded-xl shadow-sm text-[10px] cursor-move hover:brightness-95 transition-all overflow-hidden flex flex-col p-2"
+                      className="h-full w-full rounded-xl shadow-sm cursor-move hover:brightness-95 transition-all overflow-hidden flex flex-col p-2 relative"
                       style={{
-                        backgroundColor: `${statusColor}15`,
-                        border: `1.5px solid ${statusColor}`,
-                        color: statusColor,
+                        backgroundColor: `${profColor}15`,
+                        border: `1.5px solid ${profColor}`,
                       }}
                     >
-                      <div className="font-black truncate capitalize leading-tight text-xs mb-0.5" style={{ color: statusColor }}>
-                        {appt.paciente?.nombre} {appt.paciente?.apellido}
+                      <div className="flex items-start justify-between mb-0.5">
+                        <div className="font-black truncate capitalize leading-tight text-xs text-gray-900 pr-4">
+                          {appt.paciente?.nombre} {appt.paciente?.apellido}
+                        </div>
+                        {statusIcon && (
+                          <div className="absolute top-1.5 right-1.5">
+                            {statusIcon}
+                          </div>
+                        )}
                       </div>
-                      <div className="text-[9px] font-bold opacity-80 leading-none">
-                        {appt.hora_inicio.substring(0, 5)} - {appt.hora_fin.substring(0, 5)}
+                      <div className="text-[10px] font-bold text-gray-600 leading-none flex gap-1">
+                        <span>{appt.hora_inicio.substring(0, 5)} - {appt.hora_fin.substring(0, 5)}</span>
                       </div>
                       {appt.height > 40 && (
-                        <div className="text-[8px] opacity-70 truncate mt-0.5 font-medium">
+                        <div className="text-[9px] opacity-80 text-gray-500 truncate mt-1 font-medium">
                           {getInitials(appt.profesional)} • {appt.servicio?.nombre}
                         </div>
                       )}
@@ -542,8 +608,8 @@ export const CalendarView: React.FC = () => {
                   {weekDays.map((day, dayIdx) => (
                     <div key={dayIdx} className="relative h-full border-r border-transparent">
                       {getAppointmentLayout(getAppointmentsForDate(day)).map((appt) => {
-                        const statusColor = getStatusColor(appt.estado)
-                        const isLight = ['#F59E0B', '#EAB308', '#22C55E'].includes(statusColor)
+                        const profColor = getProfColor(appt.profesional_id)
+                        const statusIcon = getStatusIcon(appt.estado)
                         
                         return (
                           <div
@@ -567,18 +633,24 @@ export const CalendarView: React.FC = () => {
                                 e.stopPropagation()
                                 setSelectedAppointment(appt)
                               }}
-                              className="h-full w-full rounded-xl shadow-sm text-[8px] cursor-move hover:brightness-95 transition-all overflow-hidden flex flex-col p-1.5"
+                              className="h-full w-full rounded-xl shadow-sm cursor-move hover:brightness-95 transition-all overflow-hidden flex flex-col p-1.5 relative"
                               style={{
-                                backgroundColor: `${statusColor}15`,
-                                border: `1px solid ${statusColor}`,
-                                color: statusColor,
+                                backgroundColor: `${profColor}15`,
+                                border: `1px solid ${profColor}`,
                               }}
                             >
-                              <div className="font-black truncate capitalize leading-tight text-[9px] mb-0.5" style={{ color: statusColor }}>
-                                {appt.paciente?.nombre} {appt.paciente?.apellido}
+                              <div className="flex justify-between items-start">
+                                <div className="font-black truncate capitalize leading-tight text-[10px] text-gray-900 pr-3">
+                                  {appt.paciente?.nombre} {appt.paciente?.apellido}
+                                </div>
+                                {statusIcon && (
+                                  <div className="absolute top-1 right-1">
+                                    {statusIcon}
+                                  </div>
+                                )}
                               </div>
-                              <div className="text-[8px] font-bold opacity-80 leading-none">
-                                {appt.hora_inicio.substring(0, 5)} - {appt.hora_fin.substring(0, 5)}
+                              <div className="text-[9px] font-bold text-gray-600 leading-none mt-0.5">
+                                {appt.hora_inicio.substring(0, 5)}
                               </div>
                             </div>
                           </div>
@@ -631,7 +703,8 @@ export const CalendarView: React.FC = () => {
 
                 <div className="space-y-1">
                   {dayAppointments.slice(0, 3).map((appointment) => {
-                    const statusColor = getStatusColor(appointment.estado)
+                    const profColor = getProfColor(appointment.profesional_id)
+                    const statusIcon = getStatusIcon(appointment.estado)
                     return (
                       <div
                         key={appointment.id}
@@ -639,11 +712,16 @@ export const CalendarView: React.FC = () => {
                           e.stopPropagation()
                           setSelectedAppointment(appointment)
                         }}
-                        className="p-1 rounded-md text-[9px] cursor-pointer hover:opacity-80 transition-opacity flex items-center gap-1 overflow-hidden"
-                        style={{ backgroundColor: `${statusColor}15`, color: statusColor, border: `1px solid ${statusColor}40` }}
+                        className="p-1 rounded-md text-[9px] cursor-pointer hover:opacity-80 transition-opacity flex items-center gap-1 overflow-hidden relative"
+                        style={{ backgroundColor: `${profColor}15`, border: `1px solid ${profColor}40` }}
                       >
-                        <span className="font-bold shrink-0">{appointment.hora_inicio.substring(0, 5)}</span>
-                        <span className="truncate font-semibold text-gray-700">{appointment.paciente?.apellido}</span>
+                        <span className="font-bold shrink-0 text-gray-900">{appointment.hora_inicio.substring(0, 5)}</span>
+                        <span className="truncate font-semibold text-gray-700 pr-3">{appointment.paciente?.apellido}</span>
+                        {statusIcon && (
+                          <div className="absolute right-1 top-1/2 -translate-y-1/2 scale-75">
+                            {statusIcon}
+                          </div>
+                        )}
                       </div>
                     )
                   })}
@@ -674,10 +752,53 @@ export const CalendarView: React.FC = () => {
       
       {/* Sub Header */}
       <div className="flex flex-wrap justify-between items-center mb-6 gap-4">
-         <div className="flex flex-wrap items-center gap-2">
-            <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-full font-medium hover:bg-gray-50 text-sm shadow-sm transition">
-              <Filter className="w-4 h-4" /> Filtro
-            </button>
+         <div className="flex flex-wrap items-center gap-2 relative">
+            {/* Filters */}
+            <div className="group/filter">
+              <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-full font-medium hover:bg-gray-50 text-sm shadow-sm transition">
+                <Filter className="w-4 h-4" /> Filtros {(selectedProfessionalId || selectedServiceId) && <span className="w-2 h-2 rounded-full bg-blue-500"></span>}
+              </button>
+              
+              <div className="absolute top-full left-0 mt-2 w-64 bg-white border border-gray-100 rounded-2xl shadow-xl p-4 hidden group-hover/filter:block z-50">
+                <div className="space-y-4">
+                   <div>
+                     <label className="text-xs font-bold text-gray-400 mb-2 block uppercase tracking-wider">Profesional</label>
+                     <select 
+                       value={selectedProfessionalId || ''} 
+                       onChange={(e) => setSelectedProfessionalId(e.target.value ? parseInt(e.target.value) : null)}
+                       className="w-full border-gray-200 rounded-xl p-2 bg-gray-50 text-sm font-medium focus:border-blue-500 outline-none"
+                     >
+                        <option value="">Todos los profesionales</option>
+                        {professionals.map(p => (
+                          <option key={p.id} value={p.id}>{p.nombre} {p.apellido}</option>
+                        ))}
+                     </select>
+                   </div>
+                   <div>
+                     <label className="text-xs font-bold text-gray-400 mb-2 block uppercase tracking-wider">Servicio</label>
+                     <select 
+                       value={selectedServiceId || ''} 
+                       onChange={(e) => setSelectedServiceId(e.target.value ? parseInt(e.target.value) : null)}
+                       className="w-full border-gray-200 rounded-xl p-2 bg-gray-50 text-sm font-medium focus:border-blue-500 outline-none"
+                     >
+                        <option value="">Todos los servicios</option>
+                        {servicios.map(s => (
+                          <option key={s.id} value={s.id}>{s.nombre}</option>
+                        ))}
+                     </select>
+                   </div>
+                   {(selectedProfessionalId || selectedServiceId) && (
+                     <Button 
+                       variant="ghost" 
+                       className="w-full text-xs font-bold text-red-500 hover:bg-red-50"
+                       onClick={() => { setSelectedProfessionalId(null); setSelectedServiceId(null); }}
+                     >
+                       Limpiar Filtros
+                     </Button>
+                   )}
+                </div>
+              </div>
+            </div>
             <div className="flex items-center bg-white border border-gray-200 rounded-full overflow-hidden h-[38px] text-sm font-medium shadow-sm">
                <button onClick={() => setViewType('day')} className={`px-4 h-full transition ${viewType === 'day' ? 'bg-gray-100 text-[#2563FF] font-bold' : 'text-gray-500 hover:bg-gray-50'}`}>Diario</button>
                <button onClick={() => setViewType('week')} className={`px-4 h-full border-l border-gray-200 transition ${viewType === 'week' ? 'bg-gray-100 text-[#2563FF] font-bold' : 'text-gray-500 hover:bg-gray-50'}`}>Semanal</button>
@@ -732,58 +853,9 @@ export const CalendarView: React.FC = () => {
          </div>
       </div>
 
-      {/* Main Area: Sidebar + Calendar Grid */}
-      <div className="flex-1 flex gap-6 min-h-0">
-         {/* Left Sidebar (Mini Calendar & Doctors) */}
-         <div className="w-[280px] flex-shrink-0 flex-col gap-6 overflow-y-auto hidden xl:flex">
-            {/* Mini Calendar Card */}
-            <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 flex-shrink-0">
-               <h3 className="font-bold text-gray-900 mb-4">Mes Actual</h3>
-               <div className="grid grid-cols-7 gap-1 text-center mb-2">
-                 {['D', 'L', 'M', 'M', 'J', 'V', 'S'].map(d => <div key={d} className="text-[10px] font-bold text-gray-400">{d}</div>)}
-               </div>
-               <div className="grid grid-cols-7 gap-1">
-                 {getDaysInMonth(currentDate).map((day, idx) => {
-                    const isToday = day.date.toDateString() === new Date().toDateString()
-                    const isSelected = day.date.toDateString() === currentDate.toDateString()
-                    return (
-                      <div key={idx} 
-                        onClick={() => { setCurrentDate(day.date); setViewType('day'); }}
-                        className={`aspect-square flex items-center justify-center rounded-full text-xs cursor-pointer transition-colors ${!day.isCurrentMonth ? 'text-gray-300' : 'text-gray-700 hover:bg-gray-100'} ${isToday ? 'bg-blue-100 font-bold text-[#2563FF]' : ''} ${isSelected && !isToday ? 'bg-[#2563FF] text-white font-bold' : ''}`}>
-                         {day.date.getDate()}
-                      </div>
-                    )
-                 })}
-               </div>
-            </div>
-            
-            {/* Doctors List Card */}
-            <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 flex-1 overflow-y-auto flex flex-col">
-               <div className="flex justify-between items-center mb-4">
-                  <h3 className="font-bold text-gray-900">Profesionales</h3>
-                  <span className="bg-gray-100 text-gray-600 text-[10px] font-bold px-2 py-0.5 rounded-full">{professionals.length}</span>
-               </div>
-               <div className="space-y-2 flex-1 overflow-y-auto pr-1">
-                  {professionals.map(prof => (
-                     <div key={prof.id} className={`flex items-center gap-3 p-2 rounded-2xl cursor-pointer transition-colors ${selectedProfessionalId === prof.id ? 'bg-blue-50 border border-blue-100' : 'hover:bg-gray-50 border border-transparent'}`} onClick={() => setSelectedProfessionalId(selectedProfessionalId === prof.id ? null : prof.id)}>
-                        <div className="w-10 h-10 shrink-0 rounded-full bg-blue-100 flex items-center justify-center font-bold text-[#2563FF] text-xs">
-                          {prof.nombre[0]}{prof.apellido[0]}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="font-bold text-sm text-gray-900 truncate">{prof.nombre} {prof.apellido}</p>
-                          <p className="text-xs text-gray-500 truncate">{prof.especialidad || 'General'}</p>
-                        </div>
-                        {selectedProfessionalId === prof.id && <div className="w-2 h-2 rounded-full bg-[#2563FF]"></div>}
-                     </div>
-                  ))}
-               </div>
-               {professionals.length > 5 && (
-                 <Button variant="ghost" className="w-full mt-4 bg-gray-50 text-[#2563FF] hover:bg-blue-50 font-bold rounded-full text-xs">Ver Todos</Button>
-               )}
-            </div>
-         </div>
-
-         {/* Right Calendar Grid */}
+      {/* Main Area: Calendar Grid */}
+      <div className="flex-1 flex flex-col min-h-0">
+         {/* Calendar Grid */}
          <div className="flex-1 bg-white rounded-3xl shadow-sm border border-gray-100 flex flex-col min-w-0 overflow-hidden relative">
             {/* Navigation Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 sm:p-5 border-b border-gray-100 gap-4">
@@ -795,11 +867,11 @@ export const CalendarView: React.FC = () => {
                      <button onClick={() => navigate('next')} className="p-1 hover:bg-white rounded-full transition-colors"><ChevronRight className="w-4 h-4 text-gray-600" /></button>
                   </div>
                </div>
-               {/* Right side toggles / legend */}
-               <div className="flex flex-wrap items-center gap-3 text-[10px] font-bold text-gray-500 uppercase tracking-wider">
-                  <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-blue-500"></div> Confirmado</div>
-                  <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-green-500"></div> Atendido</div>
-                  <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-yellow-500"></div> Pendiente</div>
+               <div className="flex flex-wrap items-center gap-4 text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+                  <div className="flex items-center gap-1.5"><Hourglass className="w-3 h-3 text-[#F59E0B]" /> Pendiente</div>
+                  <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-full bg-blue-500/20 border border-blue-500"></div> Confirmado</div>
+                  <div className="flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-[#22C55E]" fill="white" /> Atendido</div>
+                  <div className="flex items-center gap-1.5"><XCircle className="w-3 h-3 text-[#EF4444]" fill="white" /> Cancelado</div>
                   <button onClick={() => setShowNewModal(true)} className="ml-2 px-3 py-1.5 border border-gray-200 rounded-full text-[#2563FF] hover:bg-blue-50 flex items-center gap-1 transition-colors"><Plus className="w-3 h-3"/> Sobreturno</button>
                </div>
             </div>
