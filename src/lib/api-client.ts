@@ -34,8 +34,9 @@ export class ApiClient {
    * reescribe la URL para usar /api/public/:slug/ en lugar de /api/.
    */
   private resolveUrl(endpoint: string): string {
+    // Solo reescribir si tenemos slug Y no tenemos token (modo público)
+    // O si el endpoint es explícitamente público
     if (this.tenantSlug && !this.token) {
-      // Rewrite: /api/servicios -> /api/public/mi-clinica/servicios
       const base = this.baseUrl.replace(/\/api$/, '')
       return `${base}/api/public/${this.tenantSlug}${endpoint}`
     }

@@ -24,9 +24,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         try {
           const userData = await authApi.me();
           setUser(userData);
+          localStorage.setItem('user', JSON.stringify(userData));
         } catch (error) {
           console.error('Failed to restore session:', error);
           apiClient.clearToken();
+          localStorage.removeItem('user');
         }
       }
       setLoading(false);
@@ -37,19 +39,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (data: LoginData) => {
     const response = await authApi.login(data);
-    setUser(response.user);
+    const userWithClinic = { ...response.user, clinica: response.clinica };
+    setUser(userWithClinic as any);
+    localStorage.setItem('user', JSON.stringify(userWithClinic));
     return response;
   };
 
   const register = async (data: SaasRegisterData) => {
     const response = await authApi.register(data);
-    setUser(response.user);
+    const userWithClinic = { ...response.user, clinica: response.clinica };
+    setUser(userWithClinic as any);
+    localStorage.setItem('user', JSON.stringify(userWithClinic));
     return response;
   };
 
   const logout = () => {
     authApi.logout();
     setUser(null);
+    localStorage.removeItem('user');
   };
 
   return (

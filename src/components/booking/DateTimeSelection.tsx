@@ -110,20 +110,20 @@ export const DateTimeSelection: React.FC<DateTimeSelectionProps> = ({
 
     return (
       <div className="space-y-4">
-        <div className="flex items-center justify-between mb-6">
-          <button onClick={() => setViewDate(new Date(year, month - 1))} className="p-2 hover:bg-gray-100 rounded-full">
-            <ChevronLeft size={20} />
+        <div className="flex items-center justify-between mb-4">
+          <button onClick={() => setViewDate(new Date(year, month - 1))} className="p-1.5 hover:bg-gray-100 rounded-full transition-colors">
+            <ChevronLeft size={18} className="text-gray-600" />
           </button>
-          <h4 className="font-black text-gray-900 capitalize">
+          <h4 className="font-bold text-sm text-gray-900 capitalize uppercase tracking-widest">
             {viewDate.toLocaleString('es-ES', { month: 'long', year: 'numeric' })}
           </h4>
-          <button onClick={() => setViewDate(new Date(year, month + 1))} className="p-2 hover:bg-gray-100 rounded-full">
-            <ChevronRight size={20} />
+          <button onClick={() => setViewDate(new Date(year, month + 1))} className="p-1.5 hover:bg-gray-100 rounded-full transition-colors">
+            <ChevronRight size={18} className="text-gray-600" />
           </button>
         </div>
-        <div className="grid grid-cols-7 gap-2">
+        <div className="grid grid-cols-7 gap-1">
           {['D', 'L', 'M', 'M', 'J', 'V', 'S'].map(d => (
-            <div key={d} className="text-center text-[10px] font-black text-gray-300 py-2">{d}</div>
+            <div key={d} className="text-center text-[10px] font-bold text-gray-400 py-1">{d}</div>
           ))}
           {days.map((day, i) => {
             if (!day) return <div key={`empty-${i}`} />
@@ -131,17 +131,18 @@ export const DateTimeSelection: React.FC<DateTimeSelectionProps> = ({
             const available = isDayAvailable(dateStr)
             const isSelected = selectedDate === dateStr
             return (
-              <button
-                key={i}
-                disabled={!available}
-                onClick={() => setSelectedDate(dateStr)}
-                className={`
-                  w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all
-                  ${isSelected ? "bg-[#026498] text-white shadow-lg scale-110" : available ? "text-gray-700 hover:bg-blue-50 hover:text-[#026498]" : "text-gray-200 cursor-not-allowed"}
-                `}
-              >
-                {day}
-              </button>
+              <div key={i} className="flex justify-center p-0.5">
+                <button
+                  disabled={!available}
+                  onClick={() => setSelectedDate(dateStr)}
+                  className={`
+                    w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center font-bold text-xs sm:text-sm transition-all
+                    ${isSelected ? "bg-[#2563FF] text-white shadow-md scale-105" : available ? "text-gray-700 hover:bg-blue-50 hover:text-[#2563FF]" : "text-gray-200 cursor-not-allowed"}
+                  `}
+                >
+                  {day}
+                </button>
+              </div>
             )
           })}
         </div>
@@ -150,37 +151,51 @@ export const DateTimeSelection: React.FC<DateTimeSelectionProps> = ({
   }
 
   return (
-    <div className="space-y-8 sm:space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <div className="flex flex-col md:grid md:grid-cols-2 gap-8 md:gap-12 items-start">
+    <div className="space-y-6 sm:space-y-8">
+      <div className="flex flex-col lg:grid lg:grid-cols-12 gap-6 lg:gap-8 items-start">
         
-        {/* Time Slots Column - On mobile, if date is selected, it goes FIRST */}
-        <div className={`space-y-6 w-full ${selectedDate ? 'order-1 md:order-2' : 'order-2 md:order-2'}`}>
-          <h3 className="font-black text-gray-900 flex items-center gap-3">
-            <Clock className="text-[#026498]" size={20} />
-            Horarios disponibles
-          </h3>
+        {/* Calendar Column */}
+        <div className={`w-full lg:col-span-5 ${selectedDate ? 'order-2 lg:order-1' : 'order-1 lg:order-1'}`}>
+          <div className="bg-white p-5 sm:p-6 rounded-2xl border border-gray-100 shadow-sm transition-all duration-500">
+            {renderCalendar()}
+          </div>
+        </div>
+
+        {/* Time Slots Column */}
+        <div className={`space-y-4 w-full lg:col-span-7 ${selectedDate ? 'order-1 lg:order-2' : 'order-2 lg:order-2'}`}>
+          <div className="flex items-center justify-between">
+            <h3 className="font-bold text-sm text-gray-900 uppercase tracking-widest flex items-center gap-2">
+              <Clock className="text-[#2563FF]" size={16} />
+              HORARIOS
+            </h3>
+            {selectedDate && (
+              <span className="text-xs font-bold text-gray-500 capitalize">
+                {new Date(selectedDate + "T00:00:00").toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}
+              </span>
+            )}
+          </div>
           
           {selectedDate ? (
             <div className="animate-in slide-in-from-top-4 duration-500">
               {loading ? (
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 sm:gap-3">
                   {[1, 2, 3, 4, 5, 6].map(i => (
-                    <div key={i} className="h-12 bg-gray-50 rounded-xl animate-pulse" />
+                    <div key={i} className="h-10 bg-gray-50 rounded-lg animate-pulse" />
                   ))}
                 </div>
               ) : error ? (
-                <div className="p-8 text-center bg-gray-50 rounded-3xl border border-dashed border-gray-200">
+                <div className="p-6 text-center bg-gray-50 rounded-2xl border border-dashed border-gray-200">
                   <p className="text-gray-400 font-bold text-xs">{error}</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 sm:gap-3">
                   {availableSlots.map(time => (
                     <button
                       key={time}
                       onClick={() => onDateTimeSelect(`${selectedDate}T${time}:00`)}
                       className={`
-                        py-4 rounded-xl font-bold transition-all border-2 text-sm
-                        ${selectedDateTime?.includes(time) ? "bg-[#026498] text-white border-[#026498] shadow-lg" : "bg-white text-gray-600 border-gray-100 hover:border-blue-100 hover:text-[#026498]"}
+                        py-2 sm:py-3 rounded-lg font-bold transition-all border text-xs sm:text-sm
+                        ${selectedDateTime?.includes(time) ? "bg-[#2563FF] text-white border-[#2563FF] shadow-md" : "bg-white text-gray-600 border-gray-200 hover:border-blue-300 hover:text-[#2563FF]"}
                       `}
                     >
                       {time}
@@ -190,39 +205,11 @@ export const DateTimeSelection: React.FC<DateTimeSelectionProps> = ({
               )}
             </div>
           ) : (
-            <div className="p-10 sm:p-12 text-center bg-gray-50 rounded-3xl sm:rounded-[2.5rem] border-2 border-dashed border-gray-100">
-              <Clock className="mx-auto text-gray-200 mb-4" size={32} />
-              <p className="text-gray-400 font-bold text-xs">Selecciona una fecha para ver horarios</p>
+            <div className="p-8 text-center bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+              <Clock className="mx-auto text-gray-300 mb-2" size={24} />
+              <p className="text-gray-400 font-bold text-xs">Selecciona un día en el calendario</p>
             </div>
           )}
-        </div>
-
-        {/* Calendar Column - On mobile, if date is selected, it goes SECOND */}
-        <div className={`w-full ${selectedDate ? 'order-2 md:order-1' : 'order-1 md:order-1'}`}>
-          <div className="bg-white p-6 sm:p-8 rounded-3xl sm:rounded-[2.5rem] border border-gray-50 shadow-sm transition-all duration-500">
-            <div className="flex items-center gap-3 mb-6 sm:mb-8">
-              <CalendarIcon className="text-[#026498]" size={20} />
-              <h3 className="font-black text-gray-900">Fecha del turno</h3>
-            </div>
-            {renderCalendar()}
-
-            {selectedDate && (
-              <div className="mt-8 pt-6 border-t border-gray-50 flex items-center justify-between">
-                <div>
-                  <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-1">Fecha seleccionada</p>
-                  <p className="text-sm font-black text-[#026498] capitalize">
-                    {new Date(selectedDate + "T00:00:00").toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
-                  </p>
-                </div>
-                <button 
-                  onClick={() => setSelectedDate("")}
-                  className="text-[10px] font-black text-gray-400 hover:text-red-500 uppercase tracking-widest transition-colors"
-                >
-                  Cambiar
-                </button>
-              </div>
-            )}
-          </div>
         </div>
       </div>
     </div>

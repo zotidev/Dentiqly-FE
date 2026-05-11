@@ -12,6 +12,7 @@ import DebtorsReport from './DebtorsReport'
 import CashFlow from './CashFlow'
 import { FeriadosManager } from './FeriadosManager'
 import { AusenciasManager } from './AusenciasManager'
+import { SettingsManager } from './SettingsManager'
 import { apiClient } from '../../lib/api-client'
 import { AlertTriangle, XCircle, Clock, CreditCard, MessageSquare, CheckCircle, ShieldCheck } from 'lucide-react'
 
@@ -243,12 +244,7 @@ export const AdminApp: React.FC = () => {
       case 'recordatorios':
         return <RemindersView />
       case 'settings':
-        return (
-          <div className="text-center py-12">
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Configuración</h3>
-            <p className="text-gray-600">Panel de configuración en desarrollo</p>
-          </div>
-        )
+        return <SettingsManager />
       default:
         return <Dashboard />
     }

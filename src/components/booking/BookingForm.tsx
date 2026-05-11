@@ -11,19 +11,7 @@ import { BookingSummary } from "./BookingSummary"
 import type { Servicio, Profesional, CrearPacienteData } from "../../types"
 import { turnosApi, pacientesApi } from "../../api"
 import { patientPortalApi, getPatientToken } from "../../api/patient-portal"
-import { 
-  Check,
-  Stethoscope,
-  User,
-  Calendar,
-  FileText,
-  CreditCard,
-  Instagram,
-  Facebook,
-  Twitter,
-  Youtube,
-  ArrowLeft
-} from "lucide-react"
+import { Check, ArrowLeft } from "lucide-react"
 
 export const BookingForm: React.FC = () => {
   const [step, setStep] = useState(1)
@@ -175,144 +163,129 @@ export const BookingForm: React.FC = () => {
     )
   }
 
-  const progressSteps = [
-    { id: 1, name: "SERVICIO", icon: Stethoscope },
-    { id: 2, name: "PROFESIONAL", icon: User },
-    { id: 3, name: "FECHA", icon: Calendar },
-    { id: 4, name: "DATOS", icon: FileText },
-    { id: 5, name: "PAGO", icon: CreditCard }
+  const formatDateTimeSummary = (dt: string) => {
+    const d = new Date(dt)
+    return `${d.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}, ${d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}hs`
+  }
+
+  const getStepSummary = (stepIndex: number) => {
+    switch (stepIndex) {
+      case 1: return selectedService?.nombre || "Seleccionar"
+      case 2: return selectedProfessional ? `${selectedProfessional.nombre} ${selectedProfessional.apellido}` : "Seleccionar"
+      case 3: return selectedDateTime ? formatDateTimeSummary(selectedDateTime) : "Seleccionar"
+      case 4: return patientData ? `${patientData.nombre} ${patientData.apellido}` : "Completar datos"
+      case 5: return "Pendiente"
+      default: return ""
+    }
+  }
+
+  const stepTitles = [
+    "SELECCIÓN DE SERVICIO",
+    "SELECCIÓN DE PROFESIONAL",
+    "FECHA Y HORA",
+    "DATOS PERSONALES",
+    "PAGO DE SEÑA"
   ]
 
   return (
-    <div className="min-h-screen bg-white font-sans selection:bg-blue-100 selection:text-[#026498]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-12">
+    <div className="min-h-screen bg-[#f8fafc] font-sans selection:bg-blue-100 selection:text-[#026498]">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
-          {/* Main Content */}
-          <div className="lg:col-span-8">
-            {/* Back Button */}
-            {step > 1 && (
-              <button 
-                onClick={() => setStep(step - 1)}
-                className="flex items-center gap-2 text-gray-400 hover:text-[#026498] font-black text-[10px] uppercase tracking-widest transition-all mb-6 group px-2 sm:px-0"
-              >
-                <div className="w-6 h-6 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-blue-50 transition-colors">
-                  <ArrowLeft size={12} strokeWidth={3} />
-                </div>
-                Volver
-              </button>
-            )}
-            <div className="space-y-4 sm:space-y-6 mb-6 sm:mb-8 px-2 sm:px-0">
-              <div className="flex items-center gap-3 sm:gap-4">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0 rounded-full bg-[#026498] text-white flex items-center justify-center font-black text-lg sm:text-xl shadow-lg shadow-blue-900/20">
-                  {step}
-                </div>
-                <div>
-                  <h2 className="text-xl sm:text-3xl font-black text-[#026498] leading-tight">
-                    {step === 1 && "Selecciona el servicio"}
-                    {step === 2 && "Elige tu profesional"}
-                    {step === 3 && "Elige la fecha y hora"}
-                    {step === 4 && "Tus datos personales"}
-                    {step === 5 && "Confirma y paga tu seña"}
-                  </h2>
-                  <p className="text-gray-400 text-xs sm:text-sm font-medium tracking-tight">
-                    {step === 1 && "Elige el tratamiento que necesitas."}
-                    {step === 2 && "Selecciona el especialista que te atenderá."}
-                    {step === 3 && "Selecciona el día y horario que prefieras."}
-                    {step === 4 && "Completa el formulario para confirmar tu turno."}
-                    {step === 5 && "Tu lugar quedará reservado una vez confirmes."}
-                  </p>
-                </div>
-              </div>
-            </div>
+          {/* Main Content: Accordion Steps */}
+          <div className="lg:col-span-8 space-y-4">
+            {stepTitles.map((title, index) => {
+              const stepNumber = index + 1
+              const isCompleted = step > stepNumber
+              const isActive = step === stepNumber
+              const isFuture = step < stepNumber
 
-            <div className="bg-white rounded-3xl sm:rounded-[2.5rem] shadow-[0_10px_30px_rgba(0,0,0,0.04)] sm:shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-gray-50 overflow-hidden">
-              {/* Progress Indicator */}
-              <div className="px-4 sm:px-12 py-6 sm:py-10 border-b border-gray-50">
-                <div className="flex items-center justify-between relative max-w-md mx-auto sm:max-w-none">
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-0.5 bg-gray-100"></div>
-                  <div 
-                    className="absolute left-0 top-1/2 -translate-y-1/2 h-0.5 bg-[#026498] transition-all duration-700" 
-                    style={{ width: `${((step - 1) / (progressSteps.length - 1)) * 100}%` }}
-                  ></div>
-
-                  {progressSteps.map((s) => {
-                    const Icon = s.icon
-                    const isCompleted = step > s.id
-                    const isActive = step === s.id
-                    const isAccessible = s.id < step
-
-                    return (
-                      <div 
-                        key={s.id} 
-                        className={`relative z-10 flex flex-col items-center ${isAccessible ? 'cursor-pointer group' : ''}`}
-                        onClick={() => { if (isAccessible) setStep(s.id) }}
-                      >
-                        <div className={`
-                          w-8 h-8 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all duration-500
-                          ${isCompleted ? "bg-[#026498] text-white" : isActive ? "bg-white border-2 border-[#026498] text-[#026498] shadow-lg scale-110" : "bg-white border-2 border-gray-100 text-gray-300"}
-                          ${isAccessible ? "group-hover:scale-110 group-hover:shadow-md" : ""}
-                        `}>
-                          {isCompleted ? <Check size={14} strokeWidth={3} className="sm:w-5 sm:h-5" /> : <Icon size={14} className="sm:w-5 sm:h-5" />}
+              return (
+                <div 
+                  key={stepNumber}
+                  className={`bg-white rounded-2xl sm:rounded-3xl border transition-all duration-300 ${
+                    isActive ? "border-[#2563FF] shadow-lg shadow-[#2563FF]/10" : 
+                    isCompleted ? "border-gray-200 hover:border-blue-300 cursor-pointer" : "border-gray-100 opacity-60"
+                  }`}
+                  onClick={() => {
+                    if (isCompleted) setStep(stepNumber)
+                  }}
+                >
+                  {/* Step Header */}
+                  <div className={`p-5 sm:p-6 flex items-center justify-between ${isActive ? "border-b border-gray-100" : ""}`}>
+                    <div className="flex items-center gap-4">
+                      {isCompleted ? (
+                        <div className="w-8 h-8 rounded-full bg-[#2563FF] text-white flex items-center justify-center">
+                          <Check size={16} strokeWidth={3} />
                         </div>
-                        {/* Labels removed as per request to avoid redundancy with the main header title */}
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
+                      ) : isActive ? (
+                        <div className="w-8 h-8 rounded-full bg-[#2563FF] text-white flex items-center justify-center font-bold text-sm">
+                          {stepNumber}
+                        </div>
+                      ) : (
+                        <div className="w-8 h-8 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center font-bold text-sm">
+                          {stepNumber}
+                        </div>
+                      )}
+                      <h3 className={`font-bold text-sm sm:text-base tracking-wide ${isActive || isCompleted ? "text-gray-900" : "text-gray-400"}`}>
+                        {title}
+                      </h3>
+                    </div>
+                    {isCompleted && !isActive && (
+                      <span className="text-sm font-bold text-[#2563FF]">
+                        {getStepSummary(stepNumber)}
+                      </span>
+                    )}
+                  </div>
 
-              {/* Step Content */}
-              <div className="p-6 sm:p-12 min-h-[400px] sm:min-h-[500px]">
-                {step === 1 && <ServiceSelection onServiceSelect={handleServiceSelect} selectedService={selectedService} />}
-                {step === 2 && (
-                  <ProfessionalSelection
-                    selectedService={selectedService}
-                    onProfessionalSelect={handleProfessionalSelect}
-                    selectedProfessional={selectedProfessional}
-                  />
-                )}
-                {step === 3 && selectedProfessional && (
-                  <DateTimeSelection
-                    selectedService={selectedService}
-                    selectedProfessional={selectedProfessional}
-                    onDateTimeSelect={handleDateTimeSelect}
-                    selectedDateTime={selectedDateTime}
-                    mesActualBloqueado={mesActualBloqueado}
-                  />
-                )}
-                {step === 4 && (
-                  <PatientForm
-                    onPatientData={handlePatientSubmit}
-                    loading={loading}
-                  />
-                )}
-                {step === 5 && selectedService && selectedProfessional && selectedDateTime && patientData && (
-                  <PaymentStep
-                    service={selectedService}
-                    professional={selectedProfessional}
-                    dateTime={selectedDateTime}
-                    patientData={patientData}
-                    loading={loading}
-                    onConfirm={handleFinalSubmit}
-                  />
-                )}
-              </div>
-            </div>
+                  {/* Step Content (Expanded) */}
+                  {isActive && (
+                    <div className="p-5 sm:p-8 animate-in slide-in-from-top-4 duration-500">
+                      {step === 1 && <ServiceSelection onServiceSelect={handleServiceSelect} selectedService={selectedService} />}
+                      {step === 2 && (
+                        <ProfessionalSelection
+                          selectedService={selectedService}
+                          onProfessionalSelect={handleProfessionalSelect}
+                          selectedProfessional={selectedProfessional}
+                        />
+                      )}
+                      {step === 3 && selectedProfessional && (
+                        <DateTimeSelection
+                          selectedService={selectedService}
+                          selectedProfessional={selectedProfessional}
+                          onDateTimeSelect={handleDateTimeSelect}
+                          selectedDateTime={selectedDateTime}
+                          mesActualBloqueado={mesActualBloqueado}
+                        />
+                      )}
+                      {step === 4 && (
+                        <PatientForm
+                          onPatientData={handlePatientSubmit}
+                          loading={loading}
+                        />
+                      )}
+                      {step === 5 && selectedService && selectedProfessional && selectedDateTime && patientData && (
+                        <PaymentStep
+                          service={selectedService}
+                          professional={selectedProfessional}
+                          dateTime={selectedDateTime}
+                          patientData={patientData}
+                          loading={loading}
+                          onConfirm={handleFinalSubmit}
+                        />
+                      )}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
           </div>
 
           {/* Sidebar */}
-          <div className="lg:col-span-4 lg:sticky lg:top-32 h-fit">
-            <BookingSummary
-              service={selectedService}
-              professional={selectedProfessional}
-              dateTime={selectedDateTime}
-              patientData={patientData}
-              step={step}
-              isAuthenticated={isAuthenticated}
-            />
+          <div className="lg:col-span-4 lg:sticky lg:top-8 h-fit">
+            <BookingSummary />
           </div>
         </div>
       </div>
     </div>
   )
-}
+}

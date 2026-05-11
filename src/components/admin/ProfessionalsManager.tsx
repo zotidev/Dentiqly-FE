@@ -10,6 +10,7 @@ import { adminApi } from "../../api/admin"
 import { ScheduleManager } from "../schedule/ScheduleManager"
 import { ServiceAssignment } from "./ServiceAssignment"
 import { ConfirmationModal } from "../ui/ConfirmationModal"
+import { useToast } from "../../hooks/use-toast"
 import type { Profesional, CrearProfesionalData, HorariosSemanales, Servicio } from "../../types"
 
 type ViewMode = 'list' | 'schedule' | 'services'
@@ -29,6 +30,7 @@ export const ProfessionalsManager: React.FC = () => {
     id: null
   })
 
+  const { toast } = useToast()
   const [formData, setFormData] = useState<CrearProfesionalData>({
     apellido: "",
     nombre: "",
@@ -88,10 +90,19 @@ export const ProfessionalsManager: React.FC = () => {
         await adminApi.profesionales.crear(formData)
       }
 
+      toast({
+        title: "Éxito",
+        description: editingProfessional ? "Profesional actualizado correctamente" : "Profesional creado correctamente"
+      })
       resetForm()
       fetchProfessionals()
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error saving professional:", error)
+      toast({
+        title: "Error",
+        description: error.response?.data?.error || "No se pudo guardar el profesional",
+        variant: "destructive"
+      })
     }
   }
 

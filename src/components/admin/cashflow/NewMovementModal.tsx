@@ -5,6 +5,7 @@ import { Input } from "../../ui/Input";
 import { Label } from "../../ui/label";
 import { Select } from "../../ui/Select";
 import { cuentaCorrienteApi } from '../../../api/cuenta-corriente';
+import { useToast } from '../../../hooks/use-toast';
 import { Bold, Italic, Strikethrough, Link, List, ListOrdered, AlignLeft, AlignCenter, Undo, Redo } from 'lucide-react';
 
 interface NewMovementModalProps {
@@ -15,6 +16,7 @@ interface NewMovementModalProps {
 }
 
 export function NewMovementModal({ isOpen, onClose, onSuccess, type }: NewMovementModalProps) {
+    const { toast } = useToast();
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         fecha: new Date().toISOString().split('T')[0],
@@ -34,9 +36,18 @@ export function NewMovementModal({ isOpen, onClose, onSuccess, type }: NewMoveme
                 forma_pago: formData.forma_pago,
                 descripcion: formData.descripcion
             });
+            toast({
+                title: "Éxito",
+                description: "Movimiento registrado correctamente"
+            });
             onSuccess();
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error registering movement:", error);
+            toast({
+                title: "Error",
+                description: error.response?.data?.error || "No se pudo registrar el movimiento",
+                variant: "destructive"
+            });
         } finally {
             setLoading(false);
         }

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Routes, Route, Navigate, useLocation, useParams } from 'react-router-dom'
 import { dentalColors } from '../config/colors'
 import { useAuth } from '../hooks/useAuth'
@@ -40,18 +40,25 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
  */
 const BookingWithSlug: React.FC = () => {
   const { slug } = useParams<{ slug: string }>()
+  const [isReady, setIsReady] = useState(false)
 
   useEffect(() => {
     if (slug) {
       apiClient.setTenantSlug(slug)
+      setIsReady(true)
     }
     return () => {
       apiClient.setTenantSlug(null)
+      setIsReady(false)
     }
   }, [slug])
 
   if (!slug) {
     return <Navigate to="/" replace />
+  }
+
+  if (!isReady) {
+    return null // Retrasar el renderizado hasta que el tenantSlug esté configurado
   }
 
   return (
@@ -64,6 +71,30 @@ const BookingWithSlug: React.FC = () => {
 }
 
 const BookingLayout: React.FC = () => {
+  const [isReady, setIsReady] = useState(false)
+
+  useEffect(() => {
+    // Fallback inteligente para la ruta legacy /reserva
+    // Intentar sacar el slug del usuario logueado si existe
+    const userStr = localStorage.getItem("user")
+    const user = userStr ? JSON.parse(userStr) : null
+    
+    // El slug puede estar en user.clinica.slug (de me()) o user.clinica_slug si lo mapeamos
+    const userSlug = user?.clinica?.slug || user?.clinica_slug
+    
+    apiClient.setTenantSlug(userSlug || 'juan-clinica')
+    setIsReady(true)
+    
+    return () => {
+      apiClient.setTenantSlug(null)
+      setIsReady(false)
+    }
+  }, [])
+
+  if (!isReady) {
+    return null
+  }
+
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: dentalColors.gray50 }}>
       <main className="flex-1 py-8">
@@ -72,6 +103,8 @@ const BookingLayout: React.FC = () => {
     </div>
   )
 }
+
+
 
 export const AppRouter: React.FC = () => {
   return (
