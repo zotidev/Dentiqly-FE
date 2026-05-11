@@ -30,13 +30,21 @@ export class ApiClient {
   }
 
   /**
-   * Resuelve la URL final. Si hay un tenantSlug seteado y NO hay token (ruta pública),
-   * reescribe la URL para usar /api/public/:slug/ en lugar de /api/.
+   * Resuelve la URL final.
    */
   private resolveUrl(endpoint: string): string {
-    // Solo reescribir si tenemos slug Y no tenemos token (modo público)
-    // O si el endpoint es explícitamente público
-    if (this.tenantSlug && !this.token) {
+    // Estas rutas son globales y no deben ser reescritas con el slug del tenant
+    const isGlobalEndpoint = endpoint.startsWith('/auth') || 
+                             endpoint.startsWith('/saas') || 
+                             endpoint.startsWith('/billing') ||
+                             endpoint.startsWith('/superadmin') ||
+                             endpoint.startsWith('/usuarios-pacientes') ||
+                             endpoint.startsWith('/whatsapp') ||
+                             endpoint.startsWith('/cuenta-corriente')
+
+    // Si estamos en modo "Booking" (hay slug de tenant) y NO estamos logueados (sin token),
+    // usamos la API pública del tenant para todo lo que no sea global.
+    if (this.tenantSlug && !this.token && !isGlobalEndpoint) {
       const base = this.baseUrl.replace(/\/api$/, '')
       return `${base}/api/public/${this.tenantSlug}${endpoint}`
     }

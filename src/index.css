@@ -40,6 +40,22 @@ html {
 
 /* Print styles */
 @media print {
+  body * {
+    visibility: hidden;
+  }
+  .printable-card, .printable-card * {
+    visibility: visible;
+  }
+  .printable-card {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    box-shadow: none !important;
+    border: 1px solid #eee !important;
+  }
   .no-print {
     display: none !important;
   }

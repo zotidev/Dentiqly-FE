@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { turnosApi, profesionalesApi, serviciosApi, pacientesApi } from '../../api';
 import { useAuth } from '../../hooks/useAuth';
+import { useToast } from '../../hooks/use-toast';
 import type { Turno } from '../../types';
 
 interface DashboardStats {
@@ -25,6 +26,7 @@ export const Dashboard: React.FC<{
   slug?: string
 }> = ({ onNavigateToCalendar, slug }) => {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [copied, setCopied] = useState(false);
   const [hideBanner, setHideBanner] = useState(false);
   const bookingUrl = slug ? `${window.location.origin}/booking/${slug}` : '';
@@ -43,74 +45,92 @@ export const Dashboard: React.FC<{
     setTimeout(() => setCopied(false), 2000);
   };
 
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const desde = new Date();
-        desde.setDate(desde.getDate() - 30);
-        const hasta = new Date();
-        hasta.setDate(hasta.getDate() + 90);
+  const fetchStats = async () => {
+    try {
+      const desde = new Date();
+      desde.setDate(desde.getDate() - 30);
+      const hasta = new Date();
+      hasta.setDate(hasta.getDate() + 90);
 
-        const [turnosRes, profRes, servRes, pacRes] = await Promise.all([
-          turnosApi.listar({
-            limit: 5000,
-            fecha_desde: desde.toISOString().split('T')[0],
-            fecha_hasta: hasta.toISOString().split('T')[0]
-          }).catch(() => ({ data: [] })),
-          profesionalesApi.listar({ estado: 'Activo', limit: 100 }).catch(() => ({ data: [] })),
-          serviciosApi.listar().catch(() => ({ data: [] })),
-          pacientesApi.listar({ limit: 5000 }).catch(() => ({ data: [] }))
-        ]);
+      const [turnosRes, profRes, servRes, pacRes] = await Promise.all([
+        turnosApi.listar({
+          limit: 5000,
+          fecha_desde: desde.toISOString().split('T')[0],
+          fecha_hasta: hasta.toISOString().split('T')[0]
+        }).catch(() => ({ data: [] })),
+        profesionalesApi.listar({ estado: 'Activo', limit: 100 }).catch(() => ({ data: [] })),
+        serviciosApi.listar().catch(() => ({ data: [] })),
+        pacientesApi.listar({ limit: 5000 }).catch(() => ({ data: [] }))
+      ]);
 
-        const turnos = turnosRes.data || [];
-        const profesionales = profRes.data || [];
-        const pacientes = pacRes.data || [];
+      const turnos = turnosRes.data || [];
+      const profesionales = profRes.data || [];
+      const pacientes = pacRes.data || [];
 
-        const today = new Date().toISOString().split('T')[0];
-        const turnosHoy = turnos.filter(turno => turno.fecha === today).length;
+      const today = new Date().toISOString().split('T')[0];
+      const turnosHoy = turnos.filter(turno => turno.fecha === today).length;
 
-        const turnosPorEstado: Record<string, number> = {};
-        turnos.forEach(turno => {
-          turnosPorEstado[turno.estado] = (turnosPorEstado[turno.estado] || 0) + 1;
-        });
+      const turnosPorEstado: Record<string, number> = {};
+      turnos.forEach(turno => {
+        turnosPorEstado[turno.estado] = (turnosPorEstado[turno.estado] || 0) + 1;
+      });
 
-        const turnosRecientes = [...turnos]
-          .sort((a, b) => {
-            const dateComparison = b.fecha.localeCompare(a.fecha);
-            if (dateComparison !== 0) return dateComparison;
-            return b.hora_inicio.localeCompare(a.hora_inicio);
-          })
-          .slice(0, 6);
+      const turnosRecientes = [...turnos]
+        .sort((a, b) => {
+          const dateComparison = b.fecha.localeCompare(a.fecha);
+          if (dateComparison !== 0) return dateComparison;
+          return b.hora_inicio.localeCompare(a.hora_inicio);
+        })
+        .slice(0, 6);
 
-        const appointmentTrend: { fecha: string; count: number }[] = [];
-        for (let i = 6; i >= 0; i--) {
-          const date = new Date();
-          date.setDate(date.getDate() - i);
-          const dateStr = date.toISOString().split('T')[0];
-          const count = turnos.filter(t => t.fecha === dateStr).length;
-          appointmentTrend.push({ fecha: dateStr, count });
-        }
-
-        setStats({
-          totalTurnos: turnos.length,
-          turnosHoy,
-          totalProfesionales: profesionales.length,
-          totalServicios: servRes.data?.length || 0,
-          totalPacientes: pacientes.length,
-          turnosPorEstado,
-          turnosRecientes,
-          turnosPorProf: {},
-          appointmentTrend
-        });
-      } catch (error) {
-        console.error('Error fetching dashboard stats:', error);
-      } finally {
-        setLoading(false);
+      const appointmentTrend: { fecha: string; count: number }[] = [];
+      for (let i = 6; i >= 0; i--) {
+        const date = new Date();
+        date.setDate(date.getDate() - i);
+        const dateStr = date.toISOString().split('T')[0];
+        const count = turnos.filter(t => t.fecha === dateStr).length;
+        appointmentTrend.push({ fecha: dateStr, count });
       }
-    };
 
+      setStats({
+        totalTurnos: turnos.length,
+        turnosHoy,
+        totalProfesionales: profesionales.length,
+        totalServicios: servRes.data?.length || 0,
+        totalPacientes: pacientes.length,
+        turnosPorEstado,
+        turnosRecientes,
+        turnosPorProf: {},
+        appointmentTrend
+      });
+    } catch (error) {
+      console.error('Error fetching dashboard stats:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchStats();
   }, []);
+
+  const handleUpdateStatus = async (id: number, nuevoEstado: string) => {
+    try {
+      await turnosApi.actualizar(id, { estado: nuevoEstado });
+      toast({
+        title: nuevoEstado === 'Confirmado' ? "Turno Confirmado" : "Turno Cancelado",
+        description: "El estado del turno se ha actualizado correctamente.",
+      });
+      fetchStats();
+    } catch (e: any) {
+      console.error('Error al actualizar estado:', e);
+      toast({
+        title: "Error",
+        description: e.response?.data?.error || "No se pudo actualizar el estado del turno.",
+        variant: "destructive"
+      });
+    }
+  };
 
   if (loading) {
     return (
@@ -293,17 +313,18 @@ export const Dashboard: React.FC<{
                   <th className="pb-3 font-medium">Servicio</th>
                   <th className="pb-3 font-medium">Estado</th>
                   <th className="pb-3 font-medium">Fecha</th>
-                  <th className="pb-3 font-medium text-right">Hora</th>
+                  <th className="pb-3 font-medium">Hora</th>
+                  <th className="pb-3 font-medium text-right">Acciones</th>
                 </tr>
               </thead>
               <tbody>
                 {stats.turnosRecientes.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="py-8 text-center text-gray-500">No hay turnos registrados</td>
+                    <td colSpan={6} className="py-8 text-center text-gray-500">No hay turnos registrados</td>
                   </tr>
                 ) : (
                   stats.turnosRecientes.map((turno) => (
-                    <tr key={turno.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                    <tr key={turno.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors group">
                       <td className="py-3 pr-4">
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 rounded-full bg-blue-100 text-[#2563FF] flex items-center justify-center font-bold text-xs shrink-0">
@@ -316,7 +337,7 @@ export const Dashboard: React.FC<{
                       <td className="py-3">
                         <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
                           turno.estado === 'Atendido' ? 'bg-green-100 text-green-700' :
-                          turno.estado === 'Confirmado' ? 'bg-[#2563FF]/10 text-[#2563FF]' :
+                          turno.estado === 'Confirmado' || turno.estado === 'Confirmado por Whatsapp' ? 'bg-blue-100 text-blue-700' :
                           turno.estado === 'Pendiente' ? 'bg-yellow-100 text-yellow-700' :
                           turno.estado === 'Ausente' ? 'bg-gray-800 text-white' :
                           'bg-red-100 text-red-700'
@@ -326,7 +347,29 @@ export const Dashboard: React.FC<{
                         </span>
                       </td>
                       <td className="py-3 text-gray-600 font-medium">{new Date(turno.fecha + 'T00:00:00').toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}</td>
-                      <td className="py-3 text-right text-gray-900 font-bold">{turno.hora_inicio}</td>
+                      <td className="py-3 text-gray-900 font-bold">{turno.hora_inicio}</td>
+                      <td className="py-3 text-right">
+                        {turno.estado === 'Pendiente' ? (
+                          <div className="flex justify-end gap-2">
+                            <button 
+                              onClick={() => handleUpdateStatus(turno.id, 'Confirmado')}
+                              className="w-8 h-8 rounded-full bg-green-50 text-green-600 flex items-center justify-center hover:bg-green-100 transition shadow-sm border border-green-200"
+                              title="Aprobar"
+                            >
+                              <Check className="w-4 h-4" />
+                            </button>
+                            <button 
+                              onClick={() => handleUpdateStatus(turno.id, 'Cancelado')}
+                              className="w-8 h-8 rounded-full bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-100 transition shadow-sm border border-red-200"
+                              title="Rechazar"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                        ) : (
+                          <span className="text-[10px] text-gray-300 italic">Sin acciones</span>
+                        )}
+                      </td>
                     </tr>
                   ))
                 )}
