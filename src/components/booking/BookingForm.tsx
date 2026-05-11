@@ -11,10 +11,12 @@ import { BookingSummary } from "./BookingSummary"
 import type { Servicio, Profesional, CrearPacienteData } from "../../types"
 import { turnosApi, pacientesApi } from "../../api"
 import { patientPortalApi, getPatientToken } from "../../api/patient-portal"
-import { Check, ArrowLeft } from "lucide-react"
+import { BranchSelection } from "./BranchSelection"
+import { Check, ArrowLeft, MapPin } from "lucide-react"
 
 export const BookingForm: React.FC = () => {
   const [step, setStep] = useState(1)
+  const [selectedBranch, setSelectedBranch] = useState<any | null>(null)
   const [selectedService, setSelectedService] = useState<Servicio | null>(null)
   const [selectedProfessional, setSelectedProfessional] = useState<Profesional | null>(null)
   const [selectedDateTime, setSelectedDateTime] = useState<string | null>(null)
@@ -69,28 +71,33 @@ export const BookingForm: React.FC = () => {
     checkAuth()
   }, [])
 
+  const handleBranchSelect = (branch: any) => {
+    setSelectedBranch(branch)
+    setStep(2)
+  }
+
   const handleServiceSelect = (service: Servicio) => {
     setSelectedService(service)
-    setStep(2)
+    setStep(3)
   }
 
   const handleProfessionalSelect = (professional: Profesional) => {
     setSelectedProfessional(professional)
-    setStep(3)
+    setStep(4)
   }
 
   const handleDateTimeSelect = (dateTime: string) => {
     setSelectedDateTime(dateTime)
     if (isAuthenticated && patientData) {
-      setStep(5)
+      setStep(6)
     } else {
-      setStep(4)
+      setStep(5)
     }
   }
 
   const handlePatientSubmit = (data: CrearPacienteData) => {
     setPatientData(data)
-    setStep(5)
+    setStep(6)
   }
 
   const handleFinalSubmit = async () => {
@@ -120,6 +127,7 @@ export const BookingForm: React.FC = () => {
         paciente_id: pacienteId,
         profesional_id: selectedProfessional.id,
         servicio_id: selectedService.id,
+        sucursal_id: selectedBranch?.id, // <--- Added sucursal_id
         fecha: selectedDateTime.split('T')[0],
         hora_inicio: horaInicio,
         hora_fin: horaFin,
@@ -131,7 +139,8 @@ export const BookingForm: React.FC = () => {
       setBookingSuccess(true)
     } catch (error: any) {
       console.error("Error creating appointment:", error)
-      alert("Error al crear el turno. Por favor, intente nuevamente.")
+      const message = error.response?.data?.error || "Error al crear el turno. Por favor, intente nuevamente."
+      alert(message)
     } finally {
       setLoading(false)
     }
@@ -139,6 +148,7 @@ export const BookingForm: React.FC = () => {
 
   const resetBooking = () => {
     setStep(1)
+    setSelectedBranch(null)
     setSelectedService(null)
     setSelectedProfessional(null)
     setSelectedDateTime(null)
@@ -170,16 +180,18 @@ export const BookingForm: React.FC = () => {
 
   const getStepSummary = (stepIndex: number) => {
     switch (stepIndex) {
-      case 1: return selectedService?.nombre || "Seleccionar"
-      case 2: return selectedProfessional ? `${selectedProfessional.nombre} ${selectedProfessional.apellido}` : "Seleccionar"
-      case 3: return selectedDateTime ? formatDateTimeSummary(selectedDateTime) : "Seleccionar"
-      case 4: return patientData ? `${patientData.nombre} ${patientData.apellido}` : "Completar datos"
-      case 5: return "Pendiente"
+      case 1: return selectedBranch?.nombre || "Seleccionar"
+      case 2: return selectedService?.nombre || "Seleccionar"
+      case 3: return selectedProfessional ? `${selectedProfessional.nombre} ${selectedProfessional.apellido}` : "Seleccionar"
+      case 4: return selectedDateTime ? formatDateTimeSummary(selectedDateTime) : "Seleccionar"
+      case 5: return patientData ? `${patientData.nombre} ${patientData.apellido}` : "Completar datos"
+      case 6: return "Pendiente"
       default: return ""
     }
   }
 
   const stepTitles = [
+    "SELECCIÓN DE SUCURSAL",
     "SELECCIÓN DE SERVICIO",
     "SELECCIÓN DE PROFESIONAL",
     "FECHA Y HORA",
@@ -240,15 +252,16 @@ export const BookingForm: React.FC = () => {
                   {/* Step Content (Expanded) */}
                   {isActive && (
                     <div className="p-5 sm:p-8 animate-in slide-in-from-top-4 duration-500">
-                      {step === 1 && <ServiceSelection onServiceSelect={handleServiceSelect} selectedService={selectedService} />}
-                      {step === 2 && (
+                      {step === 1 && <BranchSelection onBranchSelect={handleBranchSelect} selectedBranch={selectedBranch} />}
+                      {step === 2 && <ServiceSelection onServiceSelect={handleServiceSelect} selectedService={selectedService} />}
+                      {step === 3 && (
                         <ProfessionalSelection
                           selectedService={selectedService}
                           onProfessionalSelect={handleProfessionalSelect}
                           selectedProfessional={selectedProfessional}
                         />
                       )}
-                      {step === 3 && selectedProfessional && (
+                      {step === 4 && selectedProfessional && (
                         <DateTimeSelection
                           selectedService={selectedService}
                           selectedProfessional={selectedProfessional}
@@ -257,13 +270,13 @@ export const BookingForm: React.FC = () => {
                           mesActualBloqueado={mesActualBloqueado}
                         />
                       )}
-                      {step === 4 && (
+                      {step === 5 && (
                         <PatientForm
                           onPatientData={handlePatientSubmit}
                           loading={loading}
                         />
                       )}
-                      {step === 5 && selectedService && selectedProfessional && selectedDateTime && patientData && (
+                      {step === 6 && selectedService && selectedProfessional && selectedDateTime && patientData && (
                         <PaymentStep
                           service={selectedService}
                           professional={selectedProfessional}

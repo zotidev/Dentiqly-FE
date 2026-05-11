@@ -12,6 +12,7 @@ import DebtorsReport from './DebtorsReport'
 import CashFlow from './CashFlow'
 import { FeriadosManager } from './FeriadosManager'
 import { AusenciasManager } from './AusenciasManager'
+import { SucursalesManager } from './SucursalesManager'
 import { SettingsManager } from './SettingsManager'
 import { apiClient } from '../../lib/api-client'
 import { AlertTriangle, XCircle, Clock, CreditCard, MessageSquare, CheckCircle, ShieldCheck } from 'lucide-react'
@@ -243,6 +244,8 @@ export const AdminApp: React.FC = () => {
         return <ObrasSocialesManager />
       case 'recordatorios':
         return <RemindersView />
+      case 'sucursales':
+        return <SucursalesManager />
       case 'settings':
         return <SettingsManager />
       default:

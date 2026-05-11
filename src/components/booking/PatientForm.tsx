@@ -87,7 +87,7 @@ export const PatientForm: React.FC<PatientFormProps> = ({ onPatientData, loading
     if (!formData.fecha_nacimiento) newErrors.fecha_nacimiento = "Requerido"
     if (!formData.telefono?.trim()) newErrors.telefono = "Requerido"
     if (!formData.email?.trim()) newErrors.email = "Requerido"
-    else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = "Email inválido"
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(formData.email)) newErrors.email = "Email inválido"
 
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0

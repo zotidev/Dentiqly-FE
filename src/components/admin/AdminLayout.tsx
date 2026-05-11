@@ -19,7 +19,8 @@ import {
   ChevronRight,
   PanelLeftClose,
   PanelLeft,
-  Menu
+  Menu,
+  MapPin as MapIcon
 } from 'lucide-react'
 
 interface AdminLayoutProps {
@@ -48,6 +49,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
     { id: 'feriados', label: 'Feriados', icon: Calendar },
     { id: 'ausencias', label: 'Ausencias/Vacaciones', icon: CalendarOff },
     { id: 'obras-sociales', label: 'Obras Sociales', icon: Shield },
+    { id: 'sucursales', label: 'Sucursales', icon: MapIcon },
     { id: 'recordatorios', label: 'Recordatorios', icon: Bell },
     { id: 'settings', label: 'Configuración', icon: Settings },
   ]

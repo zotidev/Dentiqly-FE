@@ -34,6 +34,26 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 }
 
 /**
+ * Header de branding Dentiqly para las páginas de booking público.
+ */
+const DentiqlyBookingHeader: React.FC = () => (
+  <header className="w-full bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50">
+    <div className="max-w-[1400px] mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+      <span className="text-[10px] sm:text-xs font-semibold text-gray-400 tracking-widest uppercase">
+        Reserva online
+      </span>
+      <div className="flex items-center gap-3">
+        <img
+          src="/assets/dentiqly-logo.png"
+          alt="Dentiqly - Dental Software SaaS"
+          className="h-8 sm:h-9 w-auto object-contain"
+        />
+      </div>
+    </div>
+  </header>
+)
+
+/**
  * BookingLayout con slug del tenant.
  * Setea el tenantSlug en el apiClient para que todas las llamadas
  * del wizard de booking vayan a /api/public/:slug/
@@ -63,6 +83,7 @@ const BookingWithSlug: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: dentalColors.gray50 }}>
+      <DentiqlyBookingHeader />
       <main className="flex-1 py-8">
         <BookingForm />
       </main>
@@ -97,6 +118,7 @@ const BookingLayout: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: dentalColors.gray50 }}>
+      <DentiqlyBookingHeader />
       <main className="flex-1 py-8">
         <BookingForm />
       </main>
