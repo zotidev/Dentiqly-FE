@@ -5,7 +5,6 @@ import { useState } from "react"
 import {
   FileText,
   ChevronLeft,
-  MoreVertical,
   Camera,
   Smile,
 } from "lucide-react"
@@ -24,6 +23,7 @@ interface PatientDetailViewProps {
   patient: Paciente
   onBack: () => void
   onEdit: (patient: Paciente) => void
+  onBookTurno?: () => void
   onPhotoUpload: (e: React.ChangeEvent<HTMLInputElement>, patientId: string) => void
   uploadingPhoto: boolean
   getPhotoUrl: (patient: Paciente) => string | null
@@ -35,6 +35,7 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
   patient,
   onBack,
   onEdit,
+  onBookTurno,
   onPhotoUpload,
   uploadingPhoto,
   getPhotoUrl,
@@ -153,12 +154,12 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
         </div>
 
         <div className="flex items-center gap-3 pt-2">
-          <Button className="bg-[#4361EE] hover:bg-[#3651d4] text-white font-medium rounded-lg px-5 py-2.5 h-auto text-[14px] shadow-sm transition-all">
+          <Button 
+            onClick={onBookTurno}
+            className="bg-[#4361EE] hover:bg-[#3651d4] text-white font-medium rounded-lg px-5 py-2.5 h-auto text-[14px] shadow-sm transition-all"
+          >
             Agendar Turno
           </Button>
-          <button className="h-[42px] w-[42px] flex items-center justify-center border border-gray-200 rounded-lg text-gray-400 hover:bg-gray-50 hover:text-gray-600 transition-colors">
-            <MoreVertical className="h-5 w-5" />
-          </button>
         </div>
       </div>
 
@@ -249,109 +250,8 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
         <div className="animate-in fade-in duration-300">
           {activeTab === "historia" && <ClinicalHistorySection pacienteId={patient.id} />}
           {activeTab === "odontograma" && (
-            <div className="w-full">
-              {/* Service Toggle */}
-              <div className="flex items-center gap-4 mb-6">
-                <span className="text-[15px] font-bold text-gray-900">Service</span>
-                <div className="flex items-center bg-gray-50 rounded-xl p-1 border border-gray-100">
-                  <button className="px-5 py-1.5 bg-white text-gray-900 text-[13px] font-bold rounded-lg shadow-sm border border-gray-100">
-                    Medical
-                  </button>
-                  <button className="px-5 py-1.5 text-gray-400 text-[13px] font-bold hover:text-gray-700 transition-colors">
-                    Cosmetic
-                  </button>
-                </div>
-              </div>
-
-              {/* 2 Column Layout */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                {/* Left Column - Odontogram */}
-                <div className="lg:col-span-5 border border-gray-100 rounded-[1.5rem] p-6 bg-white shadow-sm flex flex-col items-center">
-                  <h3 className="text-lg font-bold text-gray-900 mb-8">Odontogram</h3>
-                  <div className="w-full overflow-hidden transform scale-90">
-                    <OdontogramSection pacienteId={patient.id} />
-                  </div>
-                </div>
-
-                {/* Right Column - Timeline */}
-                <div className="lg:col-span-7">
-                  <div className="flex items-center gap-3 mb-8">
-                    <div className="px-2 py-1 bg-[#F5F8FF] border border-[#E0E7FF] text-[#4361EE] text-xs font-bold rounded flex items-center gap-1">
-                       <Smile className="w-3 h-3" /> 22
-                    </div>
-                    <h3 className="text-lg font-bold text-[#1e293b]">Maxillary Left Lateral Incisor</h3>
-                  </div>
-
-                  <div className="relative pl-6 border-l border-gray-200 space-y-10 ml-4">
-                    {/* Timeline Item 1 */}
-                    <div className="relative">
-                      <div className="absolute -left-[31px] top-1 w-3 h-3 bg-gray-400 rounded-full ring-4 ring-white" />
-                      <div className="grid grid-cols-5 gap-4 mb-3">
-                        <div className="col-span-1">
-                          <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wide">MEI</p>
-                          <p className="text-lg font-bold text-gray-900 leading-none mt-1">03</p>
-                        </div>
-                        <div className="col-span-1">
-                          <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wide">CONDITON</p>
-                          <p className="text-[13px] font-medium text-gray-900 mt-1">Caries</p>
-                        </div>
-                        <div className="col-span-1">
-                          <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wide">TREATMENT</p>
-                          <p className="text-[13px] font-medium text-gray-900 mt-1">Tooth filling</p>
-                        </div>
-                        <div className="col-span-2 flex justify-between items-start">
-                          <div>
-                            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wide">DENTIST</p>
-                            <p className="text-[13px] font-medium text-gray-900 mt-1">Drg Soap Mactavish</p>
-                          </div>
-                          <span className="text-[12px] font-bold text-emerald-500 flex items-center gap-1">
-                            ✓ Done
-                          </span>
-                        </div>
-                      </div>
-                      <div className="bg-[#F8FAFC] border border-[#F1F5F9] rounded-xl p-3 flex items-start gap-2">
-                        <FileText className="w-4 h-4 text-gray-400 mt-0.5" />
-                        <span className="text-[13px] text-gray-600">Advanced Decay</span>
-                      </div>
-                    </div>
-
-                    {/* Timeline Item 2 */}
-                    <div className="relative">
-                      <div className="absolute -left-[31px] top-1 w-3 h-3 bg-[#64748B] rounded-full ring-4 ring-white" />
-                      <div className="grid grid-cols-5 gap-4 mb-3">
-                        <div className="col-span-1">
-                          <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wide">APR</p>
-                          <p className="text-lg font-bold text-gray-900 leading-none mt-1">12</p>
-                        </div>
-                        <div className="col-span-1">
-                          <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wide">CONDITON</p>
-                          <p className="text-[13px] font-medium text-gray-900 mt-1">Caries</p>
-                        </div>
-                        <div className="col-span-1">
-                          <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wide">TREATMENT</p>
-                          <p className="text-[13px] font-medium text-gray-900 mt-1">Tooth filling</p>
-                        </div>
-                        <div className="col-span-2 flex justify-between items-start">
-                          <div>
-                            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wide">DENTIST</p>
-                            <p className="text-[13px] font-medium text-gray-900 mt-1">Drg Soap Mactavish</p>
-                          </div>
-                          <span className="text-[12px] font-bold text-amber-500 flex items-center gap-1">
-                            ⏳ Pending
-                          </span>
-                        </div>
-                      </div>
-                      <div className="pl-6 border-l-2 border-[#4361EE] ml-2 mb-3">
-                        <span className="text-[13px] text-gray-600 font-medium">Reason: Not enough time</span>
-                      </div>
-                      <div className="bg-[#F8FAFC] border border-[#F1F5F9] rounded-xl p-3 flex items-start gap-2 ml-2">
-                        <FileText className="w-4 h-4 text-gray-400 mt-0.5" />
-                        <span className="text-[13px] text-gray-600">Decay in pulp</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            <div className="w-full animate-in zoom-in-95 duration-300">
+              <OdontogramSection pacienteId={patient.id} />
             </div>
           )}
           {activeTab === "prescripciones" && <PrescriptionsSection pacienteId={patient.id} />}

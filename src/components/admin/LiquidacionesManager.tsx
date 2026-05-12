@@ -1,16 +1,53 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
-import { Button } from "../ui/Button"
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/Card"
-import { Badge } from "../ui/badge"
-import { Pagination } from "../ui/Pagination"
+import { 
+  Users, 
+  Plus, 
+  Search, 
+  ArrowUpDown, 
+  ChevronLeft, 
+  ChevronRight, 
+  FileText, 
+  Download, 
+  Trash2, 
+  CheckCircle2, 
+  Clock, 
+  X,
+  CreditCard
+} from "lucide-react"
 import { liquidacionesApi } from "../../api/liquidaciones"
 import type { Liquidacion } from "../../types"
-import { Spinner } from "../ui/spinner"
 import { useToast } from "../../hooks/use-toast"
 import { NuevaLiquidacionModal } from "./liquidaciones/NuevaLiquidacionModal"
 import { LiquidacionDetailModal } from "./liquidaciones/LiquidacionDetailModal"
+
+/* ─── Dentiqly design tokens ─────────────────────────────────────────── */
+const tokens = {
+  blue: "#2563FF",
+  blueHover: "#1E40AF",
+  blueFaint: "#EEF3FF",
+  navy: "#0B1023",
+  grayText: "#4B5568",
+  grayMuted: "#8A93A8",
+  grayBorder: "#E2E6EF",
+  grayBg: "#F5F7FA",
+  grayRow: "#F0F2F7",
+  rowHover: "#F5F8FF",
+  white: "#FFFFFF",
+
+  green: "#22C55E",
+  greenFaint: "#EDFAF4",
+  greenText: "#15803D",
+
+  red: "#EF4444",
+  redFaint: "#FEF2F2",
+  redText: "#B91C1C",
+
+  orange: "#F59E0B",
+  orangeFaint: "#FFF7ED",
+  orangeText: "#92400E",
+}
 
 export function LiquidacionesManager() {
   const [liquidaciones, setLiquidaciones] = useState<Liquidacion[]>([])
@@ -18,7 +55,8 @@ export function LiquidacionesManager() {
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [selectedLiquidacion, setSelectedLiquidacion] = useState<Liquidacion | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
-  const itemsPerPage = 10
+  const [searchTerm, setSearchTerm] = useState("")
+  const itemsPerPage = 12
   const { toast } = useToast()
 
   useEffect(() => {
@@ -28,7 +66,7 @@ export function LiquidacionesManager() {
   const cargarDatos = async () => {
     try {
       setLoading(true)
-      const liquidacionesRes = await liquidacionesApi.listar({ limit: 200 })
+      const liquidacionesRes = await liquidacionesApi.listar({ limit: 500 })
       setLiquidaciones(liquidacionesRes.data)
     } catch (error) {
       toast({
@@ -43,7 +81,6 @@ export function LiquidacionesManager() {
 
   const handleLiquidacionClick = async (id: number) => {
     try {
-      // Fetch full details including prestaciones
       const fullLiquidacion = await liquidacionesApi.obtener(id)
       setSelectedLiquidacion(fullLiquidacion)
     } catch (error) {
@@ -78,7 +115,7 @@ export function LiquidacionesManager() {
   const formatDateRange = (start: string, end: string) => {
     const s = new Date(start)
     const e = new Date(end)
-    const options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short', year: 'numeric' }
+    const options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short' }
     return `${s.toLocaleDateString('es-AR', options)} - ${e.toLocaleDateString('es-AR', options)}`
   }
 
@@ -89,86 +126,257 @@ export function LiquidacionesManager() {
     }).format(Number(amount))
   }
 
+  const filteredLiquidaciones = useMemo(() => {
+    if (!searchTerm) return liquidaciones
+    const lower = searchTerm.toLowerCase()
+    return liquidaciones.filter(l => 
+      l.profesional?.nombre.toLowerCase().includes(lower) || 
+      l.profesional?.apellido.toLowerCase().includes(lower)
+    )
+  }, [liquidaciones, searchTerm])
+
   const { paginatedLiquidaciones, totalPages } = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     return {
-      paginatedLiquidaciones: liquidaciones.slice(startIndex, endIndex),
-      totalPages: Math.ceil(liquidaciones.length / itemsPerPage)
+      paginatedLiquidaciones: filteredLiquidaciones.slice(startIndex, endIndex),
+      totalPages: Math.ceil(filteredLiquidaciones.length / itemsPerPage)
     };
-  }, [liquidaciones, currentPage, itemsPerPage]);
+  }, [filteredLiquidaciones, currentPage]);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-96">
-        <Spinner className="w-8 h-8" />
-      </div>
-    )
+  const pageStyle: React.CSSProperties = {
+    background: tokens.grayBg,
+    minHeight: "100vh",
+    padding: "28px 32px",
+    fontFamily: "Poppins, -apple-system, sans-serif",
   }
 
   return (
-    <div className="bg-[#f0f2f5] min-h-screen p-4 sm:p-8 rounded-3xl font-sans space-y-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+    <div style={pageStyle}>
+      {/* ── Header ── */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 }}>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Liquidaciones</h1>
-          <p className="text-gray-500 mt-1">Gestión de liquidaciones a profesionales</p>
+          <h1 style={{ fontSize: 22, fontWeight: 600, color: tokens.navy, letterSpacing: "-0.3px", margin: 0 }}>
+            Liquidaciones
+          </h1>
+          <p style={{ fontSize: 13, color: tokens.grayMuted, marginTop: 3, fontWeight: 400 }}>
+            Gestioná el pago de honorarios a tus profesionales
+          </p>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <button onClick={() => setShowCreateDialog(true)} className="flex items-center gap-2 px-6 py-2 bg-[#2563FF] text-white rounded-full font-medium hover:bg-blue-700 transition shadow-md shadow-blue-500/20">
-            Nueva Liquidación
-          </button>
+        <button
+          onClick={() => setShowCreateDialog(true)}
+          style={{
+            display: "flex", alignItems: "center", gap: 7,
+            background: tokens.blue, color: tokens.white,
+            border: "none", borderRadius: 10, padding: "9px 18px",
+            fontSize: 13, fontWeight: 500, cursor: "pointer",
+            fontFamily: "Poppins, -apple-system, sans-serif",
+            transition: "background 0.15s",
+          }}
+          onMouseEnter={e => (e.currentTarget.style.background = tokens.blueHover)}
+          onMouseLeave={e => (e.currentTarget.style.background = tokens.blue)}
+        >
+          <Plus size={15} />
+          Nueva Liquidación
+        </button>
+      </div>
+
+      {/* ── Controls ── */}
+      <div style={{ display: "flex", gap: 12, marginBottom: 20, alignItems: "center" }}>
+        <div style={{
+          flex: 1, display: "flex", alignItems: "center", gap: 10,
+          background: tokens.white, border: `0.5px solid ${tokens.grayBorder}`,
+          borderRadius: 10, padding: "0 14px", height: 40,
+        }}>
+          <Search size={15} color={tokens.grayMuted} />
+          <input
+            type="text"
+            placeholder="Buscar por profesional…"
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            style={{
+              border: "none", outline: "none", background: "transparent",
+              fontSize: 13, color: tokens.navy, flex: 1,
+              fontFamily: "Poppins, -apple-system, sans-serif",
+            }}
+          />
+        </div>
+        
+        <div style={{
+          display: "flex", alignItems: "center", gap: 8,
+          background: tokens.white, border: `0.5px solid ${tokens.grayBorder}`,
+          borderRadius: 10, padding: "0 14px", height: 40, whiteSpace: "nowrap",
+        }}>
+          <FileText size={15} color={tokens.blue} />
+          <span style={{ fontSize: 13, fontWeight: 600, color: tokens.navy }}>{filteredLiquidaciones.length}</span>
+          <span style={{ fontSize: 13, color: tokens.grayMuted }}>registros</span>
         </div>
       </div>
 
-      <Card>
-        <CardContent className="p-0">
-          {liquidaciones.length === 0 ? (
-            <div className="p-8 text-center text-gray-500">
-              No hay liquidaciones registradas
-            </div>
-          ) : (
-            <>
-              <div className="divide-y">
-                {paginatedLiquidaciones.map((liquidacion) => (
-                  <div
-                    key={liquidacion.id}
-                    className="p-4 hover:bg-gray-50 cursor-pointer transition-colors flex justify-between items-center group"
-                    onClick={() => handleLiquidacionClick(liquidacion.id)}
-                  >
-                    <div className="space-y-1">
-                      <p className="text-xs text-gray-500 font-light">
-                        Período: {formatDateRange(liquidacion.periodo_inicio, liquidacion.periodo_fin)}
-                      </p>
-                      <h3 className="text-lg font-normal text-gray-800 uppercase tracking-wide">
-                        {liquidacion.profesional?.apellido} {liquidacion.profesional?.nombre}
-                      </h3>
-                    </div>
-
-                    <div className="flex items-center gap-6">
-                      {liquidacion.estado !== "Generada" && (
-                        <Badge variant={liquidacion.estado === "Pagada" ? "outline" : "secondary"} className="font-normal">
-                          {liquidacion.estado}
-                        </Badge>
-                      )}
-
-                      <span className="text-xl font-normal text-gray-900">
-                        {formatCurrency(liquidacion.monto_profesional)}
-                      </span>
-                    </div>
-                  </div>
+      {/* ── Table card ── */}
+      <div style={{
+        background: tokens.white, borderRadius: 14,
+        border: `0.5px solid ${tokens.grayBorder}`, overflow: "hidden",
+      }}>
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <thead>
+              <tr style={{ borderBottom: `0.5px solid ${tokens.grayBorder}` }}>
+                {[
+                  { label: "Profesional", sortable: true },
+                  { label: "Período", sortable: true },
+                  { label: "Servicios", sortable: true },
+                  { label: "Monto Profesional", sortable: true },
+                  { label: "Estado", sortable: false },
+                  { label: "", sortable: false },
+                ].map((col, i) => (
+                  <th key={i} style={{
+                    textAlign: "left", padding: "12px 16px",
+                    fontSize: 11, fontWeight: 600, color: tokens.grayMuted,
+                    textTransform: "uppercase", letterSpacing: "0.6px", whiteSpace: "nowrap",
+                  }}>
+                    {col.label && (
+                      <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                        {col.label}
+                        {col.sortable && <ArrowUpDown size={11} />}
+                      </div>
+                    )}
+                  </th>
                 ))}
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                [...Array(5)].map((_, i) => (
+                  <tr key={i} style={{ borderBottom: `0.5px solid ${tokens.grayRow}` }}>
+                    <td style={{ padding: "11px 16px" }}><div style={{ width: 120, height: 11, borderRadius: 5, background: tokens.grayRow, animation: "pulse 1.5s infinite" }} /></td>
+                    {[...Array(4)].map((_, j) => (
+                      <td key={j} style={{ padding: "11px 16px" }}><div style={{ width: 80, height: 11, borderRadius: 5, background: tokens.grayRow }} /></td>
+                    ))}
+                    <td style={{ padding: "11px 16px" }} />
+                  </tr>
+                ))
+              ) : paginatedLiquidaciones.length === 0 ? (
+                <tr>
+                  <td colSpan={6} style={{ textAlign: "center", padding: "56px 0" }}>
+                    <FileText size={36} color={tokens.grayBorder} style={{ margin: "0 auto 12px", display: "block" }} />
+                    <p style={{ fontSize: 14, fontWeight: 500, color: tokens.grayMuted }}>No hay liquidaciones que coincidan</p>
+                  </td>
+                </tr>
+              ) : (
+                paginatedLiquidaciones.map((liq, idx) => {
+                  const isLast = idx === paginatedLiquidaciones.length - 1
+                  return (
+                    <tr
+                      key={liq.id}
+                      onClick={() => handleLiquidacionClick(liq.id)}
+                      style={{ borderBottom: isLast ? "none" : `0.5px solid ${tokens.grayRow}`, cursor: "pointer", transition: "background 0.12s" }}
+                      onMouseEnter={e => (e.currentTarget.style.background = tokens.rowHover)}
+                      onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                    >
+                      {/* Profesional */}
+                      <td style={{ padding: "14px 16px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                          <div style={{
+                            width: 32, height: 32, borderRadius: 8,
+                            background: tokens.blueFaint, color: tokens.blue,
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            fontSize: 11, fontWeight: 700
+                          }}>
+                            {(liq.profesional?.nombre || "").charAt(0)}{(liq.profesional?.apellido || "").charAt(0)}
+                          </div>
+                          <p style={{ fontSize: 13.5, fontWeight: 600, color: tokens.navy, margin: 0 }}>
+                            {liq.profesional?.apellido}, {liq.profesional?.nombre}
+                          </p>
+                        </div>
+                      </td>
+
+                      {/* Período */}
+                      <td style={{ padding: "11px 16px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12.5, color: tokens.grayText }}>
+                          <Clock size={12} color={tokens.grayMuted} />
+                          {formatDateRange(liq.periodo_inicio, liq.periodo_fin)}
+                        </div>
+                      </td>
+
+                      {/* Cantidad */}
+                      <td style={{ padding: "11px 16px" }}>
+                        <div style={{ fontSize: 13, color: tokens.navy, fontWeight: 500 }}>
+                          {liq.cantidad_prestaciones || 0} serv.
+                        </div>
+                      </td>
+
+                      {/* Monto */}
+                      <td style={{ padding: "11px 16px" }}>
+                        <div style={{ fontSize: 13.5, fontWeight: 700, color: tokens.navy }}>
+                          {formatCurrency(liq.monto_profesional)}
+                        </div>
+                      </td>
+
+                      {/* Estado */}
+                      <td style={{ padding: "11px 16px" }}>
+                        <span style={{
+                          display: "inline-flex", alignItems: "center", gap: 4,
+                          padding: "3px 10px", borderRadius: 6,
+                          fontSize: 11, fontWeight: 600,
+                          background: liq.estado === "Pagada" ? tokens.greenFaint : (liq.estado === "Generada" ? tokens.orangeFaint : tokens.grayPill),
+                          color: liq.estado === "Pagada" ? tokens.greenText : (liq.estado === "Generada" ? tokens.orangeText : tokens.grayPillTx),
+                        }}>
+                          {liq.estado === "Pagada" && <CheckCircle2 size={10} />}
+                          {liq.estado}
+                        </span>
+                      </td>
+
+                      {/* Actions */}
+                      <td style={{ padding: "11px 16px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 2, justifyContent: "flex-end" }}>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); console.log("Download", liq.id) }}
+                            title="Descargar"
+                            style={{
+                              width: 30, height: 30, borderRadius: 7, border: "none",
+                              background: "transparent", cursor: "pointer",
+                              display: "flex", alignItems: "center", justifyContent: "center",
+                              color: tokens.grayMuted, transition: "all 0.12s",
+                            }}
+                            onMouseEnter={e => { e.currentTarget.style.background = tokens.blueFaint; e.currentTarget.style.color = tokens.blue }}
+                            onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = tokens.grayMuted }}
+                          >
+                            <Download size={14} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination placeholder if needed, using internal logic as it was in original */}
+        {totalPages > 1 && (
+           <div style={{ padding: "12px 16px", borderTop: `0.5px solid ${tokens.grayRow}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <p style={{ fontSize: 12, color: tokens.grayMuted }}>Página {currentPage} de {totalPages}</p>
+              <div style={{ display: "flex", gap: 8 }}>
+                <button 
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage(prev => prev - 1)}
+                  style={{ padding: 6, borderRadius: 8, border: `0.5px solid ${tokens.grayBorder}`, background: tokens.white, cursor: currentPage === 1 ? "default" : "pointer", opacity: currentPage === 1 ? 0.5 : 1 }}
+                >
+                  <ChevronLeft size={16} />
+                </button>
+                <button 
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage(prev => prev + 1)}
+                  style={{ padding: 6, borderRadius: 8, border: `0.5px solid ${tokens.grayBorder}`, background: tokens.white, cursor: currentPage === totalPages ? "default" : "pointer", opacity: currentPage === totalPages ? 0.5 : 1 }}
+                >
+                  <ChevronRight size={16} />
+                </button>
               </div>
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={setCurrentPage}
-                itemsPerPage={itemsPerPage}
-                totalItems={liquidaciones.length}
-              />
-            </>
-          )}
-        </CardContent>
-      </Card>
+           </div>
+        )}
+      </div>
 
       <NuevaLiquidacionModal
         open={showCreateDialog}

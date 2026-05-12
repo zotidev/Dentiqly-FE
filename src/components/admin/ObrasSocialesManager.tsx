@@ -1,6 +1,6 @@
+"use client"
+
 import React, { useState, useEffect } from 'react'
-import { Card } from '../ui/Card'
-import { Button } from '../ui/Button'
 import {
   Plus,
   Edit,
@@ -9,10 +9,60 @@ import {
   X,
   Search,
   Check,
+  ArrowUpDown,
+  ShieldCheck,
+  Zap
 } from 'lucide-react'
 import { obrasSocialesApi } from '../../api/obras-sociales'
 import { ConfirmationModal } from '../ui/ConfirmationModal'
 import type { ObraSocial } from '../../types'
+
+/* ─── Dentiqly design tokens ─────────────────────────────────────────── */
+const tokens = {
+  blue: "#2563FF",
+  blueHover: "#1E40AF",
+  blueFaint: "#EEF3FF",
+  navy: "#0B1023",
+  grayText: "#4B5568",
+  grayMuted: "#8A93A8",
+  grayBorder: "#E2E6EF",
+  grayBg: "#F5F7FA",
+  grayRow: "#F0F2F7",
+  rowHover: "#F5F8FF",
+  white: "#FFFFFF",
+
+  green: "#22C55E",
+  greenFaint: "#EDFAF4",
+  greenText: "#15803D",
+
+  red: "#EF4444",
+  redFaint: "#FEF2F2",
+  redText: "#B91C1C",
+}
+
+/* ─── Label styles ────────────────────────────────────────────────────── */
+const labelStyle: React.CSSProperties = {
+  display: "block",
+  fontSize: 12,
+  fontWeight: 600,
+  color: tokens.grayMuted,
+  textTransform: "uppercase",
+  letterSpacing: "0.5px",
+  marginBottom: 6,
+}
+
+const inputStyle: React.CSSProperties = {
+  width: "100%",
+  padding: "9px 12px",
+  fontSize: 13,
+  border: `0.5px solid ${tokens.grayBorder}`,
+  borderRadius: 9,
+  outline: "none",
+  color: tokens.navy,
+  background: tokens.white,
+  fontFamily: "Poppins, -apple-system, sans-serif",
+  transition: "all 0.15s",
+}
 
 export const ObrasSocialesManager: React.FC = () => {
   const [obrasSociales, setObrasSociales] = useState<ObraSocial[]>([])
@@ -22,6 +72,7 @@ export const ObrasSocialesManager: React.FC = () => {
   const [editingId, setEditingId] = useState<number | null>(null)
   const [formData, setFormData] = useState({ nombre: '', plan: '' })
   const [saving, setSaving] = useState(false)
+  const [focusedField, setFocusedField] = useState<string | null>(null)
   const [confirmDelete, setConfirmDelete] = useState<{ isOpen: boolean; id: number | null }>({
     isOpen: false,
     id: null
@@ -62,20 +113,18 @@ export const ObrasSocialesManager: React.FC = () => {
 
   const handleConfirmDelete = async () => {
     if (!confirmDelete.id) return
-
     try {
       await obrasSocialesApi.eliminar(confirmDelete.id)
       fetchObrasSociales()
+      setConfirmDelete({ isOpen: false, id: null })
     } catch (error) {
       console.error('Error deleting obra social:', error)
-      alert('Error al eliminar la obra social. Puede que tenga pacientes asociados.')
     }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!formData.nombre.trim()) return
-
     try {
       setSaving(true)
       if (editingId) {
@@ -86,8 +135,7 @@ export const ObrasSocialesManager: React.FC = () => {
       setShowModal(false)
       fetchObrasSociales()
     } catch (error) {
-      console.error('Error saving obra social:', error)
-      alert('Error al guardar la obra social')
+      console.error('Error saving:', error)
     } finally {
       setSaving(false)
     }
@@ -97,165 +145,297 @@ export const ObrasSocialesManager: React.FC = () => {
     os.nombre.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
+  const pageStyle: React.CSSProperties = {
+    background: tokens.grayBg,
+    minHeight: "100vh",
+    padding: "28px 32px",
+    fontFamily: "Poppins, -apple-system, sans-serif",
+  }
+
   return (
-    <div className="bg-[#f0f2f5] min-h-screen p-4 sm:p-8 rounded-3xl font-sans space-y-6">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+    <div style={pageStyle}>
+      {/* ── Header ── */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 }}>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
-            <Shield className="h-8 w-8 text-[#2563FF]" />
+          <h1 style={{ fontSize: 22, fontWeight: 600, color: tokens.navy, letterSpacing: "-0.3px", margin: 0 }}>
             Obras Sociales
           </h1>
-          <p className="text-gray-500 mt-1">Gestiona las obras sociales disponibles para los pacientes</p>
+          <p style={{ fontSize: 13, color: tokens.grayMuted, marginTop: 3, fontWeight: 400 }}>
+            Administrá el listado de prestadoras autorizadas para el centro
+          </p>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <button onClick={handleCreate} className="flex items-center gap-2 px-6 py-2 bg-[#2563FF] text-white rounded-full font-medium hover:bg-blue-700 transition shadow-md shadow-blue-500/20">
-            <Plus className="w-4 h-4" /> Nueva Obra Social
-          </button>
+        <button
+          onClick={handleCreate}
+          style={{
+            display: "flex", alignItems: "center", gap: 7,
+            background: tokens.blue, color: tokens.white,
+            border: "none", borderRadius: 10, padding: "9px 18px",
+            fontSize: 13, fontWeight: 500, cursor: "pointer",
+            fontFamily: "Poppins, -apple-system, sans-serif",
+            transition: "background 0.15s",
+          }}
+          onMouseEnter={e => (e.currentTarget.style.background = tokens.blueHover)}
+          onMouseLeave={e => (e.currentTarget.style.background = tokens.blue)}
+        >
+          <Plus size={15} />
+          Nueva Obra Social
+        </button>
+      </div>
+
+      {/* ── Controls ── */}
+      <div style={{ display: "flex", gap: 12, marginBottom: 20, alignItems: "center" }}>
+        <div style={{
+          flex: 1, display: "flex", alignItems: "center", gap: 10,
+          background: tokens.white, border: `0.5px solid ${tokens.grayBorder}`,
+          borderRadius: 10, padding: "0 14px", height: 40,
+        }}>
+          <Search size={15} color={tokens.grayMuted} />
+          <input
+            type="text"
+            placeholder="Buscar obra social…"
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            style={{
+              border: "none", outline: "none", background: "transparent",
+              fontSize: 13, color: tokens.navy, flex: 1,
+              fontFamily: "Poppins, -apple-system, sans-serif",
+            }}
+          />
+        </div>
+        
+        <div style={{
+          display: "flex", alignItems: "center", gap: 8,
+          background: tokens.white, border: `0.5px solid ${tokens.grayBorder}`,
+          borderRadius: 10, padding: "0 14px", height: 40, whiteSpace: "nowrap",
+        }}>
+          <ShieldCheck size={15} color={tokens.blue} />
+          <span style={{ fontSize: 13, fontWeight: 600, color: tokens.navy }}>{filtered.length}</span>
+          <span style={{ fontSize: 13, color: tokens.grayMuted }}>entidades</span>
         </div>
       </div>
 
-      {/* Search */}
-      <Card className="p-4">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Buscar obra social..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-        </div>
-      </Card>
-
-      {/* List */}
-      <Card>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Nombre
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  ID
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                  Acciones
-                </th>
+      {/* ── Table card ── */}
+      <div style={{
+        background: tokens.white, borderRadius: 14,
+        border: `0.5px solid ${tokens.grayBorder}`, overflow: "hidden",
+      }}>
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <thead>
+              <tr style={{ borderBottom: `0.5px solid ${tokens.grayBorder}` }}>
+                {[
+                  { label: "Obra Social", sortable: true },
+                  { label: "Referencia", sortable: true },
+                  { label: "Estado", sortable: false },
+                  { label: "", sortable: false },
+                ].map((col, i) => (
+                  <th key={i} style={{
+                    textAlign: "left", padding: "12px 16px",
+                    fontSize: 11, fontWeight: 600, color: tokens.grayMuted,
+                    textTransform: "uppercase", letterSpacing: "0.6px", whiteSpace: "nowrap",
+                  }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                      {col.label}
+                      {col.sortable && <ArrowUpDown size={11} />}
+                    </div>
+                  </th>
+                ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody>
               {loading ? (
-                <tr>
-                  <td colSpan={3} className="px-6 py-8 text-center text-gray-500">
-                    Cargando...
-                  </td>
-                </tr>
+                [...Array(5)].map((_, i) => (
+                  <tr key={i} style={{ borderBottom: `0.5px solid ${tokens.grayRow}` }}>
+                    <td style={{ padding: "14px 16px" }}><div style={{ width: 180, height: 11, borderRadius: 5, background: tokens.grayRow, animation: "pulse 1.5s infinite" }} /></td>
+                    <td style={{ padding: "14px 16px" }}><div style={{ width: 60, height: 11, borderRadius: 5, background: tokens.grayRow }} /></td>
+                    <td style={{ padding: "14px 16px" }}><div style={{ width: 80, height: 11, borderRadius: 5, background: tokens.grayRow }} /></td>
+                    <td style={{ padding: "14px 16px" }} />
+                  </tr>
+                ))
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={3} className="px-6 py-8 text-center text-gray-500">
-                    {searchTerm
-                      ? 'No se encontraron obras sociales con ese nombre'
-                      : 'No hay obras sociales registradas'}
+                  <td colSpan={4} style={{ textAlign: "center", padding: "56px 0" }}>
+                    <Shield size={36} color={tokens.grayBorder} style={{ margin: "0 auto 12px", display: "block" }} />
+                    <p style={{ fontSize: 14, fontWeight: 500, color: tokens.grayMuted }}>No hay obras sociales registradas</p>
                   </td>
                 </tr>
               ) : (
-                filtered.map((os) => (
-                  <tr key={os.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="h-9 w-9 rounded-lg bg-blue-50 flex items-center justify-center">
-                          <Shield className="h-4 w-4 text-[#026498]" />
+                filtered.map((os, idx) => {
+                  const isLast = idx === filtered.length - 1
+                  return (
+                    <tr
+                      key={os.id}
+                      style={{ borderBottom: isLast ? "none" : `0.5px solid ${tokens.grayRow}`, transition: "background 0.12s" }}
+                      onMouseEnter={e => (e.currentTarget.style.background = tokens.rowHover)}
+                      onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                    >
+                      {/* Nombre */}
+                      <td style={{ padding: "14px 16px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                          <div style={{
+                            width: 32, height: 32, borderRadius: 8,
+                            background: tokens.blueFaint, color: tokens.blue,
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                          }}>
+                            <Shield size={14} />
+                          </div>
+                          <p style={{ fontSize: 13.5, fontWeight: 600, color: tokens.navy, margin: 0 }}>
+                            {os.nombre}
+                          </p>
                         </div>
-                        <span className="text-sm font-medium text-gray-900">
-                          {os.nombre}
+                      </td>
+
+                      {/* ID */}
+                      <td style={{ padding: "11px 16px" }}>
+                        <div style={{ fontSize: 12.5, color: tokens.grayMuted, fontFamily: "monospace" }}>
+                          ID: #{os.id}
+                        </div>
+                      </td>
+
+                      {/* Estado */}
+                      <td style={{ padding: "11px 16px" }}>
+                        <span style={{
+                          display: "inline-flex", alignItems: "center", gap: 4,
+                          padding: "3px 10px", borderRadius: 6,
+                          fontSize: 11, fontWeight: 600,
+                          background: tokens.greenFaint, color: tokens.greenText,
+                        }}>
+                          <Check size={10} />
+                          Activa
                         </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-500">
-                      #{os.id}
-                    </td>
-                    <td className="px-6 py-4 text-right space-x-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleEdit(os)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={(e) => handleDeleteClick(e, os.id)}
-                        className="text-red-600 border-red-200 hover:bg-red-50"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </td>
-                  </tr>
-                ))
+                      </td>
+
+                      {/* Actions */}
+                      <td style={{ padding: "11px 16px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 2, justifyContent: "flex-end" }}>
+                          <button
+                            onClick={() => handleEdit(os)}
+                            title="Editar"
+                            style={{
+                              width: 30, height: 30, borderRadius: 7, border: "none",
+                              background: "transparent", cursor: "pointer",
+                              display: "flex", alignItems: "center", justifyContent: "center",
+                              color: tokens.grayMuted, transition: "all 0.12s",
+                            }}
+                            onMouseEnter={e => { e.currentTarget.style.background = tokens.blueFaint; e.currentTarget.style.color = tokens.blue }}
+                            onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = tokens.grayMuted }}
+                          >
+                            <Edit size={14} />
+                          </button>
+                          <button
+                            onClick={(e) => handleDeleteClick(e, os.id)}
+                            title="Eliminar"
+                            style={{
+                              width: 30, height: 30, borderRadius: 7, border: "none",
+                              background: "transparent", cursor: "pointer",
+                              display: "flex", alignItems: "center", justifyContent: "center",
+                              color: tokens.grayMuted, transition: "all 0.12s",
+                            }}
+                            onMouseEnter={e => { e.currentTarget.style.background = tokens.redFaint; e.currentTarget.style.color = tokens.red }}
+                            onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = tokens.grayMuted }}
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })
               )}
             </tbody>
           </table>
         </div>
-
-        <div className="px-6 py-3 border-t bg-gray-50 text-sm text-gray-600">
-          Total: {filtered.length} obra{filtered.length !== 1 ? 's' : ''} social{filtered.length !== 1 ? 'es' : ''}
-        </div>
-      </Card>
+      </div>
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-md w-full">
-            <div className="px-6 py-4 border-b flex justify-between items-center">
-              <h3 className="text-lg font-semibold text-gray-900">
+        <div style={{
+          position: "fixed", inset: 0, background: "rgba(11,16,35,0.45)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          zIndex: 50, padding: 16, backdropFilter: "blur(4px)"
+        }}>
+          <div style={{
+            background: tokens.white, borderRadius: 16,
+            maxWidth: 400, width: "100%",
+            boxShadow: "0 24px 48px rgba(11,16,35,0.12)",
+          }}>
+            <div style={{
+              padding: "18px 24px", borderBottom: `0.5px solid ${tokens.grayBorder}`,
+              display: "flex", justifyContent: "space-between", alignItems: "center",
+            }}>
+              <h3 style={{ fontSize: 16, fontWeight: 600, color: tokens.navy, margin: 0 }}>
                 {editingId ? 'Editar Obra Social' : 'Nueva Obra Social'}
               </h3>
-              <button onClick={() => setShowModal(false)} className="text-gray-500 hover:text-gray-700">
-                <X className="h-5 w-5" />
+              <button
+                onClick={() => setShowModal(false)}
+                style={{
+                  width: 30, height: 30, borderRadius: 8, border: "none",
+                  background: "transparent", cursor: "pointer",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  color: tokens.grayMuted, transition: "all 0.12s",
+                }}
+                onMouseEnter={e => { e.currentTarget.style.background = tokens.grayRow }}
+                onMouseLeave={e => { e.currentTarget.style.background = "transparent" }}
+              >
+                <X size={16} />
               </button>
             </div>
-
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Nombre de la Obra Social *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.nombre}
-                  onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-                  placeholder="Ej: OSDE, Swiss Medical..."
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  autoFocus
-                />
+            <form onSubmit={handleSubmit} style={{ padding: 24 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                <div>
+                  <label style={labelStyle}>Nombre *</label>
+                  <input
+                    type="text" required
+                    value={formData.nombre}
+                    onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+                    placeholder="Ej: OSDE, Swiss Medical..."
+                    style={{ ...inputStyle, borderColor: focusedField === "nombre" ? tokens.blue : tokens.grayBorder }}
+                    onFocus={() => setFocusedField("nombre")}
+                    onBlur={() => setFocusedField(null)}
+                  />
+                </div>
+                <div>
+                  <label style={labelStyle}>Referencia / Plan (opcional)</label>
+                  <input
+                    type="text"
+                    value={formData.plan}
+                    onChange={(e) => setFormData({ ...formData, plan: e.target.value })}
+                    placeholder="Ej: Plan 210..."
+                    style={{ ...inputStyle, borderColor: focusedField === "plan" ? tokens.blue : tokens.grayBorder }}
+                    onFocus={() => setFocusedField("plan")}
+                    onBlur={() => setFocusedField(null)}
+                  />
+                </div>
               </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Plan (opcional)
-                </label>
-                <input
-                  type="text"
-                  value={formData.plan}
-                  onChange={(e) => setFormData({ ...formData, plan: e.target.value })}
-                  placeholder="Ej: Plan 210, Plan 310..."
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-
-              <div className="flex justify-end space-x-3 pt-4 border-t">
-                <Button type="button" variant="outline" onClick={() => setShowModal(false)}>
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 24, paddingTop: 20, borderTop: `0.5px solid ${tokens.grayBorder}` }}>
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  style={{
+                    padding: "9px 18px", fontSize: 13, fontWeight: 500,
+                    border: `0.5px solid ${tokens.grayBorder}`, borderRadius: 9,
+                    background: tokens.white, color: tokens.grayText, cursor: "pointer",
+                    fontFamily: "Poppins, -apple-system, sans-serif", transition: "all 0.12s",
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.background = tokens.grayBg }}
+                  onMouseLeave={e => { e.currentTarget.style.background = tokens.white }}
+                >
                   Cancelar
-                </Button>
-                <Button type="submit" disabled={saving} className="bg-[#026498]">
-                  <Check className="h-4 w-4 mr-2" />
-                  {saving ? 'Guardando...' : editingId ? 'Guardar Cambios' : 'Crear'}
-                </Button>
+                </button>
+                <button
+                  type="submit" disabled={saving}
+                  style={{
+                    padding: "9px 20px", fontSize: 13, fontWeight: 500,
+                    background: tokens.blue, color: tokens.white,
+                    border: "none", borderRadius: 9, cursor: "pointer",
+                    fontFamily: "Poppins, -apple-system, sans-serif", transition: "background 0.15s",
+                    opacity: saving ? 0.7 : 1
+                  }}
+                  onMouseEnter={e => { if(!saving) e.currentTarget.style.background = tokens.blueHover }}
+                  onMouseLeave={e => { if(!saving) e.currentTarget.style.background = tokens.blue }}
+                >
+                  {saving ? "Guardando..." : editingId ? "Guardar Cambios" : "Crear"}
+                </button>
               </div>
             </form>
           </div>

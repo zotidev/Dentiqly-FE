@@ -13,17 +13,24 @@ import { turnosApi, pacientesApi } from "../../api"
 interface AdminBookingModalProps {
   onClose: () => void
   onSuccess: () => void
+  initialPacienteId?: string
+  initialPacienteNombre?: string
 }
 
-export const AdminBookingModal: React.FC<AdminBookingModalProps> = ({ onClose, onSuccess }) => {
+export const AdminBookingModal: React.FC<AdminBookingModalProps> = ({ 
+  onClose, 
+  onSuccess,
+  initialPacienteId,
+  initialPacienteNombre
+}) => {
   const [step, setStep] = useState(1)
   const [selectedService, setSelectedService] = useState<Servicio | null>(null)
   const [selectedProfessional, setSelectedProfessional] = useState<Profesional | null>(null)
   const [selectedDateTime, setSelectedDateTime] = useState<string | null>(null)
-  const [patientType, setPatientType] = useState<"existing" | "new" | null>(null)
-  const [searchPaciente, setSearchPaciente] = useState("")
+  const [patientType, setPatientType] = useState<"existing" | "new" | null>(initialPacienteId ? "existing" : null)
+  const [searchPaciente, setSearchPaciente] = useState(initialPacienteNombre || "")
   const [pacientes, setPacientes] = useState<any[]>([])
-  const [selectedPacienteId, setSelectedPacienteId] = useState<string | null>(null)
+  const [selectedPacienteId, setSelectedPacienteId] = useState<string | null>(initialPacienteId || null)
   const [loading, setLoading] = useState(false)
 
   React.useEffect(() => {

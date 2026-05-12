@@ -2,10 +2,64 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { Card } from "../ui/Card"
-import { Button } from "../ui/Button"
-import { Calendar, Trash2, Plus, X } from "lucide-react"
+import { 
+  Calendar, 
+  Trash2, 
+  Plus, 
+  X, 
+  ArrowUpDown, 
+  ChevronLeft, 
+  ChevronRight,
+  AlertCircle
+} from "lucide-react"
 import { feriadosApi, type Feriado } from "../../api/feriados"
+
+/* ─── Dentiqly design tokens ─────────────────────────────────────────── */
+const tokens = {
+  blue: "#2563FF",
+  blueHover: "#1E40AF",
+  blueFaint: "#EEF3FF",
+  navy: "#0B1023",
+  grayText: "#4B5568",
+  grayMuted: "#8A93A8",
+  grayBorder: "#E2E6EF",
+  grayBg: "#F5F7FA",
+  grayRow: "#F0F2F7",
+  rowHover: "#F5F8FF",
+  white: "#FFFFFF",
+
+  green: "#22C55E",
+  greenFaint: "#EDFAF4",
+  greenText: "#15803D",
+
+  red: "#EF4444",
+  redFaint: "#FEF2F2",
+  redText: "#B91C1C",
+}
+
+/* ─── Label styles ────────────────────────────────────────────────────── */
+const labelStyle: React.CSSProperties = {
+  display: "block",
+  fontSize: 12,
+  fontWeight: 600,
+  color: tokens.grayMuted,
+  textTransform: "uppercase",
+  letterSpacing: "0.5px",
+  marginBottom: 6,
+}
+
+const inputStyle: React.CSSProperties = {
+  width: "100%",
+  padding: "9px 12px",
+  fontSize: 13,
+  border: `0.5px solid ${tokens.grayBorder}`,
+  borderRadius: 9,
+  outline: "none",
+  color: tokens.navy,
+  background: tokens.white,
+  fontFamily: "Poppins, -apple-system, sans-serif",
+  transition: "all 0.15s",
+}
 
 export const FeriadosManager: React.FC = () => {
   const [feriados, setFeriados] = useState<Feriado[]>([])
@@ -14,6 +68,7 @@ export const FeriadosManager: React.FC = () => {
   const [formData, setFormData] = useState({ fecha: "", descripcion: "" })
   const [saving, setSaving] = useState(false)
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
+  const [focusedField, setFocusedField] = useState<string | null>(null)
 
   useEffect(() => {
     fetchFeriados()
@@ -63,121 +118,273 @@ export const FeriadosManager: React.FC = () => {
       weekday: "long",
       day: "numeric",
       month: "long",
-      year: "numeric",
     })
   }
 
+  const pageStyle: React.CSSProperties = {
+    background: tokens.grayBg,
+    minHeight: "100vh",
+    padding: "28px 32px",
+    fontFamily: "Poppins, -apple-system, sans-serif",
+  }
+
   return (
-    <div className="bg-[#f0f2f5] min-h-screen p-4 sm:p-8 rounded-3xl font-sans space-y-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+    <div style={pageStyle}>
+      {/* ── Header ── */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 }}>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Gestión de Feriados</h1>
-          <p className="text-gray-500 mt-1">Configura los días feriados donde no se agendarán turnos</p>
+          <h1 style={{ fontSize: 22, fontWeight: 600, color: tokens.navy, letterSpacing: "-0.3px", margin: 0 }}>
+            Gestión de Feriados
+          </h1>
+          <p style={{ fontSize: 13, color: tokens.grayMuted, marginTop: 3, fontWeight: 400 }}>
+            Administrá los días no laborables para el calendario de turnos
+          </p>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
+        <div style={{ display: "flex", gap: 10 }}>
           <select
             value={selectedYear}
             onChange={(e) => setSelectedYear(Number(e.target.value))}
-            className="px-3 py-2 border-none bg-white rounded-full font-medium focus:ring-2 focus:ring-blue-500"
+            style={{
+              padding: "0 14px", height: 40, borderRadius: 10,
+              border: `0.5px solid ${tokens.grayBorder}`, background: tokens.white,
+              fontSize: 13, fontWeight: 600, color: tokens.navy, cursor: "pointer",
+              outline: "none", fontFamily: "Poppins, -apple-system, sans-serif"
+            }}
           >
-            {[2025, 2026, 2027, 2028].map((y) => (
+            {[2024, 2025, 2026, 2027].map((y) => (
               <option key={y} value={y}>{y}</option>
             ))}
           </select>
-          <button onClick={() => setShowModal(true)} className="flex items-center gap-2 px-6 py-2 bg-[#2563FF] text-white rounded-full font-medium hover:bg-blue-700 transition shadow-md shadow-blue-500/20">
-            <Plus className="w-4 h-4" /> Agregar Feriado
+          <button
+            onClick={() => setShowModal(true)}
+            style={{
+              display: "flex", alignItems: "center", gap: 7,
+              background: tokens.blue, color: tokens.white,
+              border: "none", borderRadius: 10, padding: "9px 18px",
+              fontSize: 13, fontWeight: 500, cursor: "pointer",
+              fontFamily: "Poppins, -apple-system, sans-serif",
+              transition: "background 0.15s",
+            }}
+            onMouseEnter={e => (e.currentTarget.style.background = tokens.blueHover)}
+            onMouseLeave={e => (e.currentTarget.style.background = tokens.blue)}
+          >
+            <Plus size={15} />
+            Nuevo Feriado
           </button>
         </div>
       </div>
 
-      <Card>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Descripción</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Acciones</th>
+      {/* ── Table card ── */}
+      <div style={{
+        background: tokens.white, borderRadius: 14,
+        border: `0.5px solid ${tokens.grayBorder}`, overflow: "hidden",
+      }}>
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <thead>
+              <tr style={{ borderBottom: `0.5px solid ${tokens.grayBorder}` }}>
+                {[
+                  { label: "Fecha", sortable: true },
+                  { label: "Descripción / Motivo", sortable: true },
+                  { label: "Año", sortable: false },
+                  { label: "", sortable: false },
+                ].map((col, i) => (
+                  <th key={i} style={{
+                    textAlign: "left", padding: "12px 16px",
+                    fontSize: 11, fontWeight: 600, color: tokens.grayMuted,
+                    textTransform: "uppercase", letterSpacing: "0.6px", whiteSpace: "nowrap",
+                  }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                      {col.label}
+                      {col.sortable && <ArrowUpDown size={11} />}
+                    </div>
+                  </th>
+                ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody>
               {loading ? (
-                <tr>
-                  <td colSpan={3} className="px-6 py-8 text-center text-gray-500">Cargando...</td>
-                </tr>
+                [...Array(5)].map((_, i) => (
+                  <tr key={i} style={{ borderBottom: `0.5px solid ${tokens.grayRow}` }}>
+                    <td style={{ padding: "14px 16px" }}><div style={{ width: 140, height: 11, borderRadius: 5, background: tokens.grayRow, animation: "pulse 1.5s infinite" }} /></td>
+                    <td style={{ padding: "14px 16px" }}><div style={{ width: 200, height: 11, borderRadius: 5, background: tokens.grayRow }} /></td>
+                    <td style={{ padding: "14px 16px" }}><div style={{ width: 60, height: 11, borderRadius: 5, background: tokens.grayRow }} /></td>
+                    <td style={{ padding: "14px 16px" }} />
+                  </tr>
+                ))
               ) : feriados.length === 0 ? (
                 <tr>
-                  <td colSpan={3} className="px-6 py-8 text-center text-gray-500">
-                    <Calendar className="h-8 w-8 mx-auto mb-2 text-gray-300" />
-                    No hay feriados cargados para {selectedYear}
+                  <td colSpan={4} style={{ textAlign: "center", padding: "56px 0" }}>
+                    <Calendar size={36} color={tokens.grayBorder} style={{ margin: "0 auto 12px", display: "block" }} />
+                    <p style={{ fontSize: 14, fontWeight: 500, color: tokens.grayMuted }}>No hay feriados para {selectedYear}</p>
                   </td>
                 </tr>
               ) : (
-                feriados.map((feriado) => (
-                  <tr key={feriado.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center">
-                          <Calendar className="h-5 w-5 text-red-600" />
+                feriados.map((feriado, idx) => {
+                  const isLast = idx === feriados.length - 1
+                  return (
+                    <tr
+                      key={feriado.id}
+                      style={{ borderBottom: isLast ? "none" : `0.5px solid ${tokens.grayRow}`, transition: "background 0.12s" }}
+                      onMouseEnter={e => (e.currentTarget.style.background = tokens.rowHover)}
+                      onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                    >
+                      {/* Fecha */}
+                      <td style={{ padding: "14px 16px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                          <div style={{
+                            width: 32, height: 32, borderRadius: 8,
+                            background: tokens.redFaint, color: tokens.red,
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                          }}>
+                            <Calendar size={14} />
+                          </div>
+                          <div>
+                            <p style={{ fontSize: 13.5, fontWeight: 600, color: tokens.navy, margin: 0, textTransform: "capitalize" }}>
+                              {formatDate(feriado.fecha)}
+                            </p>
+                            <p style={{ fontSize: 11, color: tokens.grayMuted, margin: 0 }}>
+                              {feriado.fecha}
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <div className="text-sm font-medium text-gray-900">{formatDate(feriado.fecha)}</div>
-                          <div className="text-xs text-gray-500">{feriado.fecha}</div>
+                      </td>
+
+                      {/* Descripción */}
+                      <td style={{ padding: "11px 16px" }}>
+                        <div style={{ fontSize: 13.5, color: tokens.grayText, fontWeight: 500 }}>
+                          {feriado.descripcion || "Sin descripción"}
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-700">{feriado.descripcion || "-"}</td>
-                    <td className="px-6 py-4 text-right">
-                      <Button variant="outline" size="sm" onClick={() => handleDelete(feriado.id)}>
-                        <Trash2 className="h-4 w-4 text-red-500" />
-                      </Button>
-                    </td>
-                  </tr>
-                ))
+                      </td>
+
+                      {/* Año */}
+                      <td style={{ padding: "11px 16px" }}>
+                        <span style={{
+                          display: "inline-flex", padding: "3px 8px", borderRadius: 6,
+                          fontSize: 11, fontWeight: 600,
+                          background: tokens.grayPill || "#F1F5F9",
+                          color: tokens.grayMuted,
+                        }}>
+                          {new Date(feriado.fecha + "T12:00:00").getFullYear()}
+                        </span>
+                      </td>
+
+                      {/* Action */}
+                      <td style={{ padding: "11px 16px" }}>
+                        <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                          <button
+                            onClick={() => handleDelete(feriado.id)}
+                            title="Eliminar"
+                            style={{
+                              width: 30, height: 30, borderRadius: 7, border: "none",
+                              background: "transparent", cursor: "pointer",
+                              display: "flex", alignItems: "center", justifyContent: "center",
+                              color: tokens.grayMuted, transition: "all 0.12s",
+                            }}
+                            onMouseEnter={e => { e.currentTarget.style.background = tokens.redFaint; e.currentTarget.style.color = tokens.red }}
+                            onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = tokens.grayMuted }}
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })
               )}
             </tbody>
           </table>
         </div>
-      </Card>
+      </div>
 
       {/* Modal Crear Feriado */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-md w-full">
-            <div className="px-6 py-4 border-b flex justify-between items-center">
-              <h3 className="text-lg font-semibold text-gray-900">Agregar Feriado</h3>
-              <button onClick={() => setShowModal(false)}>
-                <X className="h-5 w-5" />
+        <div style={{
+          position: "fixed", inset: 0, background: "rgba(11,16,35,0.45)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          zIndex: 50, padding: 16, backdropFilter: "blur(4px)"
+        }}>
+          <div style={{
+            background: tokens.white, borderRadius: 16,
+            maxWidth: 400, width: "100%",
+            boxShadow: "0 24px 48px rgba(11,16,35,0.12)",
+          }}>
+            <div style={{
+              padding: "18px 24px", borderBottom: `0.5px solid ${tokens.grayBorder}`,
+              display: "flex", justifyContent: "space-between", alignItems: "center",
+            }}>
+              <h3 style={{ fontSize: 16, fontWeight: 600, color: tokens.navy, margin: 0 }}>
+                Agregar Feriado
+              </h3>
+              <button
+                onClick={() => setShowModal(false)}
+                style={{
+                  width: 30, height: 30, borderRadius: 8, border: "none",
+                  background: "transparent", cursor: "pointer",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  color: tokens.grayMuted, transition: "all 0.12s",
+                }}
+                onMouseEnter={e => { e.currentTarget.style.background = tokens.grayRow }}
+                onMouseLeave={e => { e.currentTarget.style.background = "transparent" }}
+              >
+                <X size={16} />
               </button>
             </div>
-            <form onSubmit={handleCreate} className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Fecha *</label>
-                <input
-                  type="date"
-                  required
-                  value={formData.fecha}
-                  onChange={(e) => setFormData({ ...formData, fecha: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                />
+            <form onSubmit={handleCreate} style={{ padding: 24 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                <div>
+                  <label style={labelStyle}>Fecha *</label>
+                  <input
+                    type="date" required
+                    value={formData.fecha}
+                    onChange={(e) => setFormData({ ...formData, fecha: e.target.value })}
+                    style={{ ...inputStyle, borderColor: focusedField === "fecha" ? tokens.blue : tokens.grayBorder }}
+                    onFocus={() => setFocusedField("fecha")}
+                    onBlur={() => setFocusedField(null)}
+                  />
+                </div>
+                <div>
+                  <label style={labelStyle}>Descripción</label>
+                  <input
+                    type="text"
+                    placeholder="Ej: Día de la Independencia"
+                    value={formData.descripcion}
+                    onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
+                    style={{ ...inputStyle, borderColor: focusedField === "desc" ? tokens.blue : tokens.grayBorder }}
+                    onFocus={() => setFocusedField("desc")}
+                    onBlur={() => setFocusedField(null)}
+                  />
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
-                <input
-                  type="text"
-                  placeholder="Ej: Día de la Independencia"
-                  value={formData.descripcion}
-                  onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div className="flex justify-end space-x-3 pt-4 border-t">
-                <Button type="button" variant="outline" onClick={() => setShowModal(false)}>
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 24, paddingTop: 20, borderTop: `0.5px solid ${tokens.grayBorder}` }}>
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  style={{
+                    padding: "9px 18px", fontSize: 13, fontWeight: 500,
+                    border: `0.5px solid ${tokens.grayBorder}`, borderRadius: 9,
+                    background: tokens.white, color: tokens.grayText, cursor: "pointer",
+                    fontFamily: "Poppins, -apple-system, sans-serif", transition: "all 0.12s",
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.background = tokens.grayBg }}
+                  onMouseLeave={e => { e.currentTarget.style.background = tokens.white }}
+                >
                   Cancelar
-                </Button>
-                <Button type="submit" disabled={saving}>
+                </button>
+                <button
+                  type="submit" disabled={saving}
+                  style={{
+                    padding: "9px 20px", fontSize: 13, fontWeight: 500,
+                    background: tokens.blue, color: tokens.white,
+                    border: "none", borderRadius: 9, cursor: "pointer",
+                    fontFamily: "Poppins, -apple-system, sans-serif", transition: "background 0.15s",
+                    opacity: saving ? 0.7 : 1
+                  }}
+                  onMouseEnter={e => { if(!saving) e.currentTarget.style.background = tokens.blueHover }}
+                  onMouseLeave={e => { if(!saving) e.currentTarget.style.background = tokens.blue }}
+                >
                   {saving ? "Guardando..." : "Agregar Feriado"}
-                </Button>
+                </button>
               </div>
             </form>
           </div>

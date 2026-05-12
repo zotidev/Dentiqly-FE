@@ -1,6 +1,6 @@
+"use client"
+
 import React, { useState, useEffect } from 'react'
-import { Card } from '../ui/Card'
-import { Button } from '../ui/Button'
 import {
   Bell,
   Send,
@@ -10,7 +10,6 @@ import {
   Briefcase,
   CheckCircle,
   AlertCircle,
-  Loader2,
   Mail,
   Search,
   ChevronLeft,
@@ -20,9 +19,38 @@ import {
   Save,
   X,
   Info,
+  ArrowUpDown,
+  MailWarning
 } from 'lucide-react'
 import { turnosApi, recordatoriosApi } from '../../api'
 import type { Turno } from '../../types'
+
+/* ─── Dentiqly design tokens ─────────────────────────────────────────── */
+const tokens = {
+  blue: "#2563FF",
+  blueHover: "#1E40AF",
+  blueFaint: "#EEF3FF",
+  navy: "#0B1023",
+  grayText: "#4B5568",
+  grayMuted: "#8A93A8",
+  grayBorder: "#E2E6EF",
+  grayBg: "#F5F7FA",
+  grayRow: "#F0F2F7",
+  rowHover: "#F5F8FF",
+  white: "#FFFFFF",
+
+  green: "#22C55E",
+  greenFaint: "#EDFAF4",
+  greenText: "#15803D",
+
+  red: "#EF4444",
+  redFaint: "#FEF2F2",
+  redText: "#B91C1C",
+
+  orange: "#F59E0B",
+  orangeFaint: "#FFF7ED",
+  orangeText: "#92400E",
+}
 
 export const RemindersView: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState(() => {
@@ -116,8 +144,7 @@ export const RemindersView: React.FC = () => {
   }
 
   const handleSendAll = async () => {
-    if (!window.confirm(`¿Enviar recordatorio a todos los pacientes con turno el ${formatDate(selectedDate)}?`)) return
-
+    if (!window.confirm(`¿Enviar recordatorio a todos los pacientes con turno el ${formatDateStr(selectedDate)}?`)) return
     try {
       setSendingAll(true)
       const result = await recordatoriosApi.enviarMasivo(selectedDate)
@@ -125,7 +152,7 @@ export const RemindersView: React.FC = () => {
       const allIds = new Set(turnos.map(t => t.id))
       setSentIds(allIds)
     } catch (error) {
-      console.error('Error sending mass reminders:', error)
+      console.error('Error:', error)
       alert('Error al enviar recordatorios masivos')
     } finally {
       setSendingAll(false)
@@ -139,8 +166,7 @@ export const RemindersView: React.FC = () => {
       setSavedTemplate(templateText)
       alert('Mensaje guardado correctamente')
     } catch (error) {
-      console.error('Error saving template:', error)
-      alert('Error al guardar el mensaje')
+      console.error('Error:', error)
     } finally {
       setSavingTemplate(false)
     }
@@ -151,14 +177,13 @@ export const RemindersView: React.FC = () => {
       setLoadingPreview(true)
       setShowPreview(true)
       setPreviewTurnoId(turnoId || null)
-
       const result = await recordatoriosApi.preview({
         turno_id: turnoId,
         custom_template: templateText || undefined,
       })
       setPreviewHtml(result.html)
     } catch (error) {
-      console.error('Error loading preview:', error)
+      console.error('Error preview:', error)
       setPreviewHtml('<p style="color:red;text-align:center;padding:40px;">Error al cargar la vista previa</p>')
     } finally {
       setLoadingPreview(false)
@@ -171,7 +196,7 @@ export const RemindersView: React.FC = () => {
     setSelectedDate(date.toISOString().split('T')[0])
   }
 
-  const formatDate = (fecha: string) => {
+  const formatDateStr = (fecha: string) => {
     return new Date(fecha + 'T00:00:00').toLocaleDateString('es-ES', {
       weekday: 'long',
       day: 'numeric',
@@ -183,405 +208,332 @@ export const RemindersView: React.FC = () => {
   const filteredTurnos = turnos.filter((turno) => {
     if (!searchTerm) return true
     const term = searchTerm.toLowerCase()
-    const pacienteName = `${turno.paciente?.apellido || ''} ${turno.paciente?.nombre || ''}`.toLowerCase()
-    const profesionalName = `${turno.profesional?.nombre || ''} ${turno.profesional?.apellido || ''}`.toLowerCase()
-    return pacienteName.includes(term) || profesionalName.includes(term)
+    const pName = `${turno.paciente?.apellido || ''} ${turno.paciente?.nombre || ''}`.toLowerCase()
+    const prName = `${turno.profesional?.nombre || ''} ${turno.profesional?.apellido || ''}`.toLowerCase()
+    return pName.includes(term) || prName.includes(term)
   })
 
-  const turnosWithEmail = filteredTurnos.filter(t => t.paciente?.email)
-  const turnosWithoutEmail = filteredTurnos.filter(t => !t.paciente?.email)
-  const templateChanged = templateText !== savedTemplate
+  const turnosWithEmail = turnos.filter(t => t.paciente?.email)
+
+  const pageStyle: React.CSSProperties = {
+    background: tokens.grayBg,
+    minHeight: "100vh",
+    padding: "28px 32px",
+    fontFamily: "Poppins, -apple-system, sans-serif",
+  }
 
   return (
-    <div className="bg-[#f0f2f5] min-h-screen p-4 sm:p-8 rounded-3xl font-sans space-y-6">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+    <div style={pageStyle}>
+      {/* ── Header ── */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 }}>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
-            <Bell className="h-8 w-8 text-[#2563FF]" />
+          <h1 style={{ fontSize: 22, fontWeight: 600, color: tokens.navy, letterSpacing: "-0.3px", margin: 0 }}>
             Recordatorios
           </h1>
-          <p className="text-gray-500 mt-1">Envía recordatorios de turno a los pacientes por email</p>
+          <p style={{ fontSize: 13, color: tokens.grayMuted, marginTop: 3, fontWeight: 400 }}>
+            Automatizá el envío de emails de recordatorio para minimizar el ausentismo
+          </p>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <button onClick={() => handlePreview()} className="flex items-center gap-2 px-6 py-2 bg-white border border-gray-200 text-gray-700 rounded-full font-medium hover:bg-gray-50 transition shadow-sm">
-            <Eye className="w-4 h-4" /> Ver email de ejemplo
+        <div style={{ display: "flex", gap: 10 }}>
+          <button
+            onClick={() => setShowTemplateEditor(!showTemplateEditor)}
+            style={{
+              display: "flex", alignItems: "center", gap: 7,
+              background: showTemplateEditor ? tokens.blueFaint : tokens.white,
+              color: showTemplateEditor ? tokens.blue : tokens.grayText,
+              border: showTemplateEditor ? `0.5px solid ${tokens.blue}` : `0.5px solid ${tokens.grayBorder}`,
+              borderRadius: 10, padding: "9px 18px",
+              fontSize: 13, fontWeight: 500, cursor: "pointer",
+              fontFamily: "Poppins, -apple-system, sans-serif",
+              transition: "all 0.15s",
+            }}
+          >
+            <Settings size={15} />
+            Configurar Mensaje
           </button>
-          <button onClick={() => setShowTemplateEditor(!showTemplateEditor)} className={`flex items-center gap-2 px-6 py-2 rounded-full font-medium transition shadow-sm border ${showTemplateEditor ? 'bg-blue-50 border-[#2563FF] text-[#2563FF]' : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'}`}>
-            <Settings className="w-4 h-4" /> Configurar mensaje
+          <button
+            onClick={handleSendAll}
+            disabled={sendingAll || turnosWithEmail.length === 0}
+            style={{
+              display: "flex", alignItems: "center", gap: 7,
+              background: tokens.blue, color: tokens.white,
+              border: "none", borderRadius: 10, padding: "9px 18px",
+              fontSize: 13, fontWeight: 500, cursor: "pointer",
+              fontFamily: "Poppins, -apple-system, sans-serif",
+              transition: "background 0.15s",
+              opacity: (sendingAll || turnosWithEmail.length === 0) ? 0.6 : 1
+            }}
+            onMouseEnter={e => { if(!sendingAll && turnosWithEmail.length > 0) e.currentTarget.style.background = tokens.blueHover }}
+            onMouseLeave={e => { if(!sendingAll && turnosWithEmail.length > 0) e.currentTarget.style.background = tokens.blue }}
+          >
+            <Send size={15} />
+            {sendingAll ? 'Enviando...' : `Enviar a todos (${turnosWithEmail.length})`}
           </button>
         </div>
       </div>
 
-      {/* Template Editor */}
+      {/* ── Template Editor Card ── */}
       {showTemplateEditor && (
-        <Card className="p-6 border-blue-200 bg-blue-50/30">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                <Mail className="h-5 w-5 text-[#026498]" />
-                Mensaje personalizado del recordatorio
-              </h3>
-              <button
-                onClick={() => setShowTemplateEditor(false)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <div className="bg-white border border-blue-100 rounded-lg p-4">
-              <div className="flex items-start gap-2 mb-3 text-sm text-blue-700 bg-blue-50 p-3 rounded-lg">
-                <Info className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                <div>
-                  <p className="font-medium mb-1">Variables disponibles (se reemplazan automáticamente):</p>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-1 text-xs font-mono">
-                    <span className="bg-blue-100 px-2 py-0.5 rounded">{'{nombre}'}</span>
-                    <span className="bg-blue-100 px-2 py-0.5 rounded">{'{apellido}'}</span>
-                    <span className="bg-blue-100 px-2 py-0.5 rounded">{'{fecha}'}</span>
-                    <span className="bg-blue-100 px-2 py-0.5 rounded">{'{hora_inicio}'}</span>
-                    <span className="bg-blue-100 px-2 py-0.5 rounded">{'{hora_fin}'}</span>
-                    <span className="bg-blue-100 px-2 py-0.5 rounded">{'{profesional}'}</span>
-                    <span className="bg-blue-100 px-2 py-0.5 rounded">{'{servicio}'}</span>
-                  </div>
-                  <p className="mt-2 text-xs text-blue-600">
-                    Si dejás el campo vacío, se usará el mensaje predeterminado: "Te recordamos que tenés un turno programado..."
-                  </p>
-                </div>
-              </div>
-
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Texto del mensaje (aparece después del saludo "Hola [nombre],")
-              </label>
+        <div style={{
+          background: tokens.white, borderRadius: 14, border: `0.5px solid ${tokens.blue}44`,
+          padding: 24, marginBottom: 24, boxShadow: "0 8px 32px rgba(37,99,255,0.04)"
+        }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+            <h3 style={{ fontSize: 15, fontWeight: 600, color: tokens.navy, margin: 0, display: "flex", alignItems: "center", gap: 8 }}>
+              <Mail size={16} color={tokens.blue} /> Personalización del Mensaje
+            </h3>
+            <button onClick={() => setShowTemplateEditor(false)} style={{ border: "none", background: "transparent", cursor: "pointer", color: tokens.grayMuted }}><X size={18} /></button>
+          </div>
+          <div style={{ display: "flex", gap: 20 }}>
+            <div style={{ flex: 1 }}>
               <textarea
                 value={templateText}
-                onChange={(e) => setTemplateText(e.target.value)}
-                rows={4}
-                placeholder='Ej: Te recordamos que tenés un turno el {fecha} a las {hora_inicio} con {profesional} para {servicio}. ¡Te esperamos!'
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm resize-none"
+                onChange={e => setTemplateText(e.target.value)}
+                placeholder="Ej: Te recordamos que tenés un turno el {fecha}..."
+                style={{
+                  width: "100%", height: 100, padding: 12, borderRadius: 10,
+                  border: `0.5px solid ${tokens.grayBorder}`, fontSize: 13,
+                  fontFamily: "Poppins, -apple-system, sans-serif", outline: "none", resize: "none"
+                }}
               />
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                {templateChanged && (
-                  <span className="text-xs text-amber-600 font-medium flex items-center gap-1">
-                    <AlertCircle className="h-3 w-3" />
-                    Cambios sin guardar
-                  </span>
-                )}
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handlePreview()}
-                >
-                  <Eye className="h-4 w-4 mr-1" />
-                  Vista previa
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={handleSaveTemplate}
-                  disabled={savingTemplate}
-                  className="bg-[#026498]"
-                >
-                  {savingTemplate ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                      Guardando...
-                    </>
-                  ) : (
-                    <>
-                      <Save className="h-4 w-4 mr-1" />
-                      Guardar mensaje
-                    </>
-                  )}
-                </Button>
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 12 }}>
+                <button onClick={() => handlePreview()} style={{ padding: "7px 14px", borderRadius: 8, border: `0.5px solid ${tokens.grayBorder}`, background: tokens.white, fontSize: 12, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}><Eye size={14} /> Vista Previa</button>
+                <button onClick={handleSaveTemplate} disabled={savingTemplate} style={{ padding: "7px 14px", borderRadius: 8, border: "none", background: tokens.blue, color: tokens.white, fontSize: 12, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}><Save size={14} /> {savingTemplate ? 'Guardando...' : 'Guardar Mensaje'}</button>
               </div>
             </div>
-          </div>
-        </Card>
-      )}
-
-      {/* Date Selector */}
-      <Card className="p-4">
-        <div className="flex flex-col sm:flex-row items-center gap-4 justify-between">
-          <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm" onClick={() => navigateDate('prev')}>
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <div className="flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-[#026498]" />
-              <input
-                type="date"
-                value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
+            <div style={{ width: 220, background: tokens.grayBg, borderRadius: 12, padding: 16 }}>
+              <p style={{ fontSize: 11, fontWeight: 700, color: tokens.grayMuted, textTransform: "uppercase", marginBottom: 8, letterSpacing: 0.4 }}>Variables</p>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+                {['nombre', 'apellido', 'fecha', 'hora_inicio', 'profesional', 'servicio'].map(v => (
+                  <span key={v} style={{ fontSize: 10, background: tokens.white, border: `0.5px solid ${tokens.grayBorder}`, padding: "2px 6px", borderRadius: 4, color: tokens.navy, fontWeight: 500 }}>{`{${v}}`}</span>
+                ))}
+              </div>
             </div>
-            <Button variant="outline" size="sm" onClick={() => navigateDate('next')}>
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                const tomorrow = new Date()
-                tomorrow.setDate(tomorrow.getDate() + 1)
-                setSelectedDate(tomorrow.toISOString().split('T')[0])
-              }}
-            >
-              Mañana
-            </Button>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Buscar paciente..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm w-48"
-              />
-            </div>
-
-            <Button
-              onClick={handleSendAll}
-              disabled={sendingAll || turnosWithEmail.length === 0}
-              className="bg-[#026498]"
-            >
-              {sendingAll ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Enviando...
-                </>
-              ) : (
-                <>
-                  <Send className="h-4 w-4 mr-2" />
-                  Enviar a todos ({turnosWithEmail.length})
-                </>
-              )}
-            </Button>
           </div>
         </div>
-      </Card>
+      )}
 
-      {/* Date Title */}
-      <div className="text-center">
-        <h3 className="text-lg font-semibold text-gray-700 capitalize">
-          {formatDate(selectedDate)}
-        </h3>
-        <p className="text-sm text-gray-500">
-          {filteredTurnos.length} turno{filteredTurnos.length !== 1 ? 's' : ''} encontrado{filteredTurnos.length !== 1 ? 's' : ''}
-          {turnosWithoutEmail.length > 0 && (
-            <span className="text-amber-600"> · {turnosWithoutEmail.length} sin email</span>
-          )}
-        </p>
+      {/* ── Controls ── */}
+      <div style={{ display: "flex", gap: 12, marginBottom: 24, alignItems: "center" }}>
+          <div style={{
+            flex: 1, display: "flex", alignItems: "center", gap: 10,
+            background: tokens.white, border: `0.5px solid ${tokens.grayBorder}`,
+            borderRadius: 10, padding: "0 14px", height: 40,
+          }}>
+            <Search size={15} color={tokens.grayMuted} />
+            <input
+              type="text"
+              placeholder="Buscar por paciente o profesional…"
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              style={{
+                border: "none", outline: "none", background: "transparent",
+                fontSize: 13, color: tokens.navy, flex: 1,
+                fontFamily: "Poppins, -apple-system, sans-serif",
+              }}
+            />
+          </div>
+          
+          <div style={{ display: "flex", alignItems: "center", gap: 3, background: tokens.white, border: `0.5px solid ${tokens.grayBorder}`, borderRadius: 10, padding: "3px" }}>
+            <button onClick={() => navigateDate('prev')} style={{ width: 34, height: 34, borderRadius: 8, border: "none", background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: tokens.grayMuted }} onMouseEnter={e => e.currentTarget.style.background = tokens.grayBg} onMouseLeave={e => e.currentTarget.style.background = "transparent"}><ChevronLeft size={16} /></button>
+            <div style={{ position: "relative", padding: "0 8px" }}>
+              <input type="date" value={selectedDate} onChange={e => setSelectedDate(e.target.value)} style={{ border: "none", outline: "none", fontSize: 13, fontWeight: 600, color: tokens.navy, fontFamily: "Poppins, -apple-system, sans-serif", cursor: "pointer" }} />
+            </div>
+            <button onClick={() => navigateDate('next')} style={{ width: 34, height: 34, borderRadius: 8, border: "none", background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: tokens.grayMuted }} onMouseEnter={e => e.currentTarget.style.background = tokens.grayBg} onMouseLeave={e => e.currentTarget.style.background = "transparent"}><ChevronRight size={16} /></button>
+          </div>
       </div>
 
-      {/* Mass result banner */}
+      {/* ── Stats / Result Banner ── */}
       {massResult && (
-        <Card className="p-4 bg-green-50 border-green-200">
-          <div className="flex items-center gap-3">
-            <CheckCircle className="h-5 w-5 text-green-600" />
-            <p className="text-green-800 font-medium">
-              Recordatorios enviados: {massResult.enviados} de {massResult.total}
-              {massResult.errores > 0 && (
-                <span className="text-red-600"> · {massResult.errores} con error</span>
-              )}
-            </p>
-          </div>
-        </Card>
+        <div style={{ background: tokens.greenFaint, padding: "12px 18px", borderRadius: 12, border: `0.5px solid ${tokens.green}33`, marginBottom: 20, display: "flex", alignItems: "center", gap: 10 }}>
+          <CheckCircle size={18} color={tokens.green} />
+          <p style={{ fontSize: 13, color: tokens.greenText, margin: 0, fontWeight: 500 }}>
+            Resultados del envío: {massResult.enviados} exitosos, {massResult.errores} fallidos. Total: {massResult.total}
+          </p>
+        </div>
       )}
 
-      {/* Turnos List */}
-      {loading ? (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
-        </div>
-      ) : filteredTurnos.length === 0 ? (
-        <Card className="p-8">
-          <div className="text-center">
-            <Calendar className="h-16 w-16 mx-auto text-gray-300 mb-4" />
-            <p className="text-gray-500 font-medium text-lg">No hay turnos para esta fecha</p>
-            <p className="text-sm text-gray-400 mt-1">
-              Seleccioná otra fecha para ver los turnos.
-            </p>
-          </div>
-        </Card>
-      ) : (
-        <div className="space-y-3">
-          {filteredTurnos.map((turno) => {
-            const isSent = sentIds.has(turno.id)
-            const isSending = sendingId === turno.id
-            const hasError = errorIds.has(turno.id)
-            const hasEmail = !!turno.paciente?.email
-
-            return (
-              <Card key={turno.id} className="p-4 hover:shadow-md transition-shadow">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                  <div className="flex-1 space-y-1">
-                    <div className="flex items-center gap-2">
-                      <User className="h-4 w-4 text-gray-400" />
-                      <span className="text-sm font-semibold text-gray-900">
-                        {turno.paciente?.apellido}, {turno.paciente?.nombre}
-                      </span>
-                      {!hasEmail && (
-                        <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-amber-100 text-amber-700">
-                          Sin email
-                        </span>
-                      )}
+      {/* ── Table card ── */}
+      <div style={{
+        background: tokens.white, borderRadius: 14,
+        border: `0.5px solid ${tokens.grayBorder}`, overflow: "hidden",
+      }}>
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <thead>
+              <tr style={{ borderBottom: `0.5px solid ${tokens.grayBorder}` }}>
+                {[
+                  { label: "Paciente", sortable: true },
+                  { label: "Horario", sortable: true },
+                  { label: "Profesional / Servicio", sortable: true },
+                  { label: "Canal de Envío", sortable: false },
+                  { label: "Estado", sortable: false },
+                  { label: "", sortable: false },
+                ].map((col, i) => (
+                  <th key={i} style={{
+                    textAlign: "left", padding: "12px 16px",
+                    fontSize: 11, fontWeight: 600, color: tokens.grayMuted,
+                    textTransform: "uppercase", letterSpacing: "0.6px", whiteSpace: "nowrap",
+                  }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                      {col.label}
+                      {col.sortable && <ArrowUpDown size={11} />}
                     </div>
-                    <div className="flex items-center gap-4 text-sm text-gray-600">
-                      <span className="flex items-center gap-1">
-                        <Clock className="h-3.5 w-3.5" />
-                        {turno.hora_inicio} - {turno.hora_fin}
-                      </span>
-                      {turno.profesional && (
-                        <span className="flex items-center gap-1">
-                          <User className="h-3.5 w-3.5" />
-                          {turno.profesional.nombre} {turno.profesional.apellido}
-                        </span>
-                      )}
-                      {turno.servicio && (
-                        <span className="flex items-center gap-1">
-                          <Briefcase className="h-3.5 w-3.5" />
-                          {turno.servicio.nombre}
-                        </span>
-                      )}
-                    </div>
-                    {hasEmail && (
-                      <div className="flex items-center gap-1 text-xs text-gray-400">
-                        <Mail className="h-3 w-3" />
-                        {turno.paciente?.email}
-                      </div>
-                    )}
-                  </div>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                [...Array(5)].map((_, i) => (
+                  <tr key={i} style={{ borderBottom: `0.5px solid ${tokens.grayRow}` }}>
+                    {[...Array(6)].map((_, j) => (
+                      <td key={j} style={{ padding: "14px 16px" }}><div style={{ width: 100, height: 11, borderRadius: 5, background: tokens.grayRow, animation: "pulse 1.5s infinite" }} /></td>
+                    ))}
+                  </tr>
+                ))
+              ) : filteredTurnos.length === 0 ? (
+                <tr>
+                  <td colSpan={6} style={{ textAlign: "center", padding: "56px 0" }}>
+                    <Bell size={36} color={tokens.grayBorder} style={{ margin: "0 auto 12px", display: "block" }} />
+                    <p style={{ fontSize: 14, fontWeight: 500, color: tokens.grayMuted }}>No hay turnos para {formatDateStr(selectedDate)}</p>
+                  </td>
+                </tr>
+              ) : (
+                filteredTurnos.map((t, idx) => {
+                  const isSent = sentIds.has(t.id)
+                  const isSending = sendingId === t.id
+                  const hasError = errorIds.has(t.id)
+                  const hasEmail = !!t.paciente?.email
+                  const isLast = idx === filteredTurnos.length - 1
+                  
+                  return (
+                    <tr
+                      key={t.id}
+                      style={{ borderBottom: isLast ? "none" : `0.5px solid ${tokens.grayRow}`, transition: "background 0.12s" }}
+                      onMouseEnter={e => (e.currentTarget.style.background = tokens.rowHover)}
+                      onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                    >
+                      {/* Paciente */}
+                      <td style={{ padding: "14px 16px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                          <div style={{
+                            width: 32, height: 32, borderRadius: 8,
+                            background: tokens.blueFaint, color: tokens.blue,
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            fontSize: 11, fontWeight: 700
+                          }}>
+                            {(t.paciente?.nombre || "").charAt(0)}{(t.paciente?.apellido || "").charAt(0)}
+                          </div>
+                          <div>
+                            <p style={{ fontSize: 13.5, fontWeight: 600, color: tokens.navy, margin: 0 }}>
+                              {t.paciente?.apellido}, {t.paciente?.nombre}
+                            </p>
+                            {!hasEmail && <span style={{ fontSize: 10, color: tokens.redText, fontWeight: 600 }}>SIN EMAIL</span>}
+                          </div>
+                        </div>
+                      </td>
 
-                  <div className="flex-shrink-0 flex items-center gap-2">
-                    {hasEmail && !isSent && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handlePreview(turno.id)}
-                        title="Vista previa del email"
-                        className="text-gray-500"
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                    )}
-                    {!hasEmail ? (
-                      <span className="text-xs text-gray-400 italic">No se puede enviar</span>
-                    ) : isSent ? (
-                      <div className="flex items-center gap-2 text-green-600 text-sm font-medium">
-                        <CheckCircle className="h-5 w-5" />
-                        Enviado
-                      </div>
-                    ) : hasError ? (
-                      <div className="flex items-center gap-2">
-                        <AlertCircle className="h-4 w-4 text-red-500" />
-                        <Button
-                          size="sm"
-                          onClick={() => handleSendReminder(turno.id)}
-                          className="bg-red-600 hover:bg-red-700"
-                        >
-                          Reintentar
-                        </Button>
-                      </div>
-                    ) : (
-                      <Button
-                        size="sm"
-                        onClick={() => handleSendReminder(turno.id)}
-                        disabled={isSending}
-                        className="bg-[#026498]"
-                      >
-                        {isSending ? (
-                          <>
-                            <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                            Enviando...
-                          </>
+                      {/* Horario */}
+                      <td style={{ padding: "11px 16px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: tokens.grayText }}>
+                          <Clock size={12} color={tokens.grayMuted} />
+                          {t.hora_inicio} hs
+                        </div>
+                      </td>
+
+                      {/* Profesional / Servicio */}
+                      <td style={{ padding: "11px 16px" }}>
+                        <div style={{ display: "flex", flexDirection: "column" }}>
+                          <span style={{ fontSize: 13, color: tokens.navy, fontWeight: 500 }}>{t.profesional?.nombre} {t.profesional?.apellido}</span>
+                          <span style={{ fontSize: 11, color: tokens.grayMuted }}>{t.servicio?.nombre}</span>
+                        </div>
+                      </td>
+
+                      {/* Canal */}
+                      <td style={{ padding: "11px 16px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: tokens.grayText }}>
+                          <Mail size={12} color={tokens.blue} />
+                          {t.paciente?.email || '—'}
+                        </div>
+                      </td>
+
+                      {/* Estado Envío */}
+                      <td style={{ padding: "11px 16px" }}>
+                        {isSent ? (
+                          <span style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "3px 10px", borderRadius: 6, fontSize: 11, fontWeight: 600, background: tokens.greenFaint, color: tokens.greenText }}>
+                            <CheckCircle size={10} /> ENVIADO
+                          </span>
+                        ) : hasError ? (
+                          <span style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "3px 10px", borderRadius: 6, fontSize: 11, fontWeight: 600, background: tokens.redFaint, color: tokens.redText }}>
+                            <AlertCircle size={10} /> ERROR
+                          </span>
+                        ) : !hasEmail ? (
+                          <span style={{ fontSize: 11, fontWeight: 600, color: tokens.grayMuted }}>N/A</span>
                         ) : (
-                          <>
-                            <Send className="h-4 w-4 mr-1" />
-                            Enviar
-                          </>
+                          <span style={{ fontSize: 11, fontWeight: 600, color: tokens.blue }}>PENDIENTE</span>
                         )}
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              </Card>
-            )
-          })}
+                      </td>
+
+                      {/* Action */}
+                      <td style={{ padding: "11px 16px" }}>
+                        <div style={{ display: "flex", justifyContent: "flex-end", gap: 4 }}>
+                          {hasEmail && !isSent && (
+                            <button onClick={() => handlePreview(t.id)} title="Previsualizar" style={{ width: 30, height: 30, borderRadius: 7, border: "none", background: "transparent", cursor: "pointer", color: tokens.grayMuted }} onMouseEnter={e => e.currentTarget.style.background = tokens.grayBg} onMouseLeave={e => e.currentTarget.style.background = "transparent"}><Eye size={14} /></button>
+                          )}
+                          {hasEmail && !isSent && (
+                            <button
+                              onClick={() => handleSendReminder(t.id)}
+                              disabled={isSending}
+                              style={{
+                                padding: "6px 12px", borderRadius: 8, border: "none",
+                                background: tokens.blue, color: tokens.white,
+                                fontSize: 11, fontWeight: 600, cursor: "pointer",
+                                opacity: isSending ? 0.6 : 1
+                              }}
+                            >
+                              {isSending ? '...' : 'ENVIAR'}
+                            </button>
+                          )}
+                          {hasError && (
+                            <button onClick={() => handleSendReminder(t.id)} style={{ padding: "6px 12px", borderRadius: 8, border: "none", background: tokens.red, color: tokens.white, fontSize: 11, fontWeight: 600, cursor: "pointer" }}>REINTENTAR</button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })
+              )}
+            </tbody>
+          </table>
         </div>
-      )}
+      </div>
 
       {/* Preview Modal */}
       {showPreview && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-            <div className="px-6 py-4 border-b flex justify-between items-center bg-gray-50">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                  <Eye className="h-5 w-5 text-[#026498]" />
-                  Vista previa del email
-                </h3>
-                <p className="text-xs text-gray-500 mt-0.5">
-                  {previewTurnoId
-                    ? 'Así se verá el email para este paciente'
-                    : 'Ejemplo con datos de prueba'}
-                </p>
-              </div>
-              <button
-                onClick={() => {
-                  setShowPreview(false)
-                  setPreviewHtml('')
-                  setPreviewTurnoId(null)
-                }}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <X className="h-5 w-5" />
-              </button>
+        <div style={{
+          position: "fixed", inset: 0, background: "rgba(11,16,35,0.45)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          zIndex: 50, padding: 16, backdropFilter: "blur(4px)"
+        }}>
+          <div style={{
+            background: tokens.white, borderRadius: 16,
+            maxWidth: 640, width: "100%", maxHeight: "90vh", overflow: "hidden",
+            boxShadow: "0 24px 48px rgba(11,16,35,0.12)",
+            display: "flex", flexDirection: "column"
+          }}>
+            <div style={{ padding: "18px 24px", borderBottom: `0.5px solid ${tokens.grayBorder}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <h3 style={{ fontSize: 16, fontWeight: 600, color: tokens.navy, margin: 0 }}>Vista Previa de Email</h3>
+              <button onClick={() => setShowPreview(false)} style={{ border: "none", background: "transparent", cursor: "pointer", color: tokens.grayMuted }}><X size={18} /></button>
             </div>
-            <div className="flex-1 overflow-y-auto">
+            <div style={{ flex: 1, overflowY: "auto", padding: 20 }}>
               {loadingPreview ? (
-                <div className="flex items-center justify-center py-20">
-                  <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
-                </div>
+                <div style={{ padding: "100px 0", textAlign: "center", color: tokens.grayMuted }}>Cargando previsualización...</div>
               ) : (
-                <div className="p-4">
-                  <div
-                    className="border rounded-lg overflow-hidden"
-                    style={{ backgroundColor: '#f9f9f9' }}
-                  >
-                    <iframe
-                      srcDoc={previewHtml}
-                      title="Email Preview"
-                      className="w-full border-0"
-                      style={{ minHeight: '500px' }}
-                      sandbox=""
-                    />
-                  </div>
+                <div style={{ border: `0.5px solid ${tokens.grayBorder}`, borderRadius: 8, overflow: "hidden" }}>
+                  <iframe srcDoc={previewHtml} title="Email Preview" style={{ width: "100%", height: 500, border: "none" }} />
                 </div>
               )}
-            </div>
-            <div className="px-6 py-3 border-t bg-gray-50 flex justify-between items-center">
-              <p className="text-xs text-gray-400">
-                Los datos del turno (fecha, hora, profesional, servicio) siempre se incluyen automáticamente.
-              </p>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setShowPreview(false)
-                  setPreviewHtml('')
-                  setPreviewTurnoId(null)
-                }}
-              >
-                Cerrar
-              </Button>
             </div>
           </div>
         </div>

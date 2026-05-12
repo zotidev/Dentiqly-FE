@@ -2,16 +2,100 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { Card } from "../ui/Card"
-import { Button } from "../ui/Button"
-import { Input } from "../ui/Input"
-import { Plus, Search, Edit, Trash2, User, Mail, Phone, Award, Award as IdCard, Clock, Briefcase, Upload, X } from 'lucide-react'
+import {
+  Plus,
+  Search,
+  Edit,
+  Trash2,
+  Users,
+  Mail,
+  Phone,
+  Award,
+  Clock,
+  Briefcase,
+  X,
+  ChevronLeft,
+  ChevronRight,
+  ArrowUpDown,
+  Check,
+  UserPlus
+} from "lucide-react"
 import { adminApi } from "../../api/admin"
 import { ScheduleManager } from "../schedule/ScheduleManager"
 import { ServiceAssignment } from "./ServiceAssignment"
 import { ConfirmationModal } from "../ui/ConfirmationModal"
 import { useToast } from "../../hooks/use-toast"
 import type { Profesional, CrearProfesionalData, HorariosSemanales, Servicio } from "../../types"
+
+/* ─── Dentiqly design tokens ─────────────────────────────────────────── */
+const tokens = {
+  blue: "#2563FF",
+  blueHover: "#1E40AF",
+  blueFaint: "#EEF3FF",
+  navy: "#0B1023",
+  grayText: "#4B5568",
+  grayMuted: "#8A93A8",
+  grayBorder: "#E2E6EF",
+  grayBg: "#F5F7FA",
+  grayRow: "#F0F2F7",
+  rowHover: "#F5F8FF",
+  white: "#FFFFFF",
+
+  green: "#22C55E",
+  greenFaint: "#EDFAF4",
+  greenText: "#15803D",
+  
+  red: "#EF4444",
+  redFaint: "#FEF2F2",
+  redText: "#B91C1C",
+
+  grayDot: "#CBD5E1",
+  grayPill: "#F1F5F9",
+  grayPillTx: "#64748B",
+
+  avatarColors: [
+    { bg: "#EEF3FF", color: "#2563FF" },
+    { bg: "#EDFAF4", color: "#16A34A" },
+    { bg: "#F3EEFF", color: "#7C3AED" },
+    { bg: "#FFF8EB", color: "#B45309" },
+    { bg: "#FEF2F2", color: "#DC2626" },
+    { bg: "#F0FDFA", color: "#0D9488" },
+  ],
+}
+
+/* ─── Tiny helpers ────────────────────────────────────────────────────── */
+const getInitials = (nombre: string, apellido: string) =>
+  `${(nombre || "").charAt(0)}${(apellido || "").charAt(0)}`.toUpperCase()
+
+const getAvatarStyle = (id: string | number) => {
+  const strId = String(id)
+  const idx = strId.charCodeAt(strId.length - 1) % tokens.avatarColors.length
+  return tokens.avatarColors[idx]
+}
+
+/* ─── Label styles ────────────────────────────────────────────────────── */
+const labelStyle: React.CSSProperties = {
+  display: "block",
+  fontSize: 12,
+  fontWeight: 600,
+  color: tokens.grayMuted,
+  textTransform: "uppercase",
+  letterSpacing: "0.5px",
+  marginBottom: 6,
+}
+
+const inputStyle: React.CSSProperties = {
+  width: "100%",
+  padding: "9px 12px",
+  fontSize: 13,
+  border: `0.5px solid ${tokens.grayBorder}`,
+  borderRadius: 9,
+  outline: "none",
+  color: tokens.navy,
+  background: tokens.white,
+  fontFamily: "Poppins, -apple-system, sans-serif",
+  transition: "all 0.15s",
+}
 
 type ViewMode = 'list' | 'schedule' | 'services'
 
@@ -24,7 +108,7 @@ export const ProfessionalsManager: React.FC = () => {
   const [editingProfessional, setEditingProfessional] = useState<Profesional | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("")
-  const [uploading, setUploading] = useState(false)
+  const [focusedField, setFocusedField] = useState<string | null>(null)
   const [confirmDelete, setConfirmDelete] = useState<{ isOpen: boolean; id: string | number | null }>({
     isOpen: false,
     id: null
@@ -39,7 +123,7 @@ export const ProfessionalsManager: React.FC = () => {
     telefono: "",
     especialidad: "",
     numero_matricula: "",
-    color: "#026498",
+    color: "#2563FF",
     foto_url: "",
   })
 
@@ -51,6 +135,7 @@ export const ProfessionalsManager: React.FC = () => {
 
   const fetchProfessionals = async () => {
     try {
+      setLoading(true)
       const response = await adminApi.profesionales.listar({
         search: searchTerm,
         estado: statusFilter,
@@ -116,7 +201,7 @@ export const ProfessionalsManager: React.FC = () => {
       telefono: professional.telefono || "",
       especialidad: professional.especialidad,
       numero_matricula: professional.numero_matricula,
-      color: professional.color || "#026498",
+      color: professional.color || "#2563FF",
       foto_url: professional.foto_url || "",
     })
     setShowForm(true)
@@ -133,6 +218,7 @@ export const ProfessionalsManager: React.FC = () => {
     try {
       await adminApi.profesionales.eliminar(confirmDelete.id)
       fetchProfessionals()
+      setConfirmDelete({ isOpen: false, id: null })
     } catch (error) {
       console.error("Error deleting professional:", error)
       alert("Error al eliminar el profesional")
@@ -174,7 +260,7 @@ export const ProfessionalsManager: React.FC = () => {
       telefono: "",
       especialidad: "",
       numero_matricula: "",
-      color: "#026498",
+      color: "#2563FF",
       foto_url: "",
     })
     setErrors({})
@@ -189,42 +275,40 @@ export const ProfessionalsManager: React.FC = () => {
     }
   }
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file || !editingProfessional) return
-
-    try {
-      setUploading(true)
-      const response = await adminApi.profesionales.subirFoto(editingProfessional.id, file)
-      setFormData((prev) => ({ ...prev, foto_url: response.foto_url }))
-      alert("Foto subida correctamente")
-    } catch (error) {
-      console.error("Error uploading photo:", error)
-      alert("Error al subir la foto")
-    } finally {
-      setUploading(false)
-    }
+  /* ── styles ── */
+  const page: React.CSSProperties = {
+    background: tokens.grayBg,
+    minHeight: "100vh",
+    padding: "28px 32px",
+    fontFamily: "Poppins, -apple-system, sans-serif",
   }
 
   if (viewMode === 'schedule' && selectedProfessional) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
+      <div style={page}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 }}>
           <div>
-            <h2 className="text-2xl font-bold text-foreground">Gestión de Horarios</h2>
-            <p className="text-muted-foreground">Configura los horarios de atención del profesional</p>
+            <h1 style={{ fontSize: 22, fontWeight: 600, color: tokens.navy, letterSpacing: "-0.3px", margin: 0 }}>
+              Gestión de Horarios
+            </h1>
+            <p style={{ fontSize: 13, color: tokens.grayMuted, marginTop: 3 }}>
+              Configura los horarios de atención de {selectedProfessional.nombre} {selectedProfessional.apellido}
+            </p>
           </div>
-          <Button
-            variant="outline"
-            onClick={() => {
-              setViewMode('list')
-              setSelectedProfessional(null)
+          <button
+            onClick={() => { setViewMode('list'); setSelectedProfessional(null) }}
+            style={{
+              background: tokens.white, color: tokens.grayText,
+              border: `0.5px solid ${tokens.grayBorder}`, borderRadius: 10, padding: "9px 18px",
+              fontSize: 13, fontWeight: 500, cursor: "pointer",
+              fontFamily: "Poppins, -apple-system, sans-serif", transition: "all 0.12s",
             }}
+            onMouseEnter={e => e.currentTarget.style.background = tokens.grayBg}
+            onMouseLeave={e => e.currentTarget.style.background = tokens.white}
           >
             Volver
-          </Button>
+          </button>
         </div>
-
         <ScheduleManager professional={selectedProfessional} onScheduleUpdate={handleScheduleUpdate} />
       </div>
     )
@@ -232,381 +316,527 @@ export const ProfessionalsManager: React.FC = () => {
 
   if (viewMode === 'services' && selectedProfessional) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
+      <div style={page}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 }}>
           <div>
-            <h2 className="text-2xl font-bold text-foreground">Gestión de Servicios</h2>
-            <p className="text-muted-foreground">Asigna servicios al profesional</p>
+            <h1 style={{ fontSize: 22, fontWeight: 600, color: tokens.navy, letterSpacing: "-0.3px", margin: 0 }}>
+              Gestión de Servicios
+            </h1>
+            <p style={{ fontSize: 13, color: tokens.grayMuted, marginTop: 3 }}>
+              Asigna servicios a {selectedProfessional.nombre} {selectedProfessional.apellido}
+            </p>
           </div>
-          <Button
-            variant="outline"
-            onClick={() => {
-              setViewMode('list')
-              setSelectedProfessional(null)
+          <button
+            onClick={() => { setViewMode('list'); setSelectedProfessional(null) }}
+            style={{
+              background: tokens.white, color: tokens.grayText,
+              border: `0.5px solid ${tokens.grayBorder}`, borderRadius: 10, padding: "9px 18px",
+              fontSize: 13, fontWeight: 500, cursor: "pointer",
+              fontFamily: "Poppins, -apple-system, sans-serif", transition: "all 0.12s",
             }}
+            onMouseEnter={e => e.currentTarget.style.background = tokens.grayBg}
+            onMouseLeave={e => e.currentTarget.style.background = tokens.white}
           >
             Volver
-          </Button>
+          </button>
         </div>
-
         <ServiceAssignment professional={selectedProfessional} onServicesUpdate={handleServicesUpdate} />
       </div>
     )
   }
 
   return (
-    <div className="bg-[#f0f2f5] min-h-screen p-4 sm:p-8 rounded-3xl font-sans space-y-6">
-      {/* Header con acciones */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+    <div style={page}>
+      {/* ── Header ── */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 }}>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Gestión de Profesionales</h1>
-          <p className="text-gray-500 mt-1">Administra los profesionales del centro odontológico</p>
+          <h1 style={{ fontSize: 22, fontWeight: 600, color: tokens.navy, letterSpacing: "-0.3px", margin: 0 }}>
+            Gestión de Profesionales
+          </h1>
+          <p style={{ fontSize: 13, color: tokens.grayMuted, marginTop: 3, fontWeight: 400 }}>
+            Administrá el staff médico de tu centro
+          </p>
+        </div>
+        <button
+          onClick={() => setShowForm(true)}
+          style={{
+            display: "flex", alignItems: "center", gap: 7,
+            background: tokens.blue, color: tokens.white,
+            border: "none", borderRadius: 10, padding: "9px 18px",
+            fontSize: 13, fontWeight: 500, cursor: "pointer",
+            fontFamily: "Poppins, -apple-system, sans-serif",
+            transition: "background 0.15s",
+          }}
+          onMouseEnter={e => (e.currentTarget.style.background = tokens.blueHover)}
+          onMouseLeave={e => (e.currentTarget.style.background = tokens.blue)}
+        >
+          <Plus size={15} />
+          Nuevo Profesional
+        </button>
+      </div>
+
+      {/* ── Controls ── */}
+      <div style={{ display: "flex", gap: 12, marginBottom: 20, alignItems: "center" }}>
+        {/* Search */}
+        <div style={{
+          flex: 1, display: "flex", alignItems: "center", gap: 10,
+          background: tokens.white, border: `0.5px solid ${tokens.grayBorder}`,
+          borderRadius: 10, padding: "0 14px", height: 40,
+        }}>
+          <Search size={15} color={tokens.grayMuted} />
+          <input
+            type="text"
+            placeholder="Buscar por nombre, especialidad o matrícula…"
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            style={{
+              border: "none", outline: "none", background: "transparent",
+              fontSize: 13, color: tokens.navy, flex: 1,
+              fontFamily: "Poppins, -apple-system, sans-serif",
+            }}
+          />
+        </div>
+        
+        {/* Status filter */}
+        <div style={{
+          display: "flex", alignItems: "center", gap: 8,
+          background: tokens.white, border: `0.5px solid ${tokens.grayBorder}`,
+          borderRadius: 10, padding: "0 14px", height: 40,
+        }}>
+          <select
+            value={statusFilter}
+            onChange={e => setStatusFilter(e.target.value)}
+            style={{
+              border: "none", outline: "none", background: "transparent",
+              fontSize: 13, color: tokens.navy, cursor: "pointer",
+              fontFamily: "Poppins, -apple-system, sans-serif",
+            }}
+          >
+            <option value="">Todos los estados</option>
+            <option value="Activo">Activos</option>
+            <option value="Inactivo">Inactivos</option>
+          </select>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
-          <button onClick={() => setShowForm(true)} className="flex items-center gap-2 px-6 py-2 bg-[#2563FF] text-white rounded-full font-medium hover:bg-blue-700 transition shadow-md shadow-blue-500/20">
-            <Plus className="w-4 h-4" /> Nuevo Profesional
-          </button>
+        {/* Counter */}
+        <div style={{
+          display: "flex", alignItems: "center", gap: 8,
+          background: tokens.white, border: `0.5px solid ${tokens.grayBorder}`,
+          borderRadius: 10, padding: "0 14px", height: 40, whiteSpace: "nowrap",
+        }}>
+          <Users size={15} color={tokens.blue} />
+          <span style={{ fontSize: 13, fontWeight: 600, color: tokens.navy }}>{professionals.length}</span>
+          <span style={{ fontSize: 13, color: tokens.grayMuted }}>profesionales</span>
         </div>
       </div>
 
-      {/* Filtros */}
-      <Card className="p-4">
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="flex-1">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder="Buscar por nombre, apellido o matrícula..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
-              />
-            </div>
-          </div>
-
-          <div className="sm:w-48">
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
-            >
-              <option value="">Todos los estados</option>
-              <option value="Activo">Activos</option>
-              <option value="Inactivo">Inactivos</option>
-            </select>
-          </div>
-        </div>
-      </Card>
-
-      {/* Lista de profesionales */}
-      <Card className="p-6">
-        {loading ? (
-          <div className="space-y-4">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-20 bg-muted rounded-lg animate-pulse"></div>
-            ))}
-          </div>
-        ) : professionals.length === 0 ? (
-          <div className="text-center py-12 text-muted-foreground">
-            <User className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p className="text-lg font-medium mb-2">No hay profesionales registrados</p>
-            <p>Comienza agregando tu primer profesional</p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-border">
-                  <th className="text-left py-3 px-4 font-semibold text-foreground">Profesional</th>
-                  <th className="text-left py-3 px-4 font-semibold text-foreground">Documento</th>
-                  <th className="text-left py-3 px-4 font-semibold text-foreground">Contacto</th>
-                  <th className="text-left py-3 px-4 font-semibold text-foreground">Especialidad</th>
-                  <th className="text-left py-3 px-4 font-semibold text-foreground">Matrícula</th>
-                  <th className="text-left py-3 px-4 font-semibold text-foreground">Estado</th>
-                  <th className="text-left py-3 px-4 font-semibold text-foreground">Acciones</th>
+      {/* ── Table card ── */}
+      <div style={{
+        background: tokens.white, borderRadius: 14,
+        border: `0.5px solid ${tokens.grayBorder}`, overflow: "hidden",
+      }}>
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <thead>
+              <tr style={{ borderBottom: `0.5px solid ${tokens.grayBorder}` }}>
+                {[
+                  { label: "Profesional", sortable: true },
+                  { label: "Documento", sortable: true },
+                  { label: "Contacto", sortable: true },
+                  { label: "Especialidad", sortable: true },
+                  { label: "Matrícula", sortable: true },
+                  { label: "Estado", sortable: false },
+                  { label: "", sortable: false },
+                ].map((col, i) => (
+                  <th key={i} style={{
+                    textAlign: "left", padding: "12px 16px",
+                    fontSize: 11, fontWeight: 600, color: tokens.grayMuted,
+                    textTransform: "uppercase", letterSpacing: "0.6px", whiteSpace: "nowrap",
+                  }}>
+                    {col.label && (
+                      <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                        {col.label}
+                        {col.sortable && <ArrowUpDown size={11} />}
+                      </div>
+                    )}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                [...Array(5)].map((_, i) => (
+                  <tr key={i} style={{ borderBottom: `0.5px solid ${tokens.grayRow}` }}>
+                    <td style={{ padding: "11px 16px" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        <div style={{ width: 34, height: 34, borderRadius: 9, background: tokens.grayRow, animation: "pulse 1.5s infinite" }} />
+                        <div style={{ width: 120, height: 11, borderRadius: 5, background: tokens.grayRow }} />
+                      </div>
+                    </td>
+                    {[...Array(5)].map((_, j) => (
+                      <td key={j} style={{ padding: "11px 16px" }}>
+                        <div style={{ width: 90, height: 11, borderRadius: 5, background: tokens.grayRow }} />
+                      </td>
+                    ))}
+                    <td style={{ padding: "11px 16px" }} />
+                  </tr>
+                ))
+              ) : professionals.length === 0 ? (
+                <tr>
+                  <td colSpan={7} style={{ textAlign: "center", padding: "56px 0" }}>
+                    <Users size={36} color={tokens.grayBorder} style={{ margin: "0 auto 12px", display: "block" }} />
+                    <p style={{ fontSize: 14, fontWeight: 500, color: tokens.grayMuted }}>No hay profesionales registrados</p>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {professionals.map((professional) => (
-                  <tr
-                    key={professional.id}
-                    className="border-b border-border hover:bg-muted/50 transition-colors duration-200"
-                  >
-                    <td className="py-4 px-4">
-                      <div className="flex items-center">
-                        <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center mr-3 overflow-hidden border border-border">
-                          {professional.foto_url ? (
-                            <img src={professional.foto_url} alt={`${professional.nombre} ${professional.apellido}`} className="w-full h-full object-cover" />
-                          ) : (
-                            <User className="h-5 w-5 text-primary-foreground" />
-                          )}
-                        </div>
-                        <div>
-                          <p className="font-medium text-foreground">
-                            {professional.nombre} {professional.apellido}
+              ) : (
+                professionals.map((prof, idx) => {
+                  const avColor = getAvatarStyle(prof.id)
+                  const isLast = idx === professionals.length - 1
+                  return (
+                    <tr
+                      key={prof.id}
+                      style={{ borderBottom: isLast ? "none" : `0.5px solid ${tokens.grayRow}`, cursor: "pointer", transition: "background 0.12s" }}
+                      onMouseEnter={e => (e.currentTarget.style.background = tokens.rowHover)}
+                      onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                    >
+                      {/* Profesional */}
+                      <td style={{ padding: "11px 16px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                          <div style={{ position: "relative", flexShrink: 0 }}>
+                            {prof.foto_url ? (
+                              <img
+                                src={prof.foto_url}
+                                alt={`${prof.nombre} ${prof.apellido}`}
+                                style={{ width: 34, height: 34, borderRadius: 9, objectFit: "cover" }}
+                              />
+                            ) : (
+                              <div style={{
+                                width: 34, height: 34, borderRadius: 9,
+                                background: avColor.bg, color: avColor.color,
+                                display: "flex", alignItems: "center", justifyContent: "center",
+                                fontSize: 11, fontWeight: 700,
+                              }}>
+                                {getInitials(prof.nombre, prof.apellido)}
+                              </div>
+                            )}
+                            <div style={{
+                              width: 8, height: 8, borderRadius: "50%",
+                              border: `1.5px solid ${tokens.white}`,
+                              background: prof.estado === "Activo" ? tokens.green : tokens.grayDot,
+                              position: "absolute", bottom: -1, right: -1,
+                            }} />
+                          </div>
+                          <p style={{ fontSize: 13, fontWeight: 600, color: tokens.navy, margin: 0, whiteSpace: "nowrap" }}>
+                            {prof.apellido}, {prof.nombre}
                           </p>
                         </div>
-                      </div>
-                    </td>
-                    <td className="py-4 px-4">
-                      <div className="flex items-center text-sm text-muted-foreground">
-                        <IdCard className="h-3 w-3 mr-1" />
-                        {professional.numero_documento}
-                      </div>
-                    </td>
-                    <td className="py-4 px-4">
-                      <div className="space-y-1">
-                        <div className="flex items-center text-sm text-muted-foreground">
-                          <Mail className="h-3 w-3 mr-1" />
-                          {professional.email}
-                        </div>
-                        <div className="flex items-center text-sm text-muted-foreground">
-                          <Phone className="h-3 w-3 mr-1" />
-                          {professional.telefono}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-4 px-4">
-                      <div className="flex items-center text-sm text-foreground">
-                        <Award className="h-4 w-4 mr-2" />
-                        {professional.especialidad}
-                      </div>
-                    </td>
-                    <td className="py-4 px-4">
-                      <span className="text-sm font-mono text-foreground">{professional.numero_matricula}</span>
-                    </td>
-                    <td className="py-4 px-4">
-                      <span
-                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${professional.estado === "Activo" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-                          }`}
-                      >
-                        {professional.estado}
-                      </span>
-                    </td>
-                    <td className="py-4 px-4">
-                      <div className="flex items-center space-x-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleManageServices(professional)}
-                          title="Gestionar servicios"
-                        >
-                          <Briefcase className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleManageSchedule(professional)}
-                          title="Gestionar horarios"
-                        >
-                          <Clock className="h-4 w-4" />
-                        </Button>
-                        <Button variant="outline" size="sm" onClick={() => handleEdit(professional)}>
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={(e) => handleDeleteClick(e, professional.id)}
-                          className="text-red-600 hover:text-red-700"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </Card>
+                      </td>
 
-      {/* Modal de formulario */}
+                      {/* Documento */}
+                      <td style={{ padding: "11px 16px" }}>
+                        <div style={{ fontSize: 13, color: tokens.grayText, whiteSpace: "nowrap" }}>
+                          {prof.numero_documento}
+                        </div>
+                      </td>
+
+                      {/* Contacto */}
+                      <td style={{ padding: "11px 16px" }}>
+                        <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12.5, color: tokens.grayText, whiteSpace: "nowrap" }}>
+                            <Mail size={12} color={tokens.grayBorder} />
+                            {prof.email}
+                          </div>
+                          <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12.5, color: tokens.grayText, whiteSpace: "nowrap" }}>
+                            <Phone size={12} color={tokens.grayBorder} />
+                            {prof.telefono}
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Especialidad */}
+                      <td style={{ padding: "11px 16px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: tokens.navy, fontWeight: 500 }}>
+                          <Award size={13} color={tokens.blue} />
+                          {prof.especialidad}
+                        </div>
+                      </td>
+
+                      {/* Matrícula */}
+                      <td style={{ padding: "11px 16px" }}>
+                        <div style={{ fontSize: 12.5, fontFamily: "monospace", color: tokens.grayMuted }}>
+                          {prof.numero_matricula}
+                        </div>
+                      </td>
+
+                      {/* Estado */}
+                      <td style={{ padding: "11px 16px" }}>
+                        <span style={{
+                          display: "inline-flex", alignItems: "center",
+                          padding: "3px 10px", borderRadius: 6,
+                          fontSize: 11, fontWeight: 600, whiteSpace: "nowrap",
+                          background: prof.estado === "Activo" ? tokens.greenFaint : tokens.redFaint,
+                          color: prof.estado === "Activo" ? tokens.greenText : tokens.redText,
+                        }}>
+                          {prof.estado}
+                        </span>
+                      </td>
+
+                      {/* Actions */}
+                      <td style={{ padding: "11px 16px" }} onClick={e => e.stopPropagation()}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
+                          <button
+                            onClick={() => handleManageServices(prof)}
+                            title="Servicios"
+                            style={{
+                              width: 30, height: 30, borderRadius: 7, border: "none",
+                              background: "transparent", cursor: "pointer",
+                              display: "flex", alignItems: "center", justifyContent: "center",
+                              color: tokens.grayMuted, transition: "all 0.12s",
+                            }}
+                            onMouseEnter={e => { e.currentTarget.style.background = tokens.blueFaint; e.currentTarget.style.color = tokens.blue }}
+                            onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = tokens.grayMuted }}
+                          >
+                            <Briefcase size={14} />
+                          </button>
+                          <button
+                            onClick={() => handleManageSchedule(prof)}
+                            title="Horarios"
+                            style={{
+                              width: 30, height: 30, borderRadius: 7, border: "none",
+                              background: "transparent", cursor: "pointer",
+                              display: "flex", alignItems: "center", justifyContent: "center",
+                              color: tokens.grayMuted, transition: "all 0.12s",
+                            }}
+                            onMouseEnter={e => { e.currentTarget.style.background = tokens.blueFaint; e.currentTarget.style.color = tokens.blue }}
+                            onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = tokens.grayMuted }}
+                          >
+                            <Clock size={14} />
+                          </button>
+                          <button
+                            onClick={() => handleEdit(prof)}
+                            title="Editar"
+                            style={{
+                              width: 30, height: 30, borderRadius: 7, border: "none",
+                              background: "transparent", cursor: "pointer",
+                              display: "flex", alignItems: "center", justifyContent: "center",
+                              color: tokens.grayMuted, transition: "all 0.12s",
+                            }}
+                            onMouseEnter={e => { e.currentTarget.style.background = tokens.blueFaint; e.currentTarget.style.color = tokens.blue }}
+                            onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = tokens.grayMuted }}
+                          >
+                            <Edit size={14} />
+                          </button>
+                          <button
+                            onClick={(e) => handleDeleteClick(e, prof.id)}
+                            title="Eliminar"
+                            style={{
+                              width: 30, height: 30, borderRadius: 7, border: "none",
+                              background: "transparent", cursor: "pointer",
+                              display: "flex", alignItems: "center", justifyContent: "center",
+                              color: tokens.grayMuted, transition: "all 0.12s",
+                            }}
+                            onMouseEnter={e => { e.currentTarget.style.background = tokens.redFaint; e.currentTarget.style.color = tokens.red }}
+                            onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = tokens.grayMuted }}
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* ── Modal Create / Edit ── */}
       {showForm && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="px-6 py-4 border-b border-border bg-white sticky top-0 z-10 flex justify-between items-center">
-              <h3 className="text-lg font-semibold text-foreground">
+        <div style={{
+          position: "fixed", inset: 0, background: "rgba(11,16,35,0.45)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          zIndex: 50, padding: 16,
+        }}>
+          <div style={{
+            background: tokens.white, borderRadius: 16,
+            maxWidth: 640, width: "100%", maxHeight: "90vh", overflowY: "auto",
+            boxShadow: "0 24px 48px rgba(11,16,35,0.12)",
+          }}>
+            {/* Modal header */}
+            <div style={{
+              padding: "18px 24px", borderBottom: `0.5px solid ${tokens.grayBorder}`,
+              display: "flex", justifyContent: "space-between", alignItems: "center",
+              position: "sticky", top: 0, background: tokens.white, zIndex: 10,
+            }}>
+              <h3 style={{ fontSize: 16, fontWeight: 600, color: tokens.navy, margin: 0 }}>
                 {editingProfessional ? "Editar Profesional" : "Nuevo Profesional"}
               </h3>
               <button
-                type="button"
                 onClick={resetForm}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
+                style={{
+                  width: 30, height: 30, borderRadius: 8, border: "none",
+                  background: "transparent", cursor: "pointer",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  color: tokens.grayMuted, transition: "all 0.12s",
+                }}
+                onMouseEnter={e => { e.currentTarget.style.background = tokens.grayRow }}
+                onMouseLeave={e => { e.currentTarget.style.background = "transparent" }}
               >
-                <X className="h-5 w-5" />
+                <X size={16} />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Form */}
+            <form onSubmit={handleSubmit} style={{ padding: 24 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">Nombre *</label>
-                  <Input
+                  <label style={labelStyle}>Nombre *</label>
+                  <input
+                    type="text" required
                     value={formData.nombre}
-                    onChange={(e) => handleChange("nombre", e.target.value)}
-                    placeholder="Nombre del profesional"
-                    className={errors.nombre ? "border-red-500" : ""}
+                    onChange={e => handleChange("nombre", e.target.value)}
+                    placeholder="Nombre"
+                    style={{ ...inputStyle, borderColor: (focusedField === "nombre" || errors.nombre) ? (errors.nombre ? tokens.red : tokens.blue) : tokens.grayBorder }}
+                    onFocus={() => setFocusedField("nombre")}
+                    onBlur={() => setFocusedField(null)}
                   />
-                  {errors.nombre && <p className="text-red-500 text-xs mt-1">{errors.nombre}</p>}
+                  {errors.nombre && <p style={{ color: tokens.red, fontSize: 11, marginTop: 4 }}>{errors.nombre}</p>}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">Apellido *</label>
-                  <Input
+                  <label style={labelStyle}>Apellido *</label>
+                  <input
+                    type="text" required
                     value={formData.apellido}
-                    onChange={(e) => handleChange("apellido", e.target.value)}
-                    placeholder="Apellido del profesional"
-                    className={errors.apellido ? "border-red-500" : ""}
+                    onChange={e => handleChange("apellido", e.target.value)}
+                    placeholder="Apellido"
+                    style={{ ...inputStyle, borderColor: (focusedField === "apellido" || errors.apellido) ? (errors.apellido ? tokens.red : tokens.blue) : tokens.grayBorder }}
+                    onFocus={() => setFocusedField("apellido")}
+                    onBlur={() => setFocusedField(null)}
                   />
-                  {errors.apellido && <p className="text-red-500 text-xs mt-1">{errors.apellido}</p>}
+                  {errors.apellido && <p style={{ color: tokens.red, fontSize: 11, marginTop: 4 }}>{errors.apellido}</p>}
                 </div>
-              </div>
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Número de Documento *</label>
-                <Input
-                  value={formData.numero_documento}
-                  onChange={(e) => handleChange("numero_documento", e.target.value)}
-                  placeholder="12345678"
-                  className={errors.numero_documento ? "border-red-500" : ""}
-                />
-                {errors.numero_documento && <p className="text-red-500 text-xs mt-1">{errors.numero_documento}</p>}
-              </div>
+                <div style={{ gridColumn: "span 2" }}>
+                  <label style={labelStyle}>DNI / Documento *</label>
+                  <input
+                    type="text" required
+                    value={formData.numero_documento}
+                    onChange={e => handleChange("numero_documento", e.target.value)}
+                    placeholder="12345678"
+                    style={{ ...inputStyle, borderColor: (focusedField === "dni" || errors.numero_documento) ? (errors.numero_documento ? tokens.red : tokens.blue) : tokens.grayBorder }}
+                    onFocus={() => setFocusedField("dni")}
+                    onBlur={() => setFocusedField(null)}
+                  />
+                  {errors.numero_documento && <p style={{ color: tokens.red, fontSize: 11, marginTop: 4 }}>{errors.numero_documento}</p>}
+                </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">Email *</label>
-                  <Input
-                    type="email"
+                  <label style={labelStyle}>Email *</label>
+                  <input
+                    type="email" required
                     value={formData.email || ""}
-                    onChange={(e) => handleChange("email", e.target.value)}
+                    onChange={e => handleChange("email", e.target.value)}
                     placeholder="email@ejemplo.com"
-                    className={errors.email ? "border-red-500" : ""}
+                    style={{ ...inputStyle, borderColor: (focusedField === "email" || errors.email) ? (errors.email ? tokens.red : tokens.blue) : tokens.grayBorder }}
+                    onFocus={() => setFocusedField("email")}
+                    onBlur={() => setFocusedField(null)}
                   />
-                  {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+                  {errors.email && <p style={{ color: tokens.red, fontSize: 11, marginTop: 4 }}>{errors.email}</p>}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">Teléfono *</label>
-                  <Input
-                    type="tel"
+                  <label style={labelStyle}>Teléfono *</label>
+                  <input
+                    type="tel" required
                     value={formData.telefono || ""}
-                    onChange={(e) => handleChange("telefono", e.target.value)}
-                    placeholder="+54 11 1234-5678"
-                    className={errors.telefono ? "border-red-500" : ""}
+                    onChange={e => handleChange("telefono", e.target.value)}
+                    placeholder="+54 11 ..."
+                    style={{ ...inputStyle, borderColor: (focusedField === "tel" || errors.telefono) ? (errors.telefono ? tokens.red : tokens.blue) : tokens.grayBorder }}
+                    onFocus={() => setFocusedField("tel")}
+                    onBlur={() => setFocusedField(null)}
                   />
-                  {errors.telefono && <p className="text-red-500 text-xs mt-1">{errors.telefono}</p>}
+                  {errors.telefono && <p style={{ color: tokens.red, fontSize: 11, marginTop: 4 }}>{errors.telefono}</p>}
                 </div>
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">Especialidad *</label>
-                  <Input
+                  <label style={labelStyle}>Especialidad *</label>
+                  <input
+                    type="text" required
                     value={formData.especialidad}
-                    onChange={(e) => handleChange("especialidad", e.target.value)}
+                    onChange={e => handleChange("especialidad", e.target.value)}
                     placeholder="Ej: Odontología General"
-                    className={errors.especialidad ? "border-red-500" : ""}
+                    style={{ ...inputStyle, borderColor: (focusedField === "esp" || errors.especialidad) ? (errors.especialidad ? tokens.red : tokens.blue) : tokens.grayBorder }}
+                    onFocus={() => setFocusedField("esp")}
+                    onBlur={() => setFocusedField(null)}
                   />
-                  {errors.especialidad && <p className="text-red-500 text-xs mt-1">{errors.especialidad}</p>}
+                  {errors.especialidad && <p style={{ color: tokens.red, fontSize: 11, marginTop: 4 }}>{errors.especialidad}</p>}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">Número de Matrícula *</label>
-                  <Input
+                  <label style={labelStyle}>Nº Matrícula *</label>
+                  <input
+                    type="text" required
                     value={formData.numero_matricula}
-                    onChange={(e) => handleChange("numero_matricula", e.target.value)}
+                    onChange={e => handleChange("numero_matricula", e.target.value)}
                     placeholder="MP 12345"
-                    className={errors.numero_matricula ? "border-red-500" : ""}
+                    style={{ ...inputStyle, borderColor: (focusedField === "mat" || errors.numero_matricula) ? (errors.numero_matricula ? tokens.red : tokens.blue) : tokens.grayBorder }}
+                    onFocus={() => setFocusedField("mat")}
+                    onBlur={() => setFocusedField(null)}
                   />
-                  {errors.numero_matricula && <p className="text-red-500 text-xs mt-1">{errors.numero_matricula}</p>}
+                  {errors.numero_matricula && <p style={{ color: tokens.red, fontSize: 11, marginTop: 4 }}>{errors.numero_matricula}</p>}
                 </div>
-              </div>
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Color Identificativo</label>
-                <div className="flex items-center space-x-3">
-                  <Input
-                    type="color"
-                    value={formData.color || "#026498"}
-                    onChange={(e) => handleChange("color", e.target.value)}
-                    className="w-16 h-10 p-1 cursor-pointer"
-                  />
-                  <span className="text-sm text-muted-foreground">
-                    Este color se usará para identificar los turnos de este profesional en el calendario.
-                  </span>
-                </div>
-              </div>
-
-              {editingProfessional && (
-                <div className="border-t border-border pt-4 mt-6">
-                  <label className="block text-sm font-medium text-foreground mb-2">Foto de Perfil</label>
-                  <div className="flex items-center space-x-6">
-                    <div className="relative w-24 h-24 rounded-2xl bg-muted overflow-hidden border-2 border-dashed border-border flex items-center justify-center">
-                      {formData.foto_url ? (
-                        <img src={formData.foto_url} alt="Preview" className="w-full h-full object-cover" />
-                      ) : (
-                        <User className="w-8 h-8 text-muted-foreground opacity-50" />
-                      )}
-                      {uploading && (
-                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                          <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-xs text-muted-foreground mb-3">
-                        Formatos aceptados: JPG, PNG, WEBP. Máximo 5MB.<br />
-                        La imagen se redimensionará automáticamente.
-                      </p>
-                      <div className="flex space-x-2">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          disabled={uploading}
-                          onClick={() => document.getElementById('photo-upload')?.click()}
-                        >
-                          <Upload className="w-4 h-4 mr-2" />
-                          {formData.foto_url ? 'Cambiar Foto' : 'Subir Foto'}
-                        </Button>
-                        {formData.foto_url && (
-                          <Button 
-                            type="button" 
-                            variant="outline" 
-                            size="sm" 
-                            className="text-red-600 border-red-100 hover:bg-red-50"
-                            onClick={() => handleChange("foto_url", "")}
-                          >
-                            <Trash2 className="w-4 h-4 mr-2" />
-                            Eliminar
-                          </Button>
-                        )}
-                      </div>
-                      <input
-                        id="photo-upload"
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={handleFileChange}
-                      />
-                    </div>
+                <div style={{ gridColumn: "span 2" }}>
+                  <label style={labelStyle}>Color Identificativo</label>
+                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                    <input
+                      type="color"
+                      value={formData.color || "#2563FF"}
+                      onChange={e => handleChange("color", e.target.value)}
+                      style={{ width: 40, height: 40, padding: 2, border: `1px solid ${tokens.grayBorder}`, borderRadius: 8, background: tokens.white, cursor: "pointer" }}
+                    />
+                    <p style={{ fontSize: 11.5, color: tokens.grayMuted, margin: 0 }}>
+                      Se usará para identificar los turnos en el calendario.
+                    </p>
                   </div>
                 </div>
-              )}
+              </div>
 
-              <div className="flex justify-end space-x-3 pt-4">
-                <Button type="button" variant="outline" onClick={resetForm}>
+              {/* Form actions */}
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 24, paddingTop: 20, borderTop: `0.5px solid ${tokens.grayBorder}` }}>
+                <button
+                  type="button"
+                  onClick={resetForm}
+                  style={{
+                    padding: "9px 18px", fontSize: 13, fontWeight: 500,
+                    border: `0.5px solid ${tokens.grayBorder}`, borderRadius: 9,
+                    background: tokens.white, color: tokens.grayText, cursor: "pointer",
+                    fontFamily: "Poppins, -apple-system, sans-serif", transition: "all 0.12s",
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.background = tokens.grayBg }}
+                  onMouseLeave={e => { e.currentTarget.style.background = tokens.white }}
+                >
                   Cancelar
-                </Button>
-                <Button type="submit">{editingProfessional ? "Actualizar" : "Crear"} Profesional</Button>
+                </button>
+                <button
+                  type="submit"
+                  style={{
+                    padding: "9px 20px", fontSize: 13, fontWeight: 500,
+                    background: tokens.blue, color: tokens.white,
+                    border: "none", borderRadius: 9, cursor: "pointer",
+                    fontFamily: "Poppins, -apple-system, sans-serif", transition: "background 0.15s",
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.background = tokens.blueHover }}
+                  onMouseLeave={e => { e.currentTarget.style.background = tokens.blue }}
+                >
+                  {editingProfessional ? "Actualizar" : "Crear"} Profesional
+                </button>
               </div>
             </form>
           </div>
         </div>
       )}
 
+      {/* ── Confirmation modal ── */}
       <ConfirmationModal
         isOpen={confirmDelete.isOpen}
         onClose={() => setConfirmDelete({ isOpen: false, id: null })}

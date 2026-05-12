@@ -1,12 +1,60 @@
+"use client"
+
 import React, { useState, useEffect } from 'react'
-import { Card } from '../ui/Card'
-import { Button } from '../ui/Button'
-import { Input } from '../ui/Input'
-import { dentalColors } from '../../config/colors'
-import { Plus, Search, Edit, Trash2, Briefcase, Clock, DollarSign, Tag, X } from 'lucide-react'
+import { Plus, Search, Edit, Trash2, Briefcase, Clock, DollarSign, Tag, X, ArrowUpDown, Layers } from 'lucide-react'
 import { adminApi } from '../../api/admin'
 import { ConfirmationModal } from '../ui/ConfirmationModal'
 import type { Servicio, CrearServicioData } from '../../types'
+
+/* ─── Dentiqly design tokens ─────────────────────────────────────────── */
+const tokens = {
+  blue: "#2563FF",
+  blueHover: "#1E40AF",
+  blueFaint: "#EEF3FF",
+  navy: "#0B1023",
+  grayText: "#4B5568",
+  grayMuted: "#8A93A8",
+  grayBorder: "#E2E6EF",
+  grayBg: "#F5F7FA",
+  grayRow: "#F0F2F7",
+  rowHover: "#F5F8FF",
+  white: "#FFFFFF",
+
+  green: "#22C55E",
+  greenFaint: "#EDFAF4",
+  greenText: "#15803D",
+
+  red: "#EF4444",
+  redFaint: "#FEF2F2",
+  redText: "#B91C1C",
+
+  grayPill: "#F1F5F9",
+  grayPillTx: "#64748B",
+}
+
+/* ─── Label styles ────────────────────────────────────────────────────── */
+const labelStyle: React.CSSProperties = {
+  display: "block",
+  fontSize: 12,
+  fontWeight: 600,
+  color: tokens.grayMuted,
+  textTransform: "uppercase",
+  letterSpacing: "0.5px",
+  marginBottom: 6,
+}
+
+const inputStyle: React.CSSProperties = {
+  width: "100%",
+  padding: "9px 12px",
+  fontSize: 13,
+  border: `0.5px solid ${tokens.grayBorder}`,
+  borderRadius: 9,
+  outline: "none",
+  color: tokens.navy,
+  background: tokens.white,
+  fontFamily: "Poppins, -apple-system, sans-serif",
+  transition: "all 0.15s",
+}
 
 export const ServicesManager: React.FC = () => {
   const [services, setServices] = useState<Servicio[]>([])
@@ -14,6 +62,7 @@ export const ServicesManager: React.FC = () => {
   const [showForm, setShowForm] = useState(false)
   const [editingService, setEditingService] = useState<Servicio | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
+  const [focusedField, setFocusedField] = useState<string | null>(null)
   const [confirmDelete, setConfirmDelete] = useState<{ isOpen: boolean; id: string | number | null }>({
     isOpen: false,
     id: null
@@ -24,12 +73,11 @@ export const ServicesManager: React.FC = () => {
     descripcion: '',
     precio_base: 0,
     duracion_estimada: 30,
-    categoria: '' // AGREGADO
+    categoria: ''
   })
 
   const [errors, setErrors] = useState<Partial<Record<keyof CrearServicioData, string>>>({})
 
-  // Categorías disponibles - puedes ajustarlas según tus necesidades
   const categorias = [
     'Odontología General',
     'Ortodoncia',
@@ -49,6 +97,7 @@ export const ServicesManager: React.FC = () => {
 
   const fetchServices = async () => {
     try {
+      setLoading(true)
       const response = await adminApi.servicios.listar({
         search: searchTerm
       })
@@ -64,10 +113,10 @@ export const ServicesManager: React.FC = () => {
     const newErrors: Partial<Record<keyof CrearServicioData, string>> = {}
 
     if (!formData.nombre.trim()) newErrors.nombre = 'El nombre es requerido'
-    if (!formData.categoria) newErrors.categoria = 'La categoría es requerida' // AGREGADO
-    if (formData.precio_base <= 0) newErrors.precio_base = 'El precio_base debe ser mayor a 0'
-    if (formData.duracion_estimada < 15 || formData.duracion_estimada > 480) {
-      newErrors.duracion_estimada = 'La duración debe estar entre 15 y 480 minutos'
+    if (!formData.categoria) newErrors.categoria = 'La categoría es requerida'
+    if (formData.precio_base <= 0) newErrors.precio_base = 'El precio debe ser mayor a 0'
+    if (formData.duracion_estimada < 5 || formData.duracion_estimada > 480) {
+      newErrors.duracion_estimada = 'La duración debe estar entre 5 y 480 minutos'
     }
 
     setErrors(newErrors)
@@ -79,11 +128,10 @@ export const ServicesManager: React.FC = () => {
     if (!validateForm()) return
 
     try {
-      // Transformar los datos al formato que espera el backend
       const dataToSend = {
         nombre: formData.nombre,
         descripcion: formData.descripcion,
-        precio_base: formData.precio_base, // Corregido: era precio_base_base
+        precio_base: formData.precio_base,
         duracion_estimada: formData.duracion_estimada,
         categoria: formData.categoria
       }
@@ -108,7 +156,7 @@ export const ServicesManager: React.FC = () => {
       descripcion: service.descripcion || '',
       precio_base: service.precio_base,
       duracion_estimada: service.duracion_estimada,
-      categoria: service.categoria || '' // AGREGADO
+      categoria: service.categoria || ''
     })
     setShowForm(true)
   }
@@ -124,6 +172,7 @@ export const ServicesManager: React.FC = () => {
     try {
       await adminApi.servicios.eliminar(confirmDelete.id)
       fetchServices()
+      setConfirmDelete({ isOpen: false, id: null })
     } catch (error) {
       console.error('Error deleting service:', error)
       alert('Error al eliminar el servicio')
@@ -136,7 +185,7 @@ export const ServicesManager: React.FC = () => {
       descripcion: '',
       precio_base: 0,
       duracion_estimada: 30,
-      categoria: '' // AGREGADO
+      categoria: ''
     })
     setErrors({})
     setEditingService(null)
@@ -150,213 +199,384 @@ export const ServicesManager: React.FC = () => {
     }
   }
 
+  const pageStyle: React.CSSProperties = {
+    background: tokens.grayBg,
+    minHeight: "100vh",
+    padding: "28px 32px",
+    fontFamily: "Poppins, -apple-system, sans-serif",
+  }
+
   return (
-    <div className="bg-[#f0f2f5] min-h-screen p-4 sm:p-8 rounded-3xl font-sans space-y-6">
-      {/* Header con acciones */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+    <div style={pageStyle}>
+      {/* ── Header ── */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 }}>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Gestión de Servicios</h1>
-          <p className="text-gray-500 mt-1">Administra los servicios ofrecidos por el centro</p>
+          <h1 style={{ fontSize: 22, fontWeight: 600, color: tokens.navy, letterSpacing: "-0.3px", margin: 0 }}>
+            Gestión de Servicios
+          </h1>
+          <p style={{ fontSize: 13, color: tokens.grayMuted, marginTop: 3, fontWeight: 400 }}>
+            Administrá el catálogo de prestaciones del centro
+          </p>
         </div>
-        
-        <div className="flex flex-wrap items-center gap-3">
-          <button onClick={() => setShowForm(true)} className="flex items-center gap-2 px-6 py-2 bg-[#2563FF] text-white rounded-full font-medium hover:bg-blue-700 transition shadow-md shadow-blue-500/20">
-            <Plus className="w-4 h-4" /> Nuevo Servicio
-          </button>
-        </div>
+        <button
+          onClick={() => setShowForm(true)}
+          style={{
+            display: "flex", alignItems: "center", gap: 7,
+            background: tokens.blue, color: tokens.white,
+            border: "none", borderRadius: 10, padding: "9px 18px",
+            fontSize: 13, fontWeight: 500, cursor: "pointer",
+            fontFamily: "Poppins, -apple-system, sans-serif",
+            transition: "background 0.15s",
+          }}
+          onMouseEnter={e => (e.currentTarget.style.background = tokens.blueHover)}
+          onMouseLeave={e => (e.currentTarget.style.background = tokens.blue)}
+        >
+          <Plus size={15} />
+          Nuevo Servicio
+        </button>
       </div>
 
-      {/* Filtros */}
-      <Card>
-        <div className="relative">
-          <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[${dentalColors.gray400}]`} />
+      {/* ── Controls ── */}
+      <div style={{ display: "flex", gap: 12, marginBottom: 20, alignItems: "center" }}>
+        <div style={{
+          flex: 1, display: "flex", alignItems: "center", gap: 10,
+          background: tokens.white, border: `0.5px solid ${tokens.grayBorder}`,
+          borderRadius: 10, padding: "0 14px", height: 40,
+        }}>
+          <Search size={15} color={tokens.grayMuted} />
           <input
             type="text"
-            placeholder="Buscar servicios..."
+            placeholder="Buscar servicios…"
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className={`w-full pl-10 pr-4 py-2 border border-[${dentalColors.gray300}] rounded-lg focus:outline-none focus:ring-2 focus:ring-[${dentalColors.primary}] focus:border-transparent`}
+            onChange={e => setSearchTerm(e.target.value)}
+            style={{
+              border: "none", outline: "none", background: "transparent",
+              fontSize: 13, color: tokens.navy, flex: 1,
+              fontFamily: "Poppins, -apple-system, sans-serif",
+            }}
           />
         </div>
-      </Card>
-
-      {/* Lista de servicios */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {loading ? (
-          [...Array(6)].map((_, i) => (
-            <div key={i} className={`h-48 bg-[${dentalColors.gray100}] rounded-xl animate-pulse`}></div>
-          ))
-        ) : services.length === 0 ? (
-          <div className={`col-span-full text-center py-12 text-[${dentalColors.gray500}]`}>
-            <Briefcase className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p className="text-lg font-medium mb-2">No hay servicios registrados</p>
-            <p>Comienza agregando tu primer servicio</p>
-          </div>
-        ) : (
-          services.map((service) => (
-            <Card key={service.id} className="relative">
-              <div className="flex justify-between items-start mb-4">
-                <div className={`w-12 h-12 rounded-lg bg-[${dentalColors.primary}]/10 flex items-center justify-center`}>
-                  <Briefcase className={`h-6 w-6 text-[${dentalColors.primary}]`} />
-                </div>
-                <div className="flex space-x-1">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleEdit(service)}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={(e) => handleDeleteClick(e, service.id)}
-                      className="text-red-600 hover:text-red-700"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                </div>
-              </div>
-
-              <h3 className={`font-semibold text-[${dentalColors.gray900}] mb-2`}>
-                {service.nombre}
-              </h3>
-              
-              {service.categoria && (
-                <div className="flex items-center mb-2">
-                  <Tag className="h-3 w-3 mr-1 text-gray-400" />
-                  <span className="text-xs text-gray-500">{service.categoria}</span>
-                </div>
-              )}
-              
-              {service.descripcion && (
-                <p className={`text-sm text-[${dentalColors.gray600}] mb-4 line-clamp-2`}>
-                  {service.descripcion}
-                </p>
-              )}
-
-              <div className="flex items-center justify-between">
-                <div className={`flex items-center text-sm text-[${dentalColors.gray500}]`}>
-                  <Clock className="h-4 w-4 mr-1" />
-                  {service.duracion_estimada || service.duracion_estimada} min
-                </div>
-                <div className={`flex items-center text-[${dentalColors.primary}] font-semibold`}>
-                  <DollarSign className="h-4 w-4 mr-1" />
-                  {parseFloat(service.precio_base || service.precio || 0).toFixed(2)}
-                </div>
-              </div>
-
-              <div className="mt-4 pt-4 border-t border-gray-100">
-                <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                  service.estado === 'Activo'
-                    ? `bg-[${dentalColors.success}]/10 text-[${dentalColors.success}]`
-                    : `bg-[${dentalColors.error}]/10 text-[${dentalColors.error}]`
-                }`}>
-                  {service.estado || 'Inactivo'}
-                </span>
-              </div>
-            </Card>
-          ))
-        )}
+        
+        <div style={{
+          display: "flex", alignItems: "center", gap: 8,
+          background: tokens.white, border: `0.5px solid ${tokens.grayBorder}`,
+          borderRadius: 10, padding: "0 14px", height: 40, whiteSpace: "nowrap",
+        }}>
+          <Layers size={15} color={tokens.blue} />
+          <span style={{ fontSize: 13, fontWeight: 600, color: tokens.navy }}>{services.length}</span>
+          <span style={{ fontSize: 13, color: tokens.grayMuted }}>servicios</span>
+        </div>
       </div>
 
-      {/* Modal de formulario */}
+      {/* ── Table card ── */}
+      <div style={{
+        background: tokens.white, borderRadius: 14,
+        border: `0.5px solid ${tokens.grayBorder}`, overflow: "hidden",
+      }}>
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <thead>
+              <tr style={{ borderBottom: `0.5px solid ${tokens.grayBorder}` }}>
+                {[
+                  { label: "Servicio", sortable: true },
+                  { label: "Categoría", sortable: true },
+                  { label: "Duración", sortable: true },
+                  { label: "Precio Base", sortable: true },
+                  { label: "Estado", sortable: false },
+                  { label: "", sortable: false },
+                ].map((col, i) => (
+                  <th key={i} style={{
+                    textAlign: "left", padding: "12px 16px",
+                    fontSize: 11, fontWeight: 600, color: tokens.grayMuted,
+                    textTransform: "uppercase", letterSpacing: "0.6px", whiteSpace: "nowrap",
+                  }}>
+                    {col.label && (
+                      <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                        {col.label}
+                        {col.sortable && <ArrowUpDown size={11} />}
+                      </div>
+                    )}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                [...Array(5)].map((_, i) => (
+                  <tr key={i} style={{ borderBottom: `0.5px solid ${tokens.grayRow}` }}>
+                    <td style={{ padding: "11px 16px" }}>
+                      <div style={{ width: 140, height: 11, borderRadius: 5, background: tokens.grayRow, animation: "pulse 1.5s infinite" }} />
+                    </td>
+                    {[...Array(4)].map((_, j) => (
+                      <td key={j} style={{ padding: "11px 16px" }}>
+                        <div style={{ width: 80, height: 11, borderRadius: 5, background: tokens.grayRow }} />
+                      </td>
+                    ))}
+                    <td style={{ padding: "11px 16px" }} />
+                  </tr>
+                ))
+              ) : services.length === 0 ? (
+                <tr>
+                  <td colSpan={6} style={{ textAlign: "center", padding: "56px 0" }}>
+                    <Briefcase size={36} color={tokens.grayBorder} style={{ margin: "0 auto 12px", display: "block" }} />
+                    <p style={{ fontSize: 14, fontWeight: 500, color: tokens.grayMuted }}>No hay servicios registrados</p>
+                  </td>
+                </tr>
+              ) : (
+                services.map((service, idx) => {
+                  const isLast = idx === services.length - 1
+                  return (
+                    <tr
+                      key={service.id}
+                      style={{ borderBottom: isLast ? "none" : `0.5px solid ${tokens.grayRow}`, transition: "background 0.12s" }}
+                      onMouseEnter={e => (e.currentTarget.style.background = tokens.rowHover)}
+                      onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                    >
+                      {/* Servicio */}
+                      <td style={{ padding: "14px 16px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                          <div style={{
+                            width: 34, height: 34, borderRadius: 9,
+                            background: tokens.blueFaint, color: tokens.blue,
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                          }}>
+                            <Briefcase size={16} />
+                          </div>
+                          <div>
+                            <p style={{ fontSize: 13.5, fontWeight: 600, color: tokens.navy, margin: 0 }}>
+                              {service.nombre}
+                            </p>
+                            {service.descripcion && (
+                              <p style={{ fontSize: 11, color: tokens.grayMuted, margin: "2px 0 0", maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                {service.descripcion}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Categoría */}
+                      <td style={{ padding: "11px 16px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12.5, color: tokens.grayText }}>
+                          <Tag size={12} color={tokens.grayMuted} />
+                          {service.categoria || "—"}
+                        </div>
+                      </td>
+
+                      {/* Duración */}
+                      <td style={{ padding: "11px 16px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12.5, color: tokens.grayText }}>
+                          <Clock size={12} color={tokens.grayMuted} />
+                          {service.duracion_estimada} min
+                        </div>
+                      </td>
+
+                      {/* Precio */}
+                      <td style={{ padding: "11px 16px" }}>
+                        <div style={{ fontSize: 13.5, fontWeight: 700, color: tokens.navy }}>
+                          <span style={{ fontSize: 11, fontWeight: 600, color: tokens.grayMuted, marginRight: 4 }}>$</span>
+                          {parseFloat(service.precio_base as any || 0).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                        </div>
+                      </td>
+
+                      {/* Estado */}
+                      <td style={{ padding: "11px 16px" }}>
+                        <span style={{
+                          display: "inline-flex", alignItems: "center",
+                          padding: "3px 10px", borderRadius: 6,
+                          fontSize: 11, fontWeight: 600, whiteSpace: "nowrap",
+                          background: service.estado === "Activo" ? tokens.greenFaint : tokens.grayPill,
+                          color: service.estado === "Activo" ? tokens.greenText : tokens.grayPillTx,
+                        }}>
+                          {service.estado || "Inactivo"}
+                        </span>
+                      </td>
+
+                      {/* Actions */}
+                      <td style={{ padding: "11px 16px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 2, justifyContent: "flex-end" }}>
+                          <button
+                            onClick={() => handleEdit(service)}
+                            title="Editar"
+                            style={{
+                              width: 30, height: 30, borderRadius: 7, border: "none",
+                              background: "transparent", cursor: "pointer",
+                              display: "flex", alignItems: "center", justifyContent: "center",
+                              color: tokens.grayMuted, transition: "all 0.12s",
+                            }}
+                            onMouseEnter={e => { e.currentTarget.style.background = tokens.blueFaint; e.currentTarget.style.color = tokens.blue }}
+                            onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = tokens.grayMuted }}
+                          >
+                            <Edit size={14} />
+                          </button>
+                          <button
+                            onClick={(e) => handleDeleteClick(e, service.id)}
+                            title="Eliminar"
+                            style={{
+                              width: 30, height: 30, borderRadius: 7, border: "none",
+                              background: "transparent", cursor: "pointer",
+                              display: "flex", alignItems: "center", justifyContent: "center",
+                              color: tokens.grayMuted, transition: "all 0.12s",
+                            }}
+                            onMouseEnter={e => { e.currentTarget.style.background = tokens.redFaint; e.currentTarget.style.color = tokens.red }}
+                            onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = tokens.grayMuted }}
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* ── Modal Create / Edit ── */}
       {showForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className={`px-6 py-4 border-b border-[${dentalColors.gray200}] flex justify-between items-center bg-white sticky top-0 z-10`}>
-              <h3 className={`text-lg font-semibold text-[${dentalColors.gray900}]`}>
+        <div style={{
+          position: "fixed", inset: 0, background: "rgba(11,16,35,0.45)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          zIndex: 50, padding: 16, backdropFilter: "blur(4px)"
+        }}>
+          <div style={{
+            background: tokens.white, borderRadius: 16,
+            maxWidth: 500, width: "100%", maxHeight: "90vh", overflowY: "auto",
+            boxShadow: "0 24px 48px rgba(11,16,35,0.12)",
+          }}>
+            <div style={{
+              padding: "18px 24px", borderBottom: `0.5px solid ${tokens.grayBorder}`,
+              display: "flex", justifyContent: "space-between", alignItems: "center",
+              position: "sticky", top: 0, background: tokens.white, zIndex: 10,
+            }}>
+              <h3 style={{ fontSize: 16, fontWeight: 600, color: tokens.navy, margin: 0 }}>
                 {editingService ? 'Editar Servicio' : 'Nuevo Servicio'}
               </h3>
               <button
-                type="button"
                 onClick={resetForm}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
+                style={{
+                  width: 30, height: 30, borderRadius: 8, border: "none",
+                  background: "transparent", cursor: "pointer",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  color: tokens.grayMuted, transition: "all 0.12s",
+                }}
+                onMouseEnter={e => { e.currentTarget.style.background = tokens.grayRow }}
+                onMouseLeave={e => { e.currentTarget.style.background = "transparent" }}
               >
-                <X className="h-5 w-5" />
+                <X size={16} />
               </button>
             </div>
-            
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              <Input
-                label="Nombre del Servicio *"
-                value={formData.nombre}
-                onChange={(e) => handleChange('nombre', e.target.value)}
-                error={errors.nombre}
-                placeholder="Ej: Limpieza dental"
-              />
 
-              {/* CAMPO CATEGORÍA AGREGADO */}
-              <div>
-                <label className={`block text-sm font-medium text-[${dentalColors.gray700}] mb-1`}>
-                  Categoría *
-                </label>
-                <select
-                  value={formData.categoria}
-                  onChange={(e) => handleChange('categoria', e.target.value)}
-                  className={`w-full px-3 py-2 border ${
-                    errors.categoria ? 'border-red-500' : `border-[${dentalColors.gray300}]`
-                  } rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[${dentalColors.primary}] focus:border-transparent hover:border-[${dentalColors.gray400}]`}
-                >
-                  <option value="">Selecciona una categoría</option>
-                  {categorias.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {cat}
-                    </option>
-                  ))}
-                </select>
-                {errors.categoria && (
-                  <p className="mt-1 text-sm text-red-600">{errors.categoria}</p>
-                )}
+            <form onSubmit={handleSubmit} style={{ padding: 24 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                <div>
+                  <label style={labelStyle}>Nombre del Servicio *</label>
+                  <input
+                    type="text" required
+                    value={formData.nombre}
+                    onChange={e => handleChange('nombre', e.target.value)}
+                    placeholder="Ej: Limpieza dental"
+                    style={{ ...inputStyle, borderColor: (focusedField === "nombre" || errors.nombre) ? (errors.nombre ? tokens.red : tokens.blue) : tokens.grayBorder }}
+                    onFocus={() => setFocusedField("nombre")}
+                    onBlur={() => setFocusedField(null)}
+                  />
+                  {errors.nombre && <p style={{ color: tokens.red, fontSize: 11, marginTop: 4 }}>{errors.nombre}</p>}
+                </div>
+
+                <div>
+                  <label style={labelStyle}>Categoría *</label>
+                  <select
+                    required
+                    value={formData.categoria}
+                    onChange={e => handleChange('categoria', e.target.value)}
+                    style={{ ...inputStyle, borderColor: (focusedField === "cat" || errors.categoria) ? (errors.categoria ? tokens.red : tokens.blue) : tokens.grayBorder }}
+                    onFocus={() => setFocusedField("cat")}
+                    onBlur={() => setFocusedField(null)}
+                  >
+                    <option value="">Seleccionar categoría</option>
+                    {categorias.map(cat => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
+                  {errors.categoria && <p style={{ color: tokens.red, fontSize: 11, marginTop: 4 }}>{errors.categoria}</p>}
+                </div>
+
+                <div>
+                  <label style={labelStyle}>Descripción</label>
+                  <textarea
+                    rows={2}
+                    value={formData.descripcion}
+                    onChange={e => handleChange('descripcion', e.target.value)}
+                    placeholder="Breve descripción del servicio..."
+                    style={{ ...inputStyle, height: "auto", resize: "none", borderColor: focusedField === "desc" ? tokens.blue : tokens.grayBorder }}
+                    onFocus={() => setFocusedField("desc")}
+                    onBlur={() => setFocusedField(null)}
+                  />
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                  <div>
+                    <label style={labelStyle}>Precio Base *</label>
+                    <div style={{ position: "relative" }}>
+                      <span style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", fontSize: 13, color: tokens.grayMuted }}>$</span>
+                      <input
+                        type="number" required step="0.01"
+                        value={formData.precio_base}
+                        onChange={e => handleChange('precio_base', parseFloat(e.target.value) || 0)}
+                        style={{ ...inputStyle, paddingLeft: 22, borderColor: (focusedField === "precio" || errors.precio_base) ? (errors.precio_base ? tokens.red : tokens.blue) : tokens.grayBorder }}
+                        onFocus={() => setFocusedField("precio")}
+                        onBlur={() => setFocusedField(null)}
+                      />
+                    </div>
+                    {errors.precio_base && <p style={{ color: tokens.red, fontSize: 11, marginTop: 4 }}>{errors.precio_base}</p>}
+                  </div>
+                  <div>
+                    <label style={labelStyle}>Duración (min) *</label>
+                    <div style={{ position: "relative" }}>
+                      <input
+                        type="number" required
+                        value={formData.duracion_estimada}
+                        onChange={e => handleChange('duracion_estimada', parseInt(e.target.value) || 30)}
+                        style={{ ...inputStyle, borderColor: (focusedField === "dur" || errors.duracion_estimada) ? (errors.duracion_estimada ? tokens.red : tokens.blue) : tokens.grayBorder }}
+                        onFocus={() => setFocusedField("dur")}
+                        onBlur={() => setFocusedField(null)}
+                      />
+                    </div>
+                    {errors.duracion_estimada && <p style={{ color: tokens.red, fontSize: 11, marginTop: 4 }}>{errors.duracion_estimada}</p>}
+                  </div>
+                </div>
               </div>
 
-              <div>
-                <label className={`block text-sm font-medium text-[${dentalColors.gray700}] mb-1`}>
-                  Descripción
-                </label>
-                <textarea
-                  rows={3}
-                  value={formData.descripcion}
-                  onChange={(e) => handleChange('descripcion', e.target.value)}
-                  className={`w-full px-3 py-2 border border-[${dentalColors.gray300}] rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[${dentalColors.primary}] focus:border-transparent hover:border-[${dentalColors.gray400}]`}
-                  placeholder="Descripción del servicio..."
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Input
-                  label="Precio Base *"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={formData.precio_base}
-                  onChange={(e) => handleChange('precio_base', parseFloat(e.target.value) || 0)}
-                  error={errors.precio_base}
-                  placeholder="0.00"
-                />
-                <Input
-                  label="Duración (minutos) *"
-                  type="number"
-                  min="15"
-                  max="480"
-                  value={formData.duracion_estimada}
-                  onChange={(e) => handleChange('duracion_estimada', parseInt(e.target.value) || 30)}
-                  error={errors.duracion_estimada}
-                  placeholder="30"
-                />
-              </div>
-
-              <div className="flex justify-end space-x-3 pt-4">
-                <Button
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 24, paddingTop: 20, borderTop: `0.5px solid ${tokens.grayBorder}` }}>
+                <button
                   type="button"
-                  variant="outline"
                   onClick={resetForm}
+                  style={{
+                    padding: "9px 18px", fontSize: 13, fontWeight: 500,
+                    border: `0.5px solid ${tokens.grayBorder}`, borderRadius: 9,
+                    background: tokens.white, color: tokens.grayText, cursor: "pointer",
+                    fontFamily: "Poppins, -apple-system, sans-serif", transition: "all 0.12s",
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.background = tokens.grayBg }}
+                  onMouseLeave={e => { e.currentTarget.style.background = tokens.white }}
                 >
                   Cancelar
-                </Button>
-                <Button type="submit">
+                </button>
+                <button
+                  type="submit"
+                  style={{
+                    padding: "9px 20px", fontSize: 13, fontWeight: 500,
+                    background: tokens.blue, color: tokens.white,
+                    border: "none", borderRadius: 9, cursor: "pointer",
+                    fontFamily: "Poppins, -apple-system, sans-serif", transition: "background 0.15s",
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.background = tokens.blueHover }}
+                  onMouseLeave={e => { e.currentTarget.style.background = tokens.blue }}
+                >
                   {editingService ? 'Actualizar' : 'Crear'} Servicio
-                </Button>
+                </button>
               </div>
             </form>
           </div>

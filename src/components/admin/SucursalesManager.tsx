@@ -1,5 +1,19 @@
+"use client"
+
 import React, { useState, useEffect } from 'react';
-import { MapPin as MapIcon, MapPin, Plus, Trash2, Edit2, Phone, Mail, Loader2, Search, X } from 'lucide-react';
+import { 
+  MapPin, 
+  Plus, 
+  Trash2, 
+  Edit2, 
+  Phone, 
+  Mail, 
+  Search, 
+  X, 
+  ArrowUpDown, 
+  Building2, 
+  ExternalLink 
+} from 'lucide-react';
 import { sucursalesApi } from '../../api';
 import { useToast } from '../../hooks/use-toast';
 
@@ -12,12 +26,60 @@ interface Sucursal {
   activo: boolean;
 }
 
+/* ─── Dentiqly design tokens ─────────────────────────────────────────── */
+const tokens = {
+  blue: "#2563FF",
+  blueHover: "#1E40AF",
+  blueFaint: "#EEF3FF",
+  navy: "#0B1023",
+  grayText: "#4B5568",
+  grayMuted: "#8A93A8",
+  grayBorder: "#E2E6EF",
+  grayBg: "#F5F7FA",
+  grayRow: "#F0F2F7",
+  rowHover: "#F5F8FF",
+  white: "#FFFFFF",
+
+  green: "#22C55E",
+  greenFaint: "#EDFAF4",
+  greenText: "#15803D",
+
+  red: "#EF4444",
+  redFaint: "#FEF2F2",
+  redText: "#B91C1C",
+}
+
+/* ─── Label styles ────────────────────────────────────────────────────── */
+const labelStyle: React.CSSProperties = {
+  display: "block",
+  fontSize: 12,
+  fontWeight: 600,
+  color: tokens.grayMuted,
+  textTransform: "uppercase",
+  letterSpacing: "0.5px",
+  marginBottom: 6,
+}
+
+const inputStyle: React.CSSProperties = {
+  width: "100%",
+  padding: "9px 12px",
+  fontSize: 13,
+  border: `0.5px solid ${tokens.grayBorder}`,
+  borderRadius: 9,
+  outline: "none",
+  color: tokens.navy,
+  background: tokens.white,
+  fontFamily: "Poppins, -apple-system, sans-serif",
+  transition: "all 0.15s",
+}
+
 export const SucursalesManager: React.FC = () => {
   const [sucursales, setSucursales] = useState<Sucursal[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [focusedField, setFocusedField] = useState<string | null>(null);
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
@@ -33,11 +95,7 @@ export const SucursalesManager: React.FC = () => {
       const data = await sucursalesApi.listar();
       setSucursales(Array.isArray(data) ? data : []);
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "No se pudieron cargar las sucursales.",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: "No se pudieron cargar las sucursales.", variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -93,189 +151,241 @@ export const SucursalesManager: React.FC = () => {
     (s.direccion?.toLowerCase() || '').includes(searchTerm.toLowerCase())
   );
 
+  const pageStyle: React.CSSProperties = {
+    background: tokens.grayBg,
+    minHeight: "100vh",
+    padding: "28px 32px",
+    fontFamily: "Poppins, -apple-system, sans-serif",
+  }
+
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div style={pageStyle}>
+      {/* ── Header ── */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 }}>
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Gestión de Sucursales</h2>
-          <p className="text-gray-500">Administra las diferentes sedes de tu clínica dental.</p>
+          <h1 style={{ fontSize: 22, fontWeight: 600, color: tokens.navy, letterSpacing: "-0.3px", margin: 0 }}>
+            Gestión de Sucursales
+          </h1>
+          <p style={{ fontSize: 13, color: tokens.grayMuted, marginTop: 3, fontWeight: 400 }}>
+            Administrá las diferentes sedes y clínicas de la red
+          </p>
         </div>
         <button
-          onClick={() => {
-            setEditingId(null);
-            setFormData({ nombre: '', direccion: '', telefono: '', email: '' });
-            setShowModal(true);
+          onClick={() => { setEditingId(null); setFormData({ nombre: '', direccion: '', telefono: '', email: '' }); setShowModal(true); }}
+          style={{
+            display: "flex", alignItems: "center", gap: 7,
+            background: tokens.blue, color: tokens.white,
+            border: "none", borderRadius: 10, padding: "9px 18px",
+            fontSize: 13, fontWeight: 500, cursor: "pointer",
+            fontFamily: "Poppins, -apple-system, sans-serif",
+            transition: "background 0.15s",
           }}
-          className="flex items-center justify-center gap-2 bg-[#2563FF] text-white px-6 py-3 rounded-xl font-bold hover:bg-[#1D4ED8] transition-all shadow-lg shadow-blue-200"
+          onMouseEnter={e => (e.currentTarget.style.background = tokens.blueHover)}
+          onMouseLeave={e => (e.currentTarget.style.background = tokens.blue)}
         >
-          <Plus size={20} />
+          <Plus size={15} />
           Nueva Sucursal
         </button>
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-        <div className="p-4 border-b border-gray-100 bg-gray-50/50">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-            <input
-              type="text"
-              placeholder="Buscar por nombre o dirección..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-            />
-          </div>
+      {/* ── Controls ── */}
+      <div style={{ display: "flex", gap: 12, marginBottom: 20, alignItems: "center" }}>
+        <div style={{
+          flex: 1, display: "flex", alignItems: "center", gap: 10,
+          background: tokens.white, border: `0.5px solid ${tokens.grayBorder}`,
+          borderRadius: 10, padding: "0 14px", height: 40,
+        }}>
+          <Search size={15} color={tokens.grayMuted} />
+          <input
+            type="text"
+            placeholder="Buscar por nombre o dirección…"
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            style={{
+              border: "none", outline: "none", background: "transparent",
+              fontSize: 13, color: tokens.navy, flex: 1,
+              fontFamily: "Poppins, -apple-system, sans-serif",
+            }}
+          />
         </div>
+        
+        <div style={{
+          display: "flex", alignItems: "center", gap: 8,
+          background: tokens.white, border: `0.5px solid ${tokens.grayBorder}`,
+          borderRadius: 10, padding: "0 14px", height: 40, whiteSpace: "nowrap",
+        }}>
+          <Building2 size={15} color={tokens.blue} />
+          <span style={{ fontSize: 13, fontWeight: 600, color: tokens.navy }}>{filteredSucursales.length}</span>
+          <span style={{ fontSize: 13, color: tokens.grayMuted }}>sucursales</span>
+        </div>
+      </div>
 
+      {/* ── Grid of Sucursales ── */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 20 }}>
         {loading ? (
-          <div className="p-12 flex flex-col items-center justify-center">
-            <Loader2 className="h-10 w-10 text-blue-500 animate-spin mb-4" />
-            <p className="text-gray-500 font-medium">Cargando sucursales...</p>
-          </div>
+          [...Array(3)].map((_, i) => (
+            <div key={i} style={{ height: 180, background: tokens.white, borderRadius: 16, border: `0.5px solid ${tokens.grayBorder}`, animation: "pulse 1.5s infinite" }} />
+          ))
         ) : filteredSucursales.length === 0 ? (
-          <div className="p-12 text-center">
-            <div className="bg-gray-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-              <MapIcon className="text-gray-400" size={32} />
-            </div>
-            <h3 className="text-lg font-bold text-gray-900 mb-1">No se encontraron sucursales</h3>
-            <p className="text-gray-500">Comienza creando tu primera sede para que los pacientes puedan elegirla.</p>
+          <div style={{ gridColumn: "1 / -1", textAlign: "center", padding: "56px 0" }}>
+            <MapPin size={36} color={tokens.grayBorder} style={{ margin: "0 auto 12px", display: "block" }} />
+            <p style={{ fontSize: 14, fontWeight: 500, color: tokens.grayMuted }}>No se encontraron sucursales</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-            {filteredSucursales.map((sucursal) => (
-              <div 
-                key={sucursal.id}
-                className="group relative bg-white rounded-2xl border border-gray-100 p-6 hover:shadow-xl hover:border-blue-100 transition-all duration-300"
-              >
-                <div className="flex justify-between items-start mb-4">
-                  <div className="p-3 bg-blue-50 text-[#2563FF] rounded-xl group-hover:bg-[#2563FF] group-hover:text-white transition-colors duration-300">
-                    <MapPin size={24} />
-                  </div>
-                  <div className="flex gap-2">
-                    <button 
-                      onClick={() => handleEdit(sucursal)}
-                      className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                    >
-                      <Edit2 size={18} />
-                    </button>
-                    <button 
-                      onClick={() => handleDelete(sucursal.id)}
-                      className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                  </div>
+          filteredSucursales.map((s) => (
+            <div 
+              key={s.id}
+              style={{
+                background: tokens.white, borderRadius: 16, border: `0.5px solid ${tokens.grayBorder}`,
+                padding: 20, transition: "all 0.2s", position: "relative"
+              }}
+              onMouseEnter={e => { e.currentTarget.style.boxShadow = "0 12px 24px rgba(11,16,35,0.06)"; e.currentTarget.style.borderColor = tokens.blue + "33" }}
+              onMouseLeave={e => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.borderColor = tokens.grayBorder }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
+                <div style={{ width: 40, height: 40, borderRadius: 10, background: tokens.blueFaint, color: tokens.blue, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <Building2 size={20} />
                 </div>
-
-                <h4 className="text-lg font-bold text-gray-900 mb-2">{sucursal.nombre}</h4>
-                
-                <div className="space-y-2 text-sm text-gray-600">
-                  <div className="flex items-center gap-2">
-                    <MapIcon size={16} className="text-gray-400 shrink-0" />
-                    <span className="line-clamp-1">{sucursal.direccion || 'Sin dirección'}</span>
-                  </div>
-                  {sucursal.telefono && (
-                    <div className="flex items-center gap-2">
-                      <Phone size={16} className="text-gray-400 shrink-0" />
-                      <span>{sucursal.telefono}</span>
-                    </div>
-                  )}
-                  {sucursal.email && (
-                    <div className="flex items-center gap-2">
-                      <Mail size={16} className="text-gray-400 shrink-0" />
-                      <span className="line-clamp-1">{sucursal.email}</span>
-                    </div>
-                  )}
+                <div style={{ display: "flex", gap: 4 }}>
+                  <button onClick={() => handleEdit(s)} style={{ width: 30, height: 30, borderRadius: 7, border: "none", background: "transparent", cursor: "pointer", color: tokens.grayMuted, transition: "all 0.12s" }} onMouseEnter={e => e.currentTarget.style.background = tokens.grayRow} onMouseLeave={e => e.currentTarget.style.background = "transparent"}><Edit2 size={14} /></button>
+                  <button onClick={() => handleDelete(s.id)} style={{ width: 30, height: 30, borderRadius: 7, border: "none", background: "transparent", cursor: "pointer", color: tokens.grayMuted, transition: "all 0.12s" }} onMouseEnter={e => { e.currentTarget.style.background = tokens.redFaint; e.currentTarget.style.color = tokens.red }} onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = tokens.grayMuted }}><Trash2 size={14} /></button>
                 </div>
               </div>
-            ))}
-          </div>
+
+              <h4 style={{ fontSize: 16, fontWeight: 600, color: tokens.navy, margin: "0 0 12px 0" }}>{s.nombre}</h4>
+              
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: tokens.grayText }}>
+                  <MapPin size={14} color={tokens.grayMuted} />
+                  <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.direccion || 'Sin dirección'}</span>
+                </div>
+                {s.telefono && (
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: tokens.grayText }}>
+                    <Phone size={14} color={tokens.grayMuted} />
+                    <span>{s.telefono}</span>
+                  </div>
+                )}
+                {s.email && (
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: tokens.grayText }}>
+                    <Mail size={14} color={tokens.grayMuted} />
+                    <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.email}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))
         )}
       </div>
 
-      {/* Modal Formulario */}
+      {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm animate-in fade-in duration-300">
-          <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
-            <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-              <h3 className="text-xl font-bold text-gray-900">
+        <div style={{
+          position: "fixed", inset: 0, background: "rgba(11,16,35,0.45)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          zIndex: 50, padding: 16, backdropFilter: "blur(4px)"
+        }}>
+          <div style={{
+            background: tokens.white, borderRadius: 16,
+            maxWidth: 480, width: "100%",
+            boxShadow: "0 24px 48px rgba(11,16,35,0.12)",
+          }}>
+            <div style={{
+              padding: "18px 24px", borderBottom: `0.5px solid ${tokens.grayBorder}`,
+              display: "flex", justifyContent: "space-between", alignItems: "center",
+            }}>
+              <h3 style={{ fontSize: 16, fontWeight: 600, color: tokens.navy, margin: 0 }}>
                 {editingId ? 'Editar Sucursal' : 'Nueva Sucursal'}
               </h3>
-              <button 
+              <button
                 onClick={() => setShowModal(false)}
-                className="p-2 hover:bg-white rounded-full transition-colors text-gray-400 hover:text-gray-600"
+                style={{
+                  width: 30, height: 30, borderRadius: 8, border: "none",
+                  background: "transparent", cursor: "pointer",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  color: tokens.grayMuted, transition: "all 0.12s",
+                }}
+                onMouseEnter={e => { e.currentTarget.style.background = tokens.grayRow }}
+                onMouseLeave={e => { e.currentTarget.style.background = "transparent" }}
               >
-                <X size={20} />
+                <X size={16} />
               </button>
             </div>
-
-            <form onSubmit={handleSubmit} className="p-8 space-y-5">
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Nombre de la Sede *</label>
-                <input
-                  type="text"
-                  required
-                  value={formData.nombre}
-                  onChange={(e) => setFormData({...formData, nombre: e.target.value})}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                  placeholder="Ej: Sede Lomas de Zamora"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Dirección</label>
-                <div className="relative">
-                  <MapIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+            <form onSubmit={handleSubmit} style={{ padding: 24 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                <div>
+                  <label style={labelStyle}>Nombre de la Sede *</label>
+                  <input
+                    type="text" required
+                    value={formData.nombre}
+                    onChange={(e) => setFormData({...formData, nombre: e.target.value})}
+                    placeholder="Ej: Clínica Central"
+                    style={{ ...inputStyle, borderColor: focusedField === "nombre" ? tokens.blue : tokens.grayBorder }}
+                    onFocus={() => setFocusedField("nombre")}
+                    onBlur={() => setFocusedField(null)}
+                  />
+                </div>
+                <div>
+                  <label style={labelStyle}>Dirección</label>
                   <input
                     type="text"
                     value={formData.direccion}
                     onChange={(e) => setFormData({...formData, direccion: e.target.value})}
-                    className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                    placeholder="Calle, Número, Localidad"
+                    placeholder="Av. Santa Fe 1234, CABA"
+                    style={{ ...inputStyle, borderColor: focusedField === "dir" ? tokens.blue : tokens.grayBorder }}
+                    onFocus={() => setFocusedField("dir")}
+                    onBlur={() => setFocusedField(null)}
                   />
                 </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">Teléfono</label>
-                  <div className="relative">
-                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                  <div>
+                    <label style={labelStyle}>Teléfono</label>
                     <input
                       type="tel"
                       value={formData.telefono}
                       onChange={(e) => setFormData({...formData, telefono: e.target.value})}
-                      className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                      placeholder="+54 ..."
+                      style={{ ...inputStyle, borderColor: focusedField === "tel" ? tokens.blue : tokens.grayBorder }}
+                      onFocus={() => setFocusedField("tel")}
+                      onBlur={() => setFocusedField(null)}
                     />
                   </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">Email</label>
-                  <div className="relative">
-                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                  <div>
+                    <label style={labelStyle}>Email</label>
                     <input
                       type="email"
                       value={formData.email}
                       onChange={(e) => setFormData({...formData, email: e.target.value})}
-                      className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                      placeholder="sede@ejemplo.com"
+                      style={{ ...inputStyle, borderColor: focusedField === "email" ? tokens.blue : tokens.grayBorder }}
+                      onFocus={() => setFocusedField("email")}
+                      onBlur={() => setFocusedField(null)}
                     />
                   </div>
                 </div>
               </div>
-
-              <div className="pt-4 flex gap-3">
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 24, paddingTop: 20, borderTop: `0.5px solid ${tokens.grayBorder}` }}>
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="flex-1 px-6 py-3 border border-gray-200 text-gray-600 font-bold rounded-xl hover:bg-gray-50 transition-all"
+                  style={{
+                    padding: "9px 18px", fontSize: 13, fontWeight: 500,
+                    border: `0.5px solid ${tokens.grayBorder}`, borderRadius: 9,
+                    background: tokens.white, color: tokens.grayText, cursor: "pointer",
+                    fontFamily: "Poppins, -apple-system, sans-serif", transition: "all 0.12s",
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.background = tokens.grayBg }}
+                  onMouseLeave={e => { e.currentTarget.style.background = tokens.white }}
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 px-6 py-3 bg-[#2563FF] text-white font-bold rounded-xl hover:bg-[#1D4ED8] transition-all shadow-lg shadow-blue-100"
+                  style={{
+                    padding: "9px 20px", fontSize: 13, fontWeight: 500,
+                    background: tokens.blue, color: tokens.white,
+                    border: "none", borderRadius: 9, cursor: "pointer",
+                    fontFamily: "Poppins, -apple-system, sans-serif", transition: "background 0.15s",
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.background = tokens.blueHover)}
+                  onMouseLeave={e => (e.currentTarget.style.background = tokens.blue)}
                 >
                   {editingId ? 'Guardar Cambios' : 'Crear Sucursal'}
                 </button>

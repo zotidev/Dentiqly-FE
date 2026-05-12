@@ -20,6 +20,7 @@ import {
   CheckCircle2,
   XCircle,
   Check,
+  X,
   Hourglass
 } from 'lucide-react'
 import { turnosApi, adminApi } from '../../api'
@@ -45,21 +46,20 @@ const getProfColor = (id?: number) => {
   return PROF_COLORS[id % PROF_COLORS.length]
 }
 
-const getStatusIcon = (estado: string) => {
+const getStatusIcon = (estado: string, sizeClass = "w-3 h-3") => {
   switch (estado) {
     case 'Atendido':
-      return <CheckCircle2 className="w-3 h-3 text-[#22C55E]" fill="white" />
+      return <CheckCircle2 className={`${sizeClass} text-[#22C55E]`} strokeWidth={3} fill="currentColor" fillOpacity={0.15} />
     case 'Cancelado':
     case 'Ausente':
-      return <XCircle className="w-3 h-3 text-[#EF4444]" fill="white" />
+      return <XCircle className={`${sizeClass} text-[#EF4444]`} strokeWidth={3} fill="currentColor" fillOpacity={0.15} />
     case 'Pendiente':
     case 'Esperando confirmación':
-      return <Hourglass className="w-3 h-3 text-[#F59E0B]" />
+      return <Hourglass className={`${sizeClass} text-[#F59E0B]`} strokeWidth={3} />
     case 'Confirmado':
     case 'Confirmado por email':
     case 'Confirmado por SMS':
     case 'Confirmado por Whatsapp':
-      // "Si está confirmado simplemente debe aparecer y ya"
       return null
     default:
       return null
@@ -313,6 +313,16 @@ export const CalendarView: React.FC = () => {
     }
   }
 
+  const handleUpdateStatus = async (id: number, nuevoEstado: string) => {
+    try {
+      await turnosApi.actualizar(id, { estado: nuevoEstado })
+      fetchAppointments()
+    } catch (error) {
+      console.error('Error updating status:', error)
+      alert('Error al actualizar el estado')
+    }
+  }
+
   const handleDeleteAppointment = async (id: number) => {
     if (window.confirm('¿Estás seguro de eliminar este turno? Esta acción no se puede deshacer.')) {
       try {
@@ -508,30 +518,51 @@ export const CalendarView: React.FC = () => {
                         e.stopPropagation()
                         setSelectedAppointment(appt)
                       }}
-                      className="h-full w-full rounded-xl shadow-sm cursor-move hover:brightness-95 transition-all overflow-hidden flex flex-col p-2 relative"
+                      className="h-full w-full rounded-xl shadow-sm cursor-move hover:brightness-95 transition-all overflow-hidden flex flex-col p-2 relative group"
                       style={{
                         backgroundColor: `${profColor}15`,
                         border: `1.5px solid ${profColor}`,
                       }}
                     >
-                      <div className="flex items-start justify-between mb-0.5">
-                        <div className="font-black truncate capitalize leading-tight text-xs text-gray-900 pr-4">
-                          {appt.paciente?.nombre} {appt.paciente?.apellido}
+                      {statusIcon && (
+                        <div className="absolute inset-0 flex items-center justify-center opacity-70 pointer-events-none">
+                          {React.cloneElement(statusIcon as React.ReactElement, { className: "w-16 h-16" })}
                         </div>
-                        {statusIcon && (
-                          <div className="absolute top-1.5 right-1.5">
-                            {statusIcon}
+                      )}
+                      
+                      {/* Quick Actions */}
+                      <div className="absolute top-2 right-2 flex flex-row gap-1.5 z-20 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); handleUpdateStatus(appt.id, 'Atendido'); }}
+                          className="w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center hover:bg-green-600 shadow-md transition-all scale-90 hover:scale-110"
+                          title="Marcar como Atendido"
+                        >
+                          <Check className="w-4 h-4" strokeWidth={4} />
+                        </button>
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); handleUpdateStatus(appt.id, 'Cancelado'); }}
+                          className="w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 shadow-md transition-all scale-90 hover:scale-110"
+                          title="Marcar como Cancelado"
+                        >
+                          <X className="w-4 h-4" strokeWidth={4} />
+                        </button>
+                      </div>
+
+                      <div className="relative z-10">
+                        <div className="flex items-start justify-between mb-0.5">
+                          <div className="font-black truncate capitalize leading-tight text-xs text-gray-900 pr-4">
+                            {appt.paciente?.nombre} {appt.paciente?.apellido}
+                          </div>
+                        </div>
+                        <div className="text-[10px] font-bold text-gray-600 leading-none flex gap-1">
+                          <span>{appt.hora_inicio.substring(0, 5)} - {appt.hora_fin.substring(0, 5)}</span>
+                        </div>
+                        {appt.height > 40 && (
+                          <div className="text-[9px] opacity-80 text-gray-500 truncate mt-1 font-medium">
+                            {getInitials(appt.profesional)} • {appt.servicio?.nombre}
                           </div>
                         )}
                       </div>
-                      <div className="text-[10px] font-bold text-gray-600 leading-none flex gap-1">
-                        <span>{appt.hora_inicio.substring(0, 5)} - {appt.hora_fin.substring(0, 5)}</span>
-                      </div>
-                      {appt.height > 40 && (
-                        <div className="text-[9px] opacity-80 text-gray-500 truncate mt-1 font-medium">
-                          {getInitials(appt.profesional)} • {appt.servicio?.nombre}
-                        </div>
-                      )}
                     </div>
                   </div>
                 )
@@ -633,24 +664,45 @@ export const CalendarView: React.FC = () => {
                                 e.stopPropagation()
                                 setSelectedAppointment(appt)
                               }}
-                              className="h-full w-full rounded-xl shadow-sm cursor-move hover:brightness-95 transition-all overflow-hidden flex flex-col p-1.5 relative"
+                              className="h-full w-full rounded-xl shadow-sm cursor-move hover:brightness-95 transition-all overflow-hidden flex flex-col p-1.5 relative group"
                               style={{
                                 backgroundColor: `${profColor}15`,
                                 border: `1px solid ${profColor}`,
                               }}
                             >
-                              <div className="flex justify-between items-start">
-                                <div className="font-black truncate capitalize leading-tight text-[10px] text-gray-900 pr-3">
-                                  {appt.paciente?.nombre} {appt.paciente?.apellido}
+                              {statusIcon && (
+                                <div className="absolute inset-0 flex items-center justify-center opacity-70 pointer-events-none">
+                                  {React.cloneElement(statusIcon as React.ReactElement, { className: "w-12 h-12" })}
                                 </div>
-                                {statusIcon && (
-                                  <div className="absolute top-1 right-1">
-                                    {statusIcon}
-                                  </div>
-                                )}
+                              )}
+                              
+                              {/* Quick Actions */}
+                              <div className="absolute top-1 right-1 flex flex-row gap-1 z-20 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button 
+                                  onClick={(e) => { e.stopPropagation(); handleUpdateStatus(appt.id, 'Atendido'); }}
+                                  className="w-5 h-5 bg-green-500 text-white rounded-full flex items-center justify-center hover:bg-green-600 shadow-sm transition-all scale-75 hover:scale-100"
+                                  title="Atendido"
+                                >
+                                  <Check className="w-3 h-3" strokeWidth={4} />
+                                </button>
+                                <button 
+                                  onClick={(e) => { e.stopPropagation(); handleUpdateStatus(appt.id, 'Cancelado'); }}
+                                  className="w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 shadow-sm transition-all scale-75 hover:scale-100"
+                                  title="Cancelado"
+                                >
+                                  <X className="w-3 h-3" strokeWidth={4} />
+                                </button>
                               </div>
-                              <div className="text-[9px] font-bold text-gray-600 leading-none mt-0.5">
-                                {appt.hora_inicio.substring(0, 5)}
+
+                              <div className="relative z-10">
+                                <div className="flex justify-between items-start">
+                                  <div className="font-black truncate capitalize leading-tight text-[10px] text-gray-900 pr-3">
+                                    {appt.paciente?.nombre} {appt.paciente?.apellido}
+                                  </div>
+                                </div>
+                                <div className="text-[9px] font-bold text-gray-600 leading-none mt-0.5">
+                                  {appt.hora_inicio.substring(0, 5)}
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -718,8 +770,8 @@ export const CalendarView: React.FC = () => {
                         <span className="font-bold shrink-0 text-gray-900">{appointment.hora_inicio.substring(0, 5)}</span>
                         <span className="truncate font-semibold text-gray-700 pr-3">{appointment.paciente?.apellido}</span>
                         {statusIcon && (
-                          <div className="absolute right-1 top-1/2 -translate-y-1/2 scale-75">
-                            {statusIcon}
+                          <div className="absolute right-1.5 top-1/2 -translate-y-1/2 opacity-60">
+                            {React.cloneElement(statusIcon as React.ReactElement, { className: "w-3.5 h-3.5" })}
                           </div>
                         )}
                       </div>
@@ -868,10 +920,10 @@ export const CalendarView: React.FC = () => {
                   </div>
                </div>
                <div className="flex flex-wrap items-center gap-4 text-[10px] font-bold text-gray-500 uppercase tracking-wider">
-                  <div className="flex items-center gap-1.5"><Hourglass className="w-3 h-3 text-[#F59E0B]" /> Pendiente</div>
-                  <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-full bg-blue-500/20 border border-blue-500"></div> Confirmado</div>
-                  <div className="flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-[#22C55E]" fill="white" /> Atendido</div>
-                  <div className="flex items-center gap-1.5"><XCircle className="w-3 h-3 text-[#EF4444]" fill="white" /> Cancelado</div>
+                  <div className="flex items-center gap-2 px-2 py-1 bg-amber-50 rounded-lg text-amber-700"><Hourglass className="w-3.5 h-3.5" /> Pendiente</div>
+                  <div className="flex items-center gap-2 px-2 py-1 bg-blue-50 rounded-lg text-blue-700"><div className="w-3 h-3 rounded-full bg-blue-500/20 border-2 border-blue-500"></div> Confirmado</div>
+                  <div className="flex items-center gap-2 px-2 py-1 bg-green-50 rounded-lg text-green-700"><CheckCircle2 className="w-3.5 h-3.5" /> Atendido</div>
+                  <div className="flex items-center gap-2 px-2 py-1 bg-red-50 rounded-lg text-red-700"><XCircle className="w-3.5 h-3.5" /> Cancelado</div>
                   <button onClick={() => setShowNewModal(true)} className="ml-2 px-3 py-1.5 border border-gray-200 rounded-full text-[#2563FF] hover:bg-blue-50 flex items-center gap-1 transition-colors"><Plus className="w-3 h-3"/> Sobreturno</button>
                </div>
             </div>

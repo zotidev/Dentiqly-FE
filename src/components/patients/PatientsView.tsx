@@ -2,21 +2,18 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { Card } from "../ui/Card"
-import { Button } from "../ui/Button"
 import {
   Search,
   Plus,
   Edit,
   Trash2,
-  User,
+  Users,
   Phone,
   X,
   ChevronLeft,
   ChevronRight,
   Calendar,
   Mail,
-  MapPin,
   ArrowUpDown,
 } from "lucide-react"
 import { pacientesApi, obrasSocialesApi } from "../../api"
@@ -24,7 +21,84 @@ import { apiClient } from "../../lib/api-client"
 import { ConfirmationModal } from "../ui/ConfirmationModal"
 import type { Paciente, CrearPacienteData, ObraSocial } from "../../types"
 import { PatientDetailView } from "./PatientDetailView"
+import { AdminAppointmentModal } from "../admin/AdminAppointmentModal"
 
+/* ─── Dentiqly design tokens ─────────────────────────────────────────── */
+const tokens = {
+  blue: "#2563FF",
+  blueHover: "#1E40AF",
+  blueFaint: "#EEF3FF",
+  navy: "#0B1023",
+  grayText: "#4B5568",
+  grayMuted: "#8A93A8",
+  grayBorder: "#E2E6EF",
+  grayBg: "#F5F7FA",
+  grayRow: "#F0F2F7",
+  rowHover: "#F5F8FF",
+  white: "#FFFFFF",
+
+  green: "#22C55E",
+  greenFaint: "#EDFAF4",
+  greenText: "#15803D",
+
+  grayDot: "#CBD5E1",
+  grayPill: "#F1F5F9",
+  grayPillTx: "#64748B",
+
+  avatarColors: [
+    { bg: "#EEF3FF", color: "#2563FF" },
+    { bg: "#EDFAF4", color: "#16A34A" },
+    { bg: "#F3EEFF", color: "#7C3AED" },
+    { bg: "#FFF8EB", color: "#B45309" },
+    { bg: "#FEF2F2", color: "#DC2626" },
+    { bg: "#F0FDFA", color: "#0D9488" },
+  ],
+}
+
+/* ─── Tiny helpers ────────────────────────────────────────────────────── */
+const getInitials = (nombre: string, apellido: string) =>
+  `${(nombre || "").charAt(0)}${(apellido || "").charAt(0)}`.toUpperCase()
+
+const getAvatarStyle = (id: string) => {
+  const idx = id.charCodeAt(id.length - 1) % tokens.avatarColors.length
+  return tokens.avatarColors[idx]
+}
+
+const calculateAge = (birthDate: string) => {
+  if (!birthDate) return "—"
+  const today = new Date()
+  const birth = new Date(birthDate)
+  let age = today.getFullYear() - birth.getFullYear()
+  const m = today.getMonth() - birth.getMonth()
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--
+  return age
+}
+
+/* ─── Label styles ────────────────────────────────────────────────────── */
+const labelStyle: React.CSSProperties = {
+  display: "block",
+  fontSize: 12,
+  fontWeight: 600,
+  color: tokens.grayMuted,
+  textTransform: "uppercase",
+  letterSpacing: "0.5px",
+  marginBottom: 6,
+}
+
+const inputStyle: React.CSSProperties = {
+  width: "100%",
+  padding: "9px 12px",
+  fontSize: 13,
+  border: `0.5px solid ${tokens.grayBorder}`,
+  borderRadius: 9,
+  outline: "none",
+  color: tokens.navy,
+  background: tokens.white,
+  fontFamily: "Poppins, -apple-system, sans-serif",
+  transition: "border-color 0.15s",
+}
+
+/* ═══════════════════════════════════════════════════════════════════════ */
 export const PatientsView: React.FC = () => {
   const [patients, setPatients] = useState<Paciente[]>([])
   const [loading, setLoading] = useState(true)
@@ -39,69 +113,50 @@ export const PatientsView: React.FC = () => {
   const [obrasSociales, setObrasSociales] = useState<ObraSocial[]>([])
   const [uploadingPhoto, setUploadingPhoto] = useState(false)
   const [viewMode, setViewMode] = useState<"list" | "detail">("list")
-  const [confirmDelete, setConfirmDelete] = useState<{ isOpen: boolean; id: string | null }>({
-    isOpen: false,
-    id: null,
-  })
+  const [confirmDelete, setConfirmDelete] = useState<{ isOpen: boolean; id: string | null }>({ isOpen: false, id: null })
+  const [showBookingModal, setShowBookingModal] = useState(false)
+  const [focusedField, setFocusedField] = useState<string | null>(null)
 
   const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api"
 
-  useEffect(() => {
-    fetchPatients()
-    fetchObrasSociales()
-  }, [currentPage, searchTerm])
+  useEffect(() => { fetchPatients(); fetchObrasSociales() }, [currentPage, searchTerm])
 
   const fetchObrasSociales = async () => {
     try {
-      const response = await obrasSocialesApi.listar()
-      setObrasSociales(response || [])
-    } catch (error) {
-      console.error("Error fetching health insurances:", error)
-    }
+      const res = await obrasSocialesApi.listar()
+      setObrasSociales(res || [])
+    } catch (e) { console.error(e) }
   }
 
   const fetchPatients = async () => {
     try {
       setLoading(true)
-      const response = await pacientesApi.listar({
-        page: currentPage,
-        limit: 12,
-        search: searchTerm || undefined,
-      })
-      setPatients(response?.data || [])
-      setTotalPages(response?.pagination?.totalPages || 1)
-      setTotalPatients(response?.pagination?.total || response?.data?.length || 0)
-    } catch (error) {
-      console.error("Error fetching patients:", error)
-      setPatients([])
-      setTotalPages(1)
-      setTotalPatients(0)
-    } finally {
-      setLoading(false)
-    }
+      const res = await pacientesApi.listar({ page: currentPage, limit: 12, search: searchTerm || undefined })
+      setPatients(res?.data || [])
+      setTotalPages(res?.pagination?.totalPages || 1)
+      setTotalPatients(res?.pagination?.totalItems || res?.data?.length || 0)
+    } catch (e) {
+      console.error(e)
+      setPatients([]); setTotalPages(1); setTotalPatients(0)
+    } finally { setLoading(false) }
   }
 
   const handleCreatePatient = () => {
     setFormData({ condicion: "Activo", tipo_facturacion: "B" })
-    setModalMode("create")
-    setShowModal(true)
+    setModalMode("create"); setShowModal(true)
   }
 
   const handleEditPatient = (patient: Paciente) => {
-    setSelectedPatient(patient)
-    setFormData(patient)
-    setModalMode("edit")
-    setShowModal(true)
+    setSelectedPatient(patient); setFormData(patient)
+    setModalMode("edit"); setShowModal(true)
   }
 
   const handleViewPatient = (patient: Paciente) => {
-    setSelectedPatient(patient)
-    setViewMode("detail")
+    setSelectedPatient(patient); setViewMode("detail")
   }
 
-  const handleDeletePatientClick = (id: string) => {
+  const handleDeletePatientClick = (id: string) =>
     setConfirmDelete({ isOpen: true, id })
-  }
 
   const handleConfirmDeletePatient = async () => {
     if (!confirmDelete.id) return
@@ -109,384 +164,444 @@ export const PatientsView: React.FC = () => {
       await pacientesApi.eliminar(confirmDelete.id)
       fetchPatients()
       setConfirmDelete({ isOpen: false, id: null })
-    } catch (error) {
-      console.error("Error deleting patient:", error)
-      alert("Error al eliminar el paciente")
-    }
+    } catch { alert("Error al eliminar el paciente") }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
-      if (modalMode === "create") {
-        await pacientesApi.crear(formData as CrearPacienteData)
-      } else if (modalMode === "edit" && selectedPatient) {
-        await pacientesApi.actualizar(selectedPatient.id, formData)
-      }
-      setShowModal(false)
-      fetchPatients()
-    } catch (error) {
-      console.error("Error saving patient:", error)
-    }
-  }
-
-  const calculateAge = (birthDate: string) => {
-    if (!birthDate) return "—"
-    const today = new Date()
-    const birth = new Date(birthDate)
-    let age = today.getFullYear() - birth.getFullYear()
-    const monthDiff = today.getMonth() - birth.getMonth()
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) age--
-    return age
+      if (modalMode === "create") await pacientesApi.crear(formData as CrearPacienteData)
+      else if (modalMode === "edit" && selectedPatient) await pacientesApi.actualizar(selectedPatient.id, formData)
+      setShowModal(false); fetchPatients()
+    } catch (e) { console.error(e) }
   }
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>, patientId: string) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const file = e.target.files?.[0]; if (!file) return
     try {
       setUploadingPhoto(true)
-      const fd = new FormData()
-      fd.append("foto", file)
+      const fd = new FormData(); fd.append("foto", file)
       const updated = await apiClient.put<Paciente>(`/pacientes/${patientId}/foto`, fd)
-      if (selectedPatient && selectedPatient.id === patientId) {
+      if (selectedPatient?.id === patientId)
         setSelectedPatient({ ...selectedPatient, foto_url: updated.foto_url })
-      }
       fetchPatients()
-    } catch (error) {
-      console.error("Error uploading photo:", error)
-      alert("Error al subir la foto")
-    } finally {
-      setUploadingPhoto(false)
-    }
+    } catch { alert("Error al subir la foto") }
+    finally { setUploadingPhoto(false) }
   }
 
   const getPhotoUrl = (patient: Paciente) => {
     if (!patient.foto_url) return null
     if (patient.foto_url.startsWith("http")) return patient.foto_url
-    const baseUrl = API_BASE_URL.replace(/\/api$/, "")
-    return `${baseUrl}/${patient.foto_url.replace(/^src\//, "")}`
+    return `${API_BASE_URL.replace(/\/api$/, "")}/${patient.foto_url.replace(/^src\//, "")}`
   }
 
-  const getInitials = (nombre: string, apellido: string) => {
-    return `${(nombre || "").charAt(0)}${(apellido || "").charAt(0)}`.toUpperCase()
+  /* ── styles ── */
+  const page: React.CSSProperties = {
+    background: tokens.grayBg,
+    minHeight: "100vh",
+    padding: "28px 32px",
+    fontFamily: "Poppins, -apple-system, sans-serif",
   }
 
-  if (viewMode === "detail" && selectedPatient) {
-    return (
-      <PatientDetailView
-        patient={selectedPatient}
-        onBack={() => setViewMode("list")}
-        onEdit={(p) => {
-          setSelectedPatient(p)
-          setFormData(p)
-          setModalMode("edit")
-          setShowModal(true)
-        }}
-        onPhotoUpload={handlePhotoUpload}
-        uploadingPhoto={uploadingPhoto}
-        getPhotoUrl={getPhotoUrl}
-      />
-    )
-  }
-
+  /* ── render ── */
   return (
-    <div className="bg-[#f0f2f5] min-h-screen p-4 sm:p-8 rounded-3xl font-sans space-y-6">
-
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Gestión de Pacientes</h1>
-          <p className="text-gray-500 mt-1">Administra los pacientes registrados en el centro</p>
-        </div>
-        <button
-          onClick={handleCreatePatient}
-          className="flex items-center gap-2 px-6 py-2 bg-[#2563FF] text-white rounded-full font-medium hover:bg-blue-700 transition shadow-md shadow-blue-500/20"
-        >
-          <Plus className="w-4 h-4" /> Nuevo Paciente
-        </button>
-      </div>
-
-      {/* Barra de búsqueda + contador */}
-      <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center">
-        <Card className="flex-1 !py-2">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Buscar por nombre, DNI, teléfono o email..."
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value)
-                setCurrentPage(1)
+    <div style={page}>
+      {viewMode === "detail" && selectedPatient ? (
+        <PatientDetailView
+          patient={selectedPatient}
+          onBack={() => setViewMode("list")}
+          onEdit={(p) => { setSelectedPatient(p); setFormData(p); setModalMode("edit"); setShowModal(true) }}
+          onPhotoUpload={handlePhotoUpload}
+          uploadingPhoto={uploadingPhoto}
+          getPhotoUrl={getPhotoUrl}
+          onBookTurno={() => setShowBookingModal(true)}
+        />
+      ) : (
+        <>
+          {/* ── Header ── */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 }}>
+            <div>
+              <h1 style={{ fontSize: 22, fontWeight: 600, color: tokens.navy, letterSpacing: "-0.3px", margin: 0 }}>
+                Gestión de Pacientes
+              </h1>
+              <p style={{ fontSize: 13, color: tokens.grayMuted, marginTop: 3, fontWeight: 400 }}>
+                Administrá los pacientes registrados en el centro
+              </p>
+            </div>
+            <button
+              onClick={handleCreatePatient}
+              style={{
+                display: "flex", alignItems: "center", gap: 7,
+                background: tokens.blue, color: tokens.white,
+                border: "none", borderRadius: 10, padding: "9px 18px",
+                fontSize: 13, fontWeight: 500, cursor: "pointer",
+                fontFamily: "Poppins, -apple-system, sans-serif",
+                transition: "background 0.15s",
               }}
-              className="w-full pl-10 pr-4 py-2 focus:outline-none text-sm text-gray-700 placeholder-gray-400 bg-transparent"
-            />
+              onMouseEnter={e => (e.currentTarget.style.background = tokens.blueHover)}
+              onMouseLeave={e => (e.currentTarget.style.background = tokens.blue)}
+            >
+              <Plus size={15} />
+              Nuevo Paciente
+            </button>
           </div>
-        </Card>
-        <div className="flex items-center gap-2 bg-white rounded-xl px-4 py-2 shadow-sm">
-          <User className="h-4 w-4 text-[#2563FF]" />
-          <span className="text-sm font-semibold text-gray-900">{totalPatients}</span>
-          <span className="text-sm text-gray-400">pacientes en total</span>
-        </div>
-      </div>
 
-      {/* Tabla */}
-      <div className="bg-white rounded-2xl overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-gray-100">
-                <th className="text-left px-5 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider whitespace-nowrap">
-                  <div className="flex items-center gap-1">
-                    Paciente <ArrowUpDown className="h-3 w-3" />
-                  </div>
-                </th>
-                <th className="text-left px-5 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider whitespace-nowrap">
-                  <div className="flex items-center gap-1">
-                    Teléfono <ArrowUpDown className="h-3 w-3" />
-                  </div>
-                </th>
-                <th className="text-left px-5 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider whitespace-nowrap">
-                  <div className="flex items-center gap-1">
-                    Email <ArrowUpDown className="h-3 w-3" />
-                  </div>
-                </th>
-                <th className="text-left px-5 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider whitespace-nowrap">
-                  <div className="flex items-center gap-1">
-                    Documento <ArrowUpDown className="h-3 w-3" />
-                  </div>
-                </th>
-                <th className="text-left px-5 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider whitespace-nowrap">
-                  <div className="flex items-center gap-1">
-                    Edad / Sexo <ArrowUpDown className="h-3 w-3" />
-                  </div>
-                </th>
-                <th className="text-left px-5 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider whitespace-nowrap">
-                  Estado
-                </th>
-                <th className="px-5 py-4" />
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                [...Array(6)].map((_, i) => (
-                  <tr key={i} className="border-b border-gray-50">
-                    <td className="px-5 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-gray-100 animate-pulse" />
-                        <div className="space-y-1">
-                          <div className="h-3 w-28 bg-gray-100 rounded animate-pulse" />
-                          <div className="h-2 w-20 bg-gray-100 rounded animate-pulse" />
-                        </div>
-                      </div>
-                    </td>
-                    {[...Array(5)].map((_, j) => (
-                      <td key={j} className="px-5 py-4">
-                        <div className="h-3 w-24 bg-gray-100 rounded animate-pulse" />
-                      </td>
-                    ))}
-                    <td className="px-5 py-4" />
-                  </tr>
-                ))
-              ) : patients.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="text-center py-16 text-gray-400">
-                    <User className="h-10 w-10 mx-auto mb-3 opacity-30" />
-                    <p className="font-medium text-gray-500">No hay pacientes registrados</p>
-                    <p className="text-sm mt-1">Comienza registrando tu primer paciente</p>
-                  </td>
-                </tr>
-              ) : (
-                patients.map((patient, idx) => (
-                  <tr
-                    key={patient.id}
-                    className={`border-b border-gray-50 hover:bg-blue-50/40 transition-colors cursor-pointer ${idx === patients.length - 1 ? "border-b-0" : ""
-                      }`}
-                    onClick={() => handleViewPatient(patient)}
-                  >
-                    {/* Nombre + avatar */}
-                    <td className="px-5 py-3">
-                      <div className="flex items-center gap-3">
-                        <div className="relative flex-shrink-0">
-                          {getPhotoUrl(patient) ? (
-                            <img
-                              src={getPhotoUrl(patient)!}
-                              alt={`${patient.nombre} ${patient.apellido}`}
-                              className="w-9 h-9 rounded-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-9 h-9 rounded-full bg-[#2563FF]/10 flex items-center justify-center text-[#2563FF] text-xs font-bold">
-                              {getInitials(patient.nombre, patient.apellido)}
-                            </div>
-                          )}
-                          <div
-                            className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white ${patient.condicion === "Activo" ? "bg-green-500" : "bg-gray-300"
-                              }`}
-                          />
-                        </div>
-                        <div>
-                          <p className="text-sm font-semibold text-gray-900 whitespace-nowrap">
-                            {patient.apellido}, {patient.nombre}
-                          </p>
-                          <p className="text-xs text-gray-400">{patient.obra_social?.nombre || "Sin obra social"}</p>
-                        </div>
-                      </div>
-                    </td>
-
-                    {/* Teléfono */}
-                    <td className="px-5 py-3">
-                      <div className="flex items-center gap-1.5 text-sm text-gray-600 whitespace-nowrap">
-                        <Phone className="h-3.5 w-3.5 text-gray-300 flex-shrink-0" />
-                        {patient.telefono || <span className="text-gray-300">—</span>}
-                      </div>
-                    </td>
-
-                    {/* Email */}
-                    <td className="px-5 py-3">
-                      <div className="flex items-center gap-1.5 text-sm text-gray-600">
-                        <Mail className="h-3.5 w-3.5 text-gray-300 flex-shrink-0" />
-                        <span className="truncate max-w-[180px]">
-                          {patient.email || <span className="text-gray-300">—</span>}
-                        </span>
-                      </div>
-                    </td>
-
-                    {/* Documento */}
-                    <td className="px-5 py-3">
-                      <div className="text-sm text-gray-600 whitespace-nowrap">
-                        <span className="text-xs font-medium text-gray-400 mr-1">{patient.tipo_documento}</span>
-                        {patient.numero_documento || <span className="text-gray-300">—</span>}
-                      </div>
-                    </td>
-
-                    {/* Edad / Sexo */}
-                    <td className="px-5 py-3">
-                      <div className="flex items-center gap-1.5 text-sm text-gray-600 whitespace-nowrap">
-                        <Calendar className="h-3.5 w-3.5 text-gray-300 flex-shrink-0" />
-                        {patient.fecha_nacimiento
-                          ? `${calculateAge(patient.fecha_nacimiento)} años · ${patient.sexo || "—"}`
-                          : <span className="text-gray-300">—</span>
-                        }
-                      </div>
-                    </td>
-
-                    {/* Estado */}
-                    <td className="px-5 py-3">
-                      <span
-                        className={`inline-flex px-2.5 py-1 text-xs font-semibold rounded-full whitespace-nowrap ${patient.condicion === "Activo"
-                            ? "bg-green-50 text-green-600"
-                            : "bg-gray-100 text-gray-500"
-                          }`}
-                      >
-                        {patient.condicion || "Inactivo"}
-                      </span>
-                    </td>
-
-                    {/* Acciones */}
-                    <td className="px-5 py-3">
-                      <div
-                        className="flex items-center gap-1"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <button
-                          onClick={() => handleEditPatient(patient)}
-                          className="p-1.5 rounded-lg text-gray-400 hover:text-[#2563FF] hover:bg-blue-50 transition-colors"
-                          title="Editar"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDeletePatientClick(patient.id)}
-                          className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
-                          title="Eliminar"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Paginación dentro del bloque blanco */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-between px-5 py-3 border-t border-gray-100">
-            <p className="text-sm text-gray-400">
-              Página <span className="font-semibold text-gray-700">{currentPage}</span> de {totalPages}
-            </p>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-                disabled={currentPage === 1}
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
-                disabled={currentPage === totalPages}
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
+          {/* ── Controls ── */}
+          <div style={{ display: "flex", gap: 12, marginBottom: 20, alignItems: "center" }}>
+            {/* Search */}
+            <div style={{
+              flex: 1, display: "flex", alignItems: "center", gap: 10,
+              background: tokens.white, border: `0.5px solid ${tokens.grayBorder}`,
+              borderRadius: 10, padding: "0 14px", height: 40,
+            }}>
+              <Search size={15} color={tokens.grayMuted} />
+              <input
+                type="text"
+                placeholder="Buscar por nombre, DNI, teléfono o email…"
+                value={searchTerm}
+                onChange={e => { setSearchTerm(e.target.value); setCurrentPage(1) }}
+                style={{
+                  border: "none", outline: "none", background: "transparent",
+                  fontSize: 13, color: tokens.navy, flex: 1,
+                  fontFamily: "Poppins, -apple-system, sans-serif",
+                }}
+              />
+            </div>
+            {/* Counter */}
+            <div style={{
+              display: "flex", alignItems: "center", gap: 8,
+              background: tokens.white, border: `0.5px solid ${tokens.grayBorder}`,
+              borderRadius: 10, padding: "0 14px", height: 40, whiteSpace: "nowrap",
+            }}>
+              <Users size={15} color={tokens.blue} />
+              <span style={{ fontSize: 13, fontWeight: 600, color: tokens.navy }}>{totalPatients}</span>
+              <span style={{ fontSize: 13, color: tokens.grayMuted }}>pacientes en total</span>
             </div>
           </div>
-        )}
-      </div>
 
-      {/* Modal Creación / Edición */}
+          {/* ── Table card ── */}
+          <div style={{
+            background: tokens.white, borderRadius: 14,
+            border: `0.5px solid ${tokens.grayBorder}`, overflow: "hidden",
+          }}>
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead>
+                  <tr style={{ borderBottom: `0.5px solid ${tokens.grayBorder}` }}>
+                    {[
+                      { label: "Paciente", sortable: true },
+                      { label: "Teléfono", sortable: true },
+                      { label: "Email", sortable: true },
+                      { label: "Documento", sortable: true },
+                      { label: "Edad / Sexo", sortable: true },
+                      { label: "Estado", sortable: false },
+                      { label: "", sortable: false },
+                    ].map((col, i) => (
+                      <th key={i} style={{
+                        textAlign: "left", padding: "12px 16px",
+                        fontSize: 11, fontWeight: 600, color: tokens.grayMuted,
+                        textTransform: "uppercase", letterSpacing: "0.6px", whiteSpace: "nowrap",
+                      }}>
+                        {col.label && (
+                          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                            {col.label}
+                            {col.sortable && <ArrowUpDown size={11} />}
+                          </div>
+                        )}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {loading ? (
+                    [...Array(6)].map((_, i) => (
+                      <tr key={i} style={{ borderBottom: `0.5px solid ${tokens.grayRow}` }}>
+                        <td style={{ padding: "11px 16px" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                            <div style={{ width: 34, height: 34, borderRadius: 9, background: tokens.grayRow, animation: "pulse 1.5s infinite" }} />
+                            <div>
+                              <div style={{ width: 120, height: 11, borderRadius: 5, background: tokens.grayRow, marginBottom: 5 }} />
+                              <div style={{ width: 80, height: 9, borderRadius: 5, background: tokens.grayRow }} />
+                            </div>
+                          </div>
+                        </td>
+                        {[...Array(5)].map((_, j) => (
+                          <td key={j} style={{ padding: "11px 16px" }}>
+                            <div style={{ width: 90, height: 11, borderRadius: 5, background: tokens.grayRow }} />
+                          </td>
+                        ))}
+                        <td style={{ padding: "11px 16px" }} />
+                      </tr>
+                    ))
+                  ) : patients.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} style={{ textAlign: "center", padding: "56px 0" }}>
+                        <Users size={36} color={tokens.grayBorder} style={{ margin: "0 auto 12px", display: "block" }} />
+                        <p style={{ fontSize: 14, fontWeight: 500, color: tokens.grayMuted }}>No hay pacientes registrados</p>
+                        <p style={{ fontSize: 13, color: tokens.grayMuted, marginTop: 4, opacity: 0.7 }}>
+                          Comenzá registrando tu primer paciente
+                        </p>
+                      </td>
+                    </tr>
+                  ) : (
+                    patients.map((patient, idx) => {
+                      const avColor = getAvatarStyle(patient.id)
+                      const isLast = idx === patients.length - 1
+                      return (
+                        <tr
+                          key={patient.id}
+                          style={{ borderBottom: isLast ? "none" : `0.5px solid ${tokens.grayRow}`, cursor: "pointer", transition: "background 0.12s" }}
+                          onClick={() => handleViewPatient(patient)}
+                          onMouseEnter={e => (e.currentTarget.style.background = tokens.rowHover)}
+                          onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+                        >
+                          {/* Patient */}
+                          <td style={{ padding: "11px 16px" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                              <div style={{ position: "relative", flexShrink: 0 }}>
+                                {getPhotoUrl(patient) ? (
+                                  <img
+                                    src={getPhotoUrl(patient)!}
+                                    alt={`${patient.nombre} ${patient.apellido}`}
+                                    style={{ width: 34, height: 34, borderRadius: 9, objectFit: "cover" }}
+                                  />
+                                ) : (
+                                  <div style={{
+                                    width: 34, height: 34, borderRadius: 9,
+                                    background: avColor.bg, color: avColor.color,
+                                    display: "flex", alignItems: "center", justifyContent: "center",
+                                    fontSize: 11, fontWeight: 700,
+                                  }}>
+                                    {getInitials(patient.nombre, patient.apellido)}
+                                  </div>
+                                )}
+                                <div style={{
+                                  width: 8, height: 8, borderRadius: "50%",
+                                  border: `1.5px solid ${tokens.white}`,
+                                  background: patient.condicion === "Activo" ? tokens.green : tokens.grayDot,
+                                  position: "absolute", bottom: -1, right: -1,
+                                }} />
+                              </div>
+                              <div>
+                                <p style={{ fontSize: 13, fontWeight: 600, color: tokens.navy, margin: 0, whiteSpace: "nowrap" }}>
+                                  {patient.apellido}, {patient.nombre}
+                                </p>
+                                <p style={{ fontSize: 11.5, color: tokens.grayMuted, margin: "2px 0 0" }}>
+                                  {patient.obra_social?.nombre || "Sin obra social"}
+                                </p>
+                              </div>
+                            </div>
+                          </td>
+
+                          {/* Phone */}
+                          <td style={{ padding: "11px 16px" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: tokens.grayText, whiteSpace: "nowrap" }}>
+                              <Phone size={13} color={tokens.grayBorder} />
+                              {patient.telefono || <span style={{ color: tokens.grayBorder }}>—</span>}
+                            </div>
+                          </td>
+
+                          {/* Email */}
+                          <td style={{ padding: "11px 16px" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: tokens.grayText }}>
+                              <Mail size={13} color={tokens.grayBorder} />
+                              <span style={{ maxWidth: 180, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                {patient.email || <span style={{ color: tokens.grayBorder }}>—</span>}
+                              </span>
+                            </div>
+                          </td>
+
+                          {/* Doc */}
+                          <td style={{ padding: "11px 16px" }}>
+                            <div style={{ fontSize: 13, color: tokens.grayText, whiteSpace: "nowrap" }}>
+                              <span style={{ fontSize: 10.5, fontWeight: 600, color: tokens.grayMuted, marginRight: 4 }}>
+                                {patient.tipo_documento}
+                              </span>
+                              {patient.numero_documento || <span style={{ color: tokens.grayBorder }}>—</span>}
+                            </div>
+                          </td>
+
+                          {/* Age/Sex */}
+                          <td style={{ padding: "11px 16px" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: tokens.grayText, whiteSpace: "nowrap" }}>
+                              <Calendar size={13} color={tokens.grayBorder} />
+                              {patient.fecha_nacimiento
+                                ? `${calculateAge(patient.fecha_nacimiento)} años · ${patient.sexo || "—"}`
+                                : <span style={{ color: tokens.grayBorder }}>—</span>}
+                            </div>
+                          </td>
+
+                          {/* Status */}
+                          <td style={{ padding: "11px 16px" }}>
+                            <span style={{
+                              display: "inline-flex", alignItems: "center",
+                              padding: "3px 10px", borderRadius: 6,
+                              fontSize: 11, fontWeight: 600, whiteSpace: "nowrap",
+                              background: patient.condicion === "Activo" ? tokens.greenFaint : tokens.grayPill,
+                              color: patient.condicion === "Activo" ? tokens.greenText : tokens.grayPillTx,
+                            }}>
+                              {patient.condicion || "Inactivo"}
+                            </span>
+                          </td>
+
+                          {/* Actions */}
+                          <td style={{ padding: "11px 16px" }} onClick={e => e.stopPropagation()}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
+                              <button
+                                onClick={() => handleEditPatient(patient)}
+                                title="Editar"
+                                style={{
+                                  width: 30, height: 30, borderRadius: 7, border: "none",
+                                  background: "transparent", cursor: "pointer",
+                                  display: "flex", alignItems: "center", justifyContent: "center",
+                                  color: tokens.grayMuted, transition: "all 0.12s",
+                                }}
+                                onMouseEnter={e => { e.currentTarget.style.background = tokens.blueFaint; e.currentTarget.style.color = tokens.blue }}
+                                onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = tokens.grayMuted }}
+                              >
+                                <Edit size={14} />
+                              </button>
+                              <button
+                                onClick={() => handleDeletePatientClick(patient.id)}
+                                title="Eliminar"
+                                style={{
+                                  width: 30, height: 30, borderRadius: 7, border: "none",
+                                  background: "transparent", cursor: "pointer",
+                                  display: "flex", alignItems: "center", justifyContent: "center",
+                                  color: tokens.grayMuted, transition: "all 0.12s",
+                                }}
+                                onMouseEnter={e => { e.currentTarget.style.background = "#FEF2F2"; e.currentTarget.style.color = "#EF4444" }}
+                                onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = tokens.grayMuted }}
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      )
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div style={{
+                display: "flex", alignItems: "center", justifyContent: "space-between",
+                padding: "12px 16px", borderTop: `0.5px solid ${tokens.grayRow}`,
+              }}>
+                <p style={{ fontSize: 12.5, color: tokens.grayMuted }}>
+                  Página <strong style={{ color: tokens.navy }}>{currentPage}</strong> de {totalPages}
+                </p>
+                <div style={{ display: "flex", gap: 6 }}>
+                  {[
+                    { icon: <ChevronLeft size={15} />, action: () => setCurrentPage(p => Math.max(1, p - 1)), disabled: currentPage === 1 },
+                    { icon: <ChevronRight size={15} />, action: () => setCurrentPage(p => Math.min(totalPages, p + 1)), disabled: currentPage === totalPages },
+                  ].map((btn, i) => (
+                    <button
+                      key={i}
+                      onClick={btn.action}
+                      disabled={btn.disabled}
+                      style={{
+                        width: 30, height: 30, borderRadius: 7,
+                        border: `0.5px solid ${tokens.grayBorder}`,
+                        background: tokens.white, cursor: btn.disabled ? "not-allowed" : "pointer",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        color: btn.disabled ? tokens.grayBorder : tokens.grayText,
+                        opacity: btn.disabled ? 0.5 : 1,
+                        transition: "all 0.12s",
+                      }}
+                      onMouseEnter={e => { if (!btn.disabled) { e.currentTarget.style.background = tokens.blueFaint; e.currentTarget.style.borderColor = tokens.blue; e.currentTarget.style.color = tokens.blue } }}
+                      onMouseLeave={e => { if (!btn.disabled) { e.currentTarget.style.background = tokens.white; e.currentTarget.style.borderColor = tokens.grayBorder; e.currentTarget.style.color = tokens.grayText } }}
+                    >
+                      {btn.icon}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </>
+      )}
+
+      {/* ── Modal Create / Edit ── */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-white sticky top-0 z-10">
-              <h3 className="text-lg font-semibold text-gray-900">
+        <div style={{
+          position: "fixed", inset: 0, background: "rgba(11,16,35,0.45)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          zIndex: 50, padding: 16,
+        }}>
+          <div style={{
+            background: tokens.white, borderRadius: 16,
+            maxWidth: 640, width: "100%", maxHeight: "90vh", overflowY: "auto",
+            boxShadow: "0 24px 48px rgba(11,16,35,0.12)",
+          }}>
+            {/* Modal header */}
+            <div style={{
+              padding: "18px 24px", borderBottom: `0.5px solid ${tokens.grayBorder}`,
+              display: "flex", justifyContent: "space-between", alignItems: "center",
+              position: "sticky", top: 0, background: tokens.white, zIndex: 10,
+            }}>
+              <h3 style={{ fontSize: 16, fontWeight: 600, color: tokens.navy, margin: 0 }}>
                 {modalMode === "create" ? "Nuevo Paciente" : "Editar Paciente"}
               </h3>
               <button
-                type="button"
                 onClick={() => setShowModal(false)}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
+                style={{
+                  width: 30, height: 30, borderRadius: 8, border: "none",
+                  background: "transparent", cursor: "pointer",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  color: tokens.grayMuted, transition: "all 0.12s",
+                }}
+                onMouseEnter={e => { e.currentTarget.style.background = tokens.grayRow }}
+                onMouseLeave={e => { e.currentTarget.style.background = "transparent" }}
               >
-                <X className="h-5 w-5" />
+                <X size={16} />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Form */}
+            <form onSubmit={handleSubmit} style={{ padding: 24 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                {/* Apellido */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Apellido *</label>
+                  <label style={labelStyle}>Apellido *</label>
                   <input
-                    type="text"
-                    required
+                    type="text" required
                     value={formData.apellido || ""}
-                    onChange={(e) => setFormData({ ...formData, apellido: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563FF] focus:border-transparent"
+                    onChange={e => setFormData({ ...formData, apellido: e.target.value })}
                     placeholder="Apellido del paciente"
+                    style={{ ...inputStyle, borderColor: focusedField === "apellido" ? tokens.blue : tokens.grayBorder }}
+                    onFocus={() => setFocusedField("apellido")}
+                    onBlur={() => setFocusedField(null)}
                   />
                 </div>
+
+                {/* Nombre */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
+                  <label style={labelStyle}>Nombre *</label>
                   <input
-                    type="text"
-                    required
+                    type="text" required
                     value={formData.nombre || ""}
-                    onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563FF] focus:border-transparent"
+                    onChange={e => setFormData({ ...formData, nombre: e.target.value })}
                     placeholder="Nombre del paciente"
+                    style={{ ...inputStyle, borderColor: focusedField === "nombre" ? tokens.blue : tokens.grayBorder }}
+                    onFocus={() => setFocusedField("nombre")}
+                    onBlur={() => setFocusedField(null)}
                   />
                 </div>
+
+                {/* Tipo documento */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Documento *</label>
+                  <label style={labelStyle}>Tipo de Documento *</label>
                   <select
                     required
                     value={formData.tipo_documento || ""}
-                    onChange={(e) => setFormData({ ...formData, tipo_documento: e.target.value as any })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563FF] focus:border-transparent"
+                    onChange={e => setFormData({ ...formData, tipo_documento: e.target.value as any })}
+                    style={{ ...inputStyle, borderColor: focusedField === "tipodoc" ? tokens.blue : tokens.grayBorder }}
+                    onFocus={() => setFocusedField("tipodoc")}
+                    onBlur={() => setFocusedField(null)}
                   >
                     <option value="">Seleccionar</option>
                     <option value="DNI">DNI</option>
@@ -494,34 +609,44 @@ export const PatientsView: React.FC = () => {
                     <option value="Cédula">Cédula</option>
                   </select>
                 </div>
+
+                {/* Número documento */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Número de Documento *</label>
+                  <label style={labelStyle}>Número de Documento *</label>
                   <input
-                    type="text"
-                    required
+                    type="text" required
                     value={formData.numero_documento || ""}
-                    onChange={(e) => setFormData({ ...formData, numero_documento: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563FF] focus:border-transparent"
+                    onChange={e => setFormData({ ...formData, numero_documento: e.target.value })}
                     placeholder="Ej: 35.123.456"
+                    style={{ ...inputStyle, borderColor: focusedField === "numdoc" ? tokens.blue : tokens.grayBorder }}
+                    onFocus={() => setFocusedField("numdoc")}
+                    onBlur={() => setFocusedField(null)}
                   />
                 </div>
+
+                {/* Fecha nacimiento */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Nacimiento *</label>
+                  <label style={labelStyle}>Fecha de Nacimiento *</label>
                   <input
-                    type="date"
-                    required
+                    type="date" required
                     value={formData.fecha_nacimiento || ""}
-                    onChange={(e) => setFormData({ ...formData, fecha_nacimiento: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563FF] focus:border-transparent"
+                    onChange={e => setFormData({ ...formData, fecha_nacimiento: e.target.value })}
+                    style={{ ...inputStyle, borderColor: focusedField === "fnac" ? tokens.blue : tokens.grayBorder }}
+                    onFocus={() => setFocusedField("fnac")}
+                    onBlur={() => setFocusedField(null)}
                   />
                 </div>
+
+                {/* Sexo */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Sexo *</label>
+                  <label style={labelStyle}>Sexo *</label>
                   <select
                     required
                     value={formData.sexo || ""}
-                    onChange={(e) => setFormData({ ...formData, sexo: e.target.value as any })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563FF] focus:border-transparent"
+                    onChange={e => setFormData({ ...formData, sexo: e.target.value as any })}
+                    style={{ ...inputStyle, borderColor: focusedField === "sexo" ? tokens.blue : tokens.grayBorder }}
+                    onFocus={() => setFocusedField("sexo")}
+                    onBlur={() => setFocusedField(null)}
                   >
                     <option value="">Seleccionar</option>
                     <option value="Masculino">Masculino</option>
@@ -529,47 +654,61 @@ export const PatientsView: React.FC = () => {
                     <option value="Otro">Otro</option>
                   </select>
                 </div>
+
+                {/* Teléfono */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+                  <label style={labelStyle}>Teléfono</label>
                   <input
                     type="tel"
                     value={formData.telefono || ""}
-                    onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563FF] focus:border-transparent"
+                    onChange={e => setFormData({ ...formData, telefono: e.target.value })}
                     placeholder="Ej: +54 9 11 ..."
+                    style={{ ...inputStyle, borderColor: focusedField === "tel" ? tokens.blue : tokens.grayBorder }}
+                    onFocus={() => setFocusedField("tel")}
+                    onBlur={() => setFocusedField(null)}
                   />
                 </div>
+
+                {/* Email */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                  <label style={labelStyle}>Email</label>
                   <input
                     type="email"
                     value={formData.email || ""}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563FF] focus:border-transparent"
+                    onChange={e => setFormData({ ...formData, email: e.target.value })}
                     placeholder="paciente@ejemplo.com"
+                    style={{ ...inputStyle, borderColor: focusedField === "email" ? tokens.blue : tokens.grayBorder }}
+                    onFocus={() => setFocusedField("email")}
+                    onBlur={() => setFocusedField(null)}
                   />
                 </div>
+
+                {/* Obra social */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Obra Social</label>
+                  <label style={labelStyle}>Obra Social</label>
                   <select
                     value={formData.obra_social_id || ""}
-                    onChange={(e) => setFormData({ ...formData, obra_social_id: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563FF] focus:border-transparent"
+                    onChange={e => setFormData({ ...formData, obra_social_id: e.target.value })}
+                    style={{ ...inputStyle, borderColor: focusedField === "os" ? tokens.blue : tokens.grayBorder }}
+                    onFocus={() => setFocusedField("os")}
+                    onBlur={() => setFocusedField(null)}
                   >
                     <option value="">Sin obra social</option>
-                    {obrasSociales.map((os) => (
-                      <option key={os.id} value={os.id}>
-                        {os.nombre}
-                      </option>
+                    {obrasSociales.map(os => (
+                      <option key={os.id} value={os.id}>{os.nombre}</option>
                     ))}
                   </select>
                 </div>
+
+                {/* Condición */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Condición</label>
+                  <label style={labelStyle}>Condición</label>
                   <select
                     value={formData.condicion || "Activo"}
-                    onChange={(e) => setFormData({ ...formData, condicion: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2563FF] focus:border-transparent"
+                    onChange={e => setFormData({ ...formData, condicion: e.target.value })}
+                    style={{ ...inputStyle, borderColor: focusedField === "cond" ? tokens.blue : tokens.grayBorder }}
+                    onFocus={() => setFocusedField("cond")}
+                    onBlur={() => setFocusedField(null)}
                   >
                     <option value="Activo">Activo</option>
                     <option value="Inactivo">Inactivo</option>
@@ -577,20 +716,42 @@ export const PatientsView: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex justify-end space-x-3 pt-4">
-                <Button type="button" variant="outline" onClick={() => setShowModal(false)}>
+              {/* Form actions */}
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 24, paddingTop: 20, borderTop: `0.5px solid ${tokens.grayBorder}` }}>
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  style={{
+                    padding: "9px 18px", fontSize: 13, fontWeight: 500,
+                    border: `0.5px solid ${tokens.grayBorder}`, borderRadius: 9,
+                    background: tokens.white, color: tokens.grayText, cursor: "pointer",
+                    fontFamily: "Poppins, -apple-system, sans-serif", transition: "all 0.12s",
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.background = tokens.grayBg }}
+                  onMouseLeave={e => { e.currentTarget.style.background = tokens.white }}
+                >
                   Cancelar
-                </Button>
-                <Button type="submit">
+                </button>
+                <button
+                  type="submit"
+                  style={{
+                    padding: "9px 20px", fontSize: 13, fontWeight: 500,
+                    background: tokens.blue, color: tokens.white,
+                    border: "none", borderRadius: 9, cursor: "pointer",
+                    fontFamily: "Poppins, -apple-system, sans-serif", transition: "background 0.15s",
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.background = tokens.blueHover }}
+                  onMouseLeave={e => { e.currentTarget.style.background = tokens.blue }}
+                >
                   {modalMode === "create" ? "Crear" : "Actualizar"} Paciente
-                </Button>
+                </button>
               </div>
             </form>
           </div>
         </div>
       )}
 
-      {/* Modal de confirmación */}
+      {/* ── Confirmation modal ── */}
       <ConfirmationModal
         isOpen={confirmDelete.isOpen}
         onClose={() => setConfirmDelete({ isOpen: false, id: null })}
@@ -598,6 +759,20 @@ export const PatientsView: React.FC = () => {
         title="Eliminar Paciente"
         message="¿Estás seguro de que deseas eliminar este paciente? Esta acción no se puede deshacer."
       />
+
+      {/* ── Booking modal ── */}
+      {showBookingModal && selectedPatient && (
+        <AdminAppointmentModal
+          initialData={{
+            paciente_id: selectedPatient.id,
+            paciente_nombre: `${selectedPatient.apellido}, ${selectedPatient.nombre} (DNI: ${selectedPatient.numero_documento})`,
+            fecha: new Date().toISOString().split("T")[0],
+            sobre_turno: true,
+          }}
+          onClose={() => setShowBookingModal(false)}
+          onCreate={() => { setShowBookingModal(false); fetchPatients() }}
+        />
+      )}
     </div>
   )
 }
