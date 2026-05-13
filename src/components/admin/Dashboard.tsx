@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
-  Plus, ArrowUpRight, ArrowDownRight,
-  Users, TrendingUp, TrendingDown, CheckCircle2, AlertCircle,
-  Clock, Stethoscope, Copy, Check, X, Link2,
-  CalendarDays, Activity, Zap, BarChart3, ArrowRight,
-  Sparkles, UserPlus, ClipboardList
+  Plus, Users, Check, X, Copy,
+  Clock, Stethoscope, Link2,
+  CalendarDays, Activity, BarChart3, ArrowRight,
+  TrendingUp, TrendingDown, ChevronLeft, ChevronRight,
+  ClipboardList, Sparkles, UserPlus,
 } from 'lucide-react';
 import { turnosApi, profesionalesApi, serviciosApi, pacientesApi } from '../../api';
 import { useAuth } from '../../hooks/useAuth';
@@ -21,6 +21,7 @@ interface DashboardStats {
   turnosRecientes: Turno[];
   turnosPorProf: Record<string, number>;
   appointmentTrend: { fecha: string; count: number }[];
+  turnosDeHoy: Turno[];
 }
 
 const getGreeting = () => {
@@ -30,35 +31,96 @@ const getGreeting = () => {
   return 'Buenas noches';
 };
 
-const StatCard: React.FC<{
-  label: string;
-  value: number;
-  icon: React.ElementType;
-  trend?: { value: string; positive: boolean };
-  gradient: string;
-  iconColor: string;
-  delay?: number;
-}> = ({ label, value, icon: Icon, trend, gradient, iconColor, delay = 0 }) => (
-  <div
-    className="relative bg-white rounded-2xl p-5 border border-gray-100/80 shadow-card card-hover overflow-hidden group"
-    style={{ animationDelay: `${delay}ms` }}
-  >
-    <div className="absolute top-0 right-0 w-24 h-24 opacity-[0.04] pointer-events-none">
-      <Icon className="w-full h-full" />
-    </div>
-    <div className={`w-10 h-10 rounded-xl ${gradient} flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-      <Icon className={`w-5 h-5 ${iconColor}`} />
-    </div>
-    <p className="text-[13px] font-medium text-gray-500 mb-1">{label}</p>
-    <p className="text-3xl font-extrabold text-gray-900 tracking-tight animate-count-up">{value}</p>
-    {trend && (
-      <div className={`flex items-center gap-1 mt-2 text-xs font-semibold ${trend.positive ? 'text-emerald-600' : 'text-red-500'}`}>
-        {trend.positive ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
-        {trend.value}
+const dayNames = ['LU', 'MA', 'MI', 'JU', 'VI', 'SA', 'DO'];
+
+const MiniCalendar: React.FC<{ turnosDeHoy?: Turno[] }> = () => {
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const today = new Date();
+
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth();
+
+  const firstDayOfMonth = new Date(year, month, 1);
+  let startDay = firstDayOfMonth.getDay() - 1;
+  if (startDay < 0) startDay = 6;
+
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  const weeks: (number | null)[][] = [];
+  let currentWeek: (number | null)[] = [];
+  for (let i = 0; i < startDay; i++) currentWeek.push(null);
+  for (let day = 1; day <= daysInMonth; day++) {
+    currentWeek.push(day);
+    if (currentWeek.length === 7) {
+      weeks.push(currentWeek);
+      currentWeek = [];
+    }
+  }
+  if (currentWeek.length > 0) {
+    while (currentWeek.length < 7) currentWeek.push(null);
+    weeks.push(currentWeek);
+  }
+
+  const isToday = (day: number | null) =>
+    day !== null && today.getDate() === day && today.getMonth() === month && today.getFullYear() === year;
+
+  const monthName = currentDate.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-sm font-bold text-gray-900 capitalize">{monthName}</h3>
+        <div className="flex gap-1">
+          <button
+            onClick={() => setCurrentDate(new Date(year, month - 1, 1))}
+            className="p-1 hover:bg-[#EDE6DD] rounded-lg transition-colors"
+          >
+            <ChevronLeft className="w-4 h-4 text-gray-400" />
+          </button>
+          <button
+            onClick={() => setCurrentDate(new Date(year, month + 1, 1))}
+            className="p-1 hover:bg-[#EDE6DD] rounded-lg transition-colors"
+          >
+            <ChevronRight className="w-4 h-4 text-gray-400" />
+          </button>
+        </div>
       </div>
-    )}
-  </div>
-);
+      <div className="grid grid-cols-7 gap-0">
+        {dayNames.map((d) => (
+          <div key={d} className="text-center text-[10px] font-semibold text-gray-400 py-1.5">{d}</div>
+        ))}
+        {weeks.map((week, wi) =>
+          week.map((day, di) => (
+            <div key={`${wi}-${di}`} className="text-center py-1">
+              {day !== null ? (
+                <span
+                  className={`inline-flex items-center justify-center w-7 h-7 text-xs font-medium rounded-lg transition-colors ${
+                    isToday(day)
+                      ? 'bg-[#2563FF] text-white font-bold'
+                      : 'text-gray-700 hover:bg-[#EDE6DD] cursor-pointer'
+                  }`}
+                >
+                  {day}
+                </span>
+              ) : (
+                <span className="inline-flex w-7 h-7" />
+              )}
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+};
+
+const timelineColors = [
+  { bg: 'bg-blue-100', border: 'border-l-blue-500', text: 'text-blue-700' },
+  { bg: 'bg-emerald-100', border: 'border-l-emerald-500', text: 'text-emerald-700' },
+  { bg: 'bg-violet-100', border: 'border-l-violet-500', text: 'text-violet-700' },
+  { bg: 'bg-amber-100', border: 'border-l-amber-500', text: 'text-amber-700' },
+  { bg: 'bg-rose-100', border: 'border-l-rose-500', text: 'text-rose-700' },
+  { bg: 'bg-cyan-100', border: 'border-l-cyan-500', text: 'text-cyan-700' },
+];
 
 export const Dashboard: React.FC<{
   onNavigateToCalendar?: () => void,
@@ -73,7 +135,8 @@ export const Dashboard: React.FC<{
   const [stats, setStats] = useState<DashboardStats>({
     totalTurnos: 0, turnosHoy: 0, totalProfesionales: 0,
     totalServicios: 0, totalPacientes: 0, turnosPorEstado: {},
-    turnosRecientes: [], turnosPorProf: {}, appointmentTrend: []
+    turnosRecientes: [], turnosPorProf: {}, appointmentTrend: [],
+    turnosDeHoy: []
   });
   const [loading, setLoading] = useState(true);
 
@@ -106,9 +169,11 @@ export const Dashboard: React.FC<{
       const turnos = turnosRes.data || [];
       const profesionales = profRes.data || [];
       const pacientes = pacRes.data || [];
-
       const today = new Date().toISOString().split('T')[0];
-      const turnosHoy = turnos.filter(turno => turno.fecha === today).length;
+      const turnosDeHoy = turnos
+        .filter(t => t.fecha === today)
+        .sort((a, b) => a.hora_inicio.localeCompare(b.hora_inicio));
+      const turnosHoy = turnosDeHoy.length;
 
       const turnosPorEstado: Record<string, number> = {};
       turnos.forEach(turno => {
@@ -141,7 +206,8 @@ export const Dashboard: React.FC<{
         turnosPorEstado,
         turnosRecientes,
         turnosPorProf: {},
-        appointmentTrend
+        appointmentTrend,
+        turnosDeHoy
       });
     } catch (error) {
       console.error('Error fetching dashboard stats:', error);
@@ -175,11 +241,9 @@ export const Dashboard: React.FC<{
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="flex flex-col items-center gap-4">
-          <div className="relative">
-            <div className="w-14 h-14 rounded-2xl gradient-primary animate-pulse-soft flex items-center justify-center shadow-blue-glow">
-              <Sparkles className="w-6 h-6 text-white" />
-            </div>
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-12 h-12 rounded-2xl bg-[#0B1023] flex items-center justify-center animate-pulse-soft">
+            <Sparkles className="w-5 h-5 text-[#2563FF]" />
           </div>
           <p className="text-sm font-medium text-gray-400">Cargando dashboard...</p>
         </div>
@@ -193,337 +257,362 @@ export const Dashboard: React.FC<{
   const ausentes = stats.turnosPorEstado['Ausente'] || 0;
   const confirmados = stats.turnosPorEstado['Confirmado'] || 0;
 
+  const todayLabel = new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'long' });
+
   return (
     <div className="min-h-screen font-sans">
-      {/* ═══ HEADER ═══ */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 animate-fade-in">
-        <div>
-          <p className="text-sm font-medium text-blue-500 mb-1 flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5" />
-            {getGreeting()}
-          </p>
-          <h1 className="text-2xl lg:text-3xl font-extrabold text-gray-900 tracking-tight">
-            {user?.nombre || 'Doc'}, acá está tu resumen
-          </h1>
-          <p className="text-gray-400 mt-1 text-sm">
-            Controlá los turnos, pacientes y rendimiento de tu clínica.
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2.5">
-          <button
-            onClick={onNavigateToCalendar}
-            className="flex items-center gap-2 px-5 py-2.5 gradient-primary text-white rounded-xl font-semibold text-sm hover:shadow-blue-glow transition-all duration-300 active:scale-[0.98]"
-          >
-            <Plus className="w-4 h-4" />
-            Nuevo Turno
-          </button>
-        </div>
-      </div>
+      <div className="flex flex-col xl:flex-row gap-6">
+        {/* ═══ LEFT / MAIN CONTENT ═══ */}
+        <div className="flex-1 min-w-0">
 
-      {/* ═══ STAT CARDS ═══ */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8 stagger-children">
-        <StatCard
-          label="Turnos Hoy"
-          value={stats.turnosHoy}
-          icon={CalendarDays}
-          gradient="bg-gradient-to-br from-blue-500 to-blue-600"
-          iconColor="text-white"
-          delay={0}
-        />
-        <StatCard
-          label="Pacientes"
-          value={stats.totalPacientes}
-          icon={Users}
-          trend={{ value: '+12.5% vs mes ant.', positive: true }}
-          gradient="bg-gradient-to-br from-emerald-500 to-emerald-600"
-          iconColor="text-white"
-          delay={60}
-        />
-        <StatCard
-          label="Profesionales"
-          value={stats.totalProfesionales}
-          icon={Stethoscope}
-          gradient="bg-gradient-to-br from-violet-500 to-violet-600"
-          iconColor="text-white"
-          delay={120}
-        />
-        <StatCard
-          label="Servicios"
-          value={stats.totalServicios}
-          icon={ClipboardList}
-          gradient="bg-gradient-to-br from-amber-500 to-amber-600"
-          iconColor="text-white"
-          delay={180}
-        />
-      </div>
+          {/* Greeting */}
+          <div className="mb-6 animate-fade-in">
+            <h1 className="text-2xl lg:text-[28px] font-extrabold text-[#0B1023] tracking-tight">
+              {getGreeting()}, {user?.nombre || 'Doc'}!
+            </h1>
+            <p className="text-gray-500 mt-1 text-sm leading-relaxed max-w-xl">
+              Hoy tenés <span className="font-semibold text-[#0B1023]">{stats.turnosHoy} turnos</span> programados.
+              Controlá los pacientes y el rendimiento de tu clínica.
+            </p>
+          </div>
 
-      {/* ═══ MAIN GRID ═══ */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
+          {/* ═══ STAT CARDS — 2×2 GRID ═══ */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 stagger-children">
 
-        {/* Chart Section */}
-        <div className="lg:col-span-8 bg-white rounded-2xl p-6 shadow-card border border-gray-100/80 animate-fade-in" style={{ animationDelay: '200ms' }}>
-          <div className="flex justify-between items-center mb-6">
-            <div>
-              <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
-                <BarChart3 className="w-4.5 h-4.5 text-blue-500" />
-                Tendencia de Turnos
-              </h2>
-              <p className="text-xs text-gray-400 mt-0.5">Últimos 7 días</p>
+            {/* Card 1 — Pacientes (soft blue) */}
+            <div className="bg-[#DBEAFE] rounded-2xl p-5 relative overflow-hidden group card-hover">
+              <div className="absolute top-3 right-3 w-8 h-8 rounded-full bg-blue-400/20 flex items-center justify-center">
+                <Users className="w-4 h-4 text-blue-600" />
+              </div>
+              <p className="text-sm font-bold text-blue-900 mb-3">Pacientes:</p>
+              <div className="flex gap-5 mb-4">
+                <div>
+                  <p className="text-2xl font-extrabold text-blue-900">{stats.totalPacientes}</p>
+                  <p className="text-[10px] font-semibold text-blue-600/70 uppercase tracking-wider">Total</p>
+                </div>
+                <div>
+                  <p className="text-2xl font-extrabold text-blue-900">{stats.turnosHoy}</p>
+                  <p className="text-[10px] font-semibold text-blue-600/70 uppercase tracking-wider">Hoy</p>
+                </div>
+              </div>
+              {/* Mini bar chart */}
+              <div className="flex items-end gap-1.5 h-10">
+                {stats.appointmentTrend.map((d, i) => (
+                  <div
+                    key={i}
+                    className="flex-1 bg-blue-400/40 rounded-sm transition-all group-hover:bg-blue-500/50"
+                    style={{ height: `${Math.max((d.count / maxTrendValue) * 100, 8)}%` }}
+                  />
+                ))}
+              </div>
             </div>
-            <div className="flex items-center gap-3 text-xs">
-              <div className="flex items-center gap-1.5">
-                <div className="w-2.5 h-2.5 rounded-full bg-blue-500" />
-                <span className="text-gray-500 font-medium">Turnos</span>
+
+            {/* Card 2 — Resumen de visitas (soft green) */}
+            <div className="bg-[#D1FAE5] rounded-2xl p-5 relative overflow-hidden group card-hover">
+              <div className="absolute top-3 right-3 w-8 h-8 rounded-full bg-emerald-400/20 flex items-center justify-center">
+                <CalendarDays className="w-4 h-4 text-emerald-600" />
+              </div>
+              <p className="text-sm font-bold text-emerald-900 mb-3">Resumen de turnos:</p>
+              <div className="flex gap-4 mb-4">
+                <div>
+                  <p className="text-2xl font-extrabold text-emerald-900">{stats.totalTurnos}</p>
+                  <p className="text-[10px] font-semibold text-emerald-600/70 uppercase tracking-wider">Total</p>
+                </div>
+                <div>
+                  <p className="text-2xl font-extrabold text-emerald-900">{atendidos}</p>
+                  <p className="text-[10px] font-semibold text-emerald-600/70 uppercase tracking-wider">Atendidos</p>
+                </div>
+                <div>
+                  <p className="text-2xl font-extrabold text-emerald-900">{pendientes}</p>
+                  <p className="text-[10px] font-semibold text-emerald-600/70 uppercase tracking-wider">Pendientes</p>
+                </div>
+              </div>
+              {/* Mini line chart */}
+              <svg className="w-full h-10" viewBox="0 0 100 30" preserveAspectRatio="none">
+                <path
+                  d={`M0,${30 - (stats.appointmentTrend[0]?.count / maxTrendValue) * 28} ${stats.appointmentTrend.map((d, i) => `L${(i / 6) * 100},${30 - (d.count / maxTrendValue) * 28}`).join(' ')}`}
+                  fill="none"
+                  stroke="#059669"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="opacity-60"
+                />
+              </svg>
+            </div>
+
+            {/* Card 3 — Por estado (soft rose) */}
+            <div className="bg-[#FFE4E6] rounded-2xl p-5 relative overflow-hidden group card-hover">
+              <div className="absolute top-3 right-3 w-8 h-8 rounded-full bg-rose-400/20 flex items-center justify-center">
+                <Activity className="w-4 h-4 text-rose-600" />
+              </div>
+              <p className="text-sm font-bold text-rose-900 mb-3">Por estado:</p>
+              <div className="flex gap-5 mb-4">
+                {[
+                  { n: atendidos, label: 'Atendido', dot: 'bg-emerald-500' },
+                  { n: confirmados, label: 'Confirm.', dot: 'bg-blue-500' },
+                  { n: ausentes, label: 'Ausente', dot: 'bg-rose-500' },
+                ].map((s) => (
+                  <div key={s.label} className="flex items-center gap-1.5">
+                    <span className={`w-2 h-2 rounded-full ${s.dot}`} />
+                    <div>
+                      <p className="text-lg font-extrabold text-rose-900 leading-none">{s.n}</p>
+                      <p className="text-[9px] font-semibold text-rose-600/70 uppercase">{s.label}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {/* Horizontal bars */}
+              <div className="space-y-1.5">
+                {[
+                  { w: stats.totalTurnos > 0 ? (atendidos / stats.totalTurnos) * 100 : 0, color: 'bg-emerald-500' },
+                  { w: stats.totalTurnos > 0 ? (confirmados / stats.totalTurnos) * 100 : 0, color: 'bg-blue-500' },
+                  { w: stats.totalTurnos > 0 ? (ausentes / stats.totalTurnos) * 100 : 0, color: 'bg-rose-500' },
+                ].map((bar, i) => (
+                  <div key={i} className="h-1.5 bg-rose-200/50 rounded-full overflow-hidden">
+                    <div className={`h-full ${bar.color} rounded-full transition-all duration-1000`} style={{ width: `${Math.max(bar.w, 2)}%` }} />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Card 4 — Servicios (soft violet) */}
+            <div className="bg-[#EDE9FE] rounded-2xl p-5 relative overflow-hidden group card-hover">
+              <div className="absolute top-3 right-3 w-8 h-8 rounded-full bg-violet-400/20 flex items-center justify-center">
+                <ClipboardList className="w-4 h-4 text-violet-600" />
+              </div>
+              <p className="text-sm font-bold text-violet-900 mb-3">Servicios:</p>
+              <div className="flex gap-5 mb-4">
+                <div>
+                  <p className="text-2xl font-extrabold text-violet-900">{stats.totalServicios}</p>
+                  <p className="text-[10px] font-semibold text-violet-600/70 uppercase tracking-wider">Activos</p>
+                </div>
+                <div>
+                  <p className="text-2xl font-extrabold text-violet-900">{stats.totalProfesionales}</p>
+                  <p className="text-[10px] font-semibold text-violet-600/70 uppercase tracking-wider">Profesionales</p>
+                </div>
+              </div>
+              {/* Decorative dots grid */}
+              <div className="flex gap-1.5 flex-wrap">
+                {Array.from({ length: Math.min(stats.totalServicios, 20) }).map((_, i) => (
+                  <div key={i} className="w-3 h-3 rounded-full bg-violet-400/30 group-hover:bg-violet-400/50 transition-colors" />
+                ))}
               </div>
             </div>
           </div>
 
-          <div className="h-48 flex items-end justify-between gap-2 lg:gap-3 pt-4">
-            {stats.appointmentTrend.map((day, idx) => {
-              const height = Math.max((day.count / maxTrendValue) * 100, 4);
-              const dayName = new Date(day.fecha + 'T12:00:00').toLocaleDateString('es-ES', { weekday: 'short' });
-              return (
-                <div key={idx} className="flex-1 flex flex-col items-center gap-2 group">
-                  <span className="text-xs font-bold text-gray-900 opacity-0 group-hover:opacity-100 transition-opacity">
-                    {day.count}
-                  </span>
-                  <div className="w-full relative" style={{ height: '100%' }}>
-                    <div className="absolute bottom-0 w-full rounded-xl bg-gray-100/80 h-full" />
-                    <div
-                      className="absolute bottom-0 w-full rounded-xl bg-gradient-to-t from-blue-600 to-blue-400 transition-all duration-700 ease-out group-hover:from-blue-700 group-hover:to-blue-500"
-                      style={{ height: `${height}%` }}
-                    />
-                  </div>
-                  <span className="text-[10px] font-medium text-gray-400 uppercase">{dayName}</span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Status Breakdown */}
-        <div className="lg:col-span-4 bg-white rounded-2xl p-6 shadow-card border border-gray-100/80 animate-fade-in" style={{ animationDelay: '260ms' }}>
-          <h2 className="text-base font-bold text-gray-900 flex items-center gap-2 mb-6">
-            <Activity className="w-4.5 h-4.5 text-blue-500" />
-            Estado de Turnos
-          </h2>
-
-          <div className="space-y-4">
-            {[
-              { label: 'Atendidos', count: atendidos, color: 'bg-emerald-500', textColor: 'text-emerald-600', bgColor: 'bg-emerald-50' },
-              { label: 'Confirmados', count: confirmados, color: 'bg-blue-500', textColor: 'text-blue-600', bgColor: 'bg-blue-50' },
-              { label: 'Pendientes', count: pendientes, color: 'bg-amber-500', textColor: 'text-amber-600', bgColor: 'bg-amber-50' },
-              { label: 'Ausentes', count: ausentes, color: 'bg-red-500', textColor: 'text-red-600', bgColor: 'bg-red-50' },
-            ].map((item) => (
-              <div key={item.label} className="flex items-center gap-3 group">
-                <div className={`w-8 h-8 rounded-lg ${item.bgColor} flex items-center justify-center`}>
-                  <div className={`w-2.5 h-2.5 rounded-full ${item.color}`} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex justify-between items-center mb-1.5">
-                    <span className="text-sm font-medium text-gray-700">{item.label}</span>
-                    <span className={`text-sm font-bold ${item.textColor}`}>{item.count}</span>
-                  </div>
-                  <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full ${item.color} rounded-full transition-all duration-1000 ease-out`}
-                      style={{ width: `${stats.totalTurnos > 0 ? (item.count / stats.totalTurnos) * 100 : 0}%` }}
-                    />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-6 pt-5 border-t border-gray-100">
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-500">Total de Turnos</span>
-              <span className="text-2xl font-extrabold text-gray-900">{stats.totalTurnos}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ═══ LOWER SECTION ═══ */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-
-        {/* Booking CTA + Quick Actions */}
-        <div className="lg:col-span-4 flex flex-col gap-5">
-          {!hideBanner && (
-            <div className="relative overflow-hidden rounded-2xl gradient-card-blue p-6 text-white shadow-blue-glow animate-fade-in" style={{ animationDelay: '300ms' }}>
-              <div className="absolute top-0 right-0 w-full h-full opacity-10 pointer-events-none">
-                <svg viewBox="0 0 200 200" className="w-full h-full">
-                  <circle cx="160" cy="40" r="60" fill="white" opacity="0.1" />
-                  <circle cx="180" cy="160" r="40" fill="white" opacity="0.08" />
+          {/* ═══ BOOKING BANNER ═══ */}
+          {!hideBanner && slug && (
+            <div className="bg-[#0B1023] rounded-2xl p-5 flex items-center justify-between mb-6 relative overflow-hidden animate-fade-in">
+              <div className="absolute inset-0 opacity-10 pointer-events-none">
+                <svg viewBox="0 0 400 120" className="w-full h-full">
+                  <circle cx="350" cy="20" r="80" fill="#2563FF" />
+                  <circle cx="380" cy="100" r="40" fill="#02E3FF" />
                 </svg>
               </div>
-              <button
-                onClick={() => setHideBanner(true)}
-                className="absolute top-3 right-3 w-7 h-7 bg-white/10 hover:bg-white/20 rounded-lg flex items-center justify-center transition z-10"
-              >
-                <X className="w-3.5 h-3.5 text-white" />
-              </button>
-              <div className="relative z-10">
-                <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center mb-4 backdrop-blur-sm">
-                  <Link2 className="w-5 h-5 text-white" />
+              <div className="relative z-10 flex items-center gap-4">
+                <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
+                  <Link2 className="w-5 h-5 text-[#02E3FF]" />
                 </div>
-                <h3 className="text-lg font-bold leading-tight mb-1.5">Portal de Reservas</h3>
-                <p className="text-sm text-blue-100/80 mb-4 leading-relaxed">Compartí tu enlace para que tus pacientes reserven online.</p>
+                <div>
+                  <h3 className="text-sm font-bold text-white">Compartí tu portal de reservas automático</h3>
+                  <p className="text-xs text-gray-400 mt-0.5">Tus pacientes pueden reservar online 24/7</p>
+                </div>
+              </div>
+              <div className="relative z-10 flex items-center gap-2">
                 <button
                   onClick={handleCopyLink}
-                  className="flex items-center gap-2 text-sm font-semibold bg-white/15 hover:bg-white/25 px-4 py-2 rounded-lg backdrop-blur-sm transition-all active:scale-[0.98]"
+                  className="flex items-center gap-2 text-sm font-semibold bg-white/10 hover:bg-white/15 text-white px-4 py-2 rounded-xl transition-all active:scale-[0.98]"
                 >
                   {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                   {copied ? '¡Copiado!' : 'Copiar enlace'}
+                </button>
+                <button
+                  onClick={() => setHideBanner(true)}
+                  className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                >
+                  <X className="w-4 h-4 text-gray-500" />
                 </button>
               </div>
             </div>
           )}
 
-          {/* Quick Actions */}
-          <div className="bg-white rounded-2xl p-5 shadow-card border border-gray-100/80 animate-fade-in" style={{ animationDelay: '360ms' }}>
-            <h3 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
-              <Zap className="w-4 h-4 text-amber-500" />
-              Acciones Rápidas
-            </h3>
-            <div className="grid grid-cols-2 gap-2.5">
-              {[
-                { label: 'Nuevo Turno', icon: CalendarDays, color: 'bg-blue-50 text-blue-600 hover:bg-blue-100', action: onNavigateToCalendar },
-                { label: 'Nuevo Paciente', icon: UserPlus, color: 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100' },
-                { label: 'Ver Calendario', icon: CalendarDays, color: 'bg-violet-50 text-violet-600 hover:bg-violet-100', action: onNavigateToCalendar },
-                { label: 'Ver Reportes', icon: BarChart3, color: 'bg-amber-50 text-amber-600 hover:bg-amber-100' },
-              ].map((item, idx) => (
-                <button
-                  key={idx}
-                  onClick={item.action}
-                  className={`flex flex-col items-center gap-2 p-3.5 rounded-xl text-xs font-semibold transition-all active:scale-[0.97] ${item.color}`}
-                >
-                  <item.icon className="w-5 h-5" />
-                  {item.label}
-                </button>
-              ))}
+          {/* ═══ PATIENT LIST ═══ */}
+          <div className="bg-white rounded-2xl p-5 border border-[#E8E0D6]/60 shadow-sm animate-fade-in" style={{ animationDelay: '200ms' }}>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-sm font-bold text-[#0B1023] flex items-center gap-2">
+                Lista de pacientes
+              </h2>
+              <button
+                onClick={onNavigateToCalendar}
+                className="flex items-center gap-1 text-xs font-semibold text-[#2563FF] hover:text-blue-700 transition-colors"
+              >
+                Ver todos
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            <div className="overflow-x-auto -mx-5 px-5">
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b border-gray-100">
+                    <th className="pb-2.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Paciente</th>
+                    <th className="pb-2.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Servicio</th>
+                    <th className="pb-2.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Estado</th>
+                    <th className="pb-2.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Fecha</th>
+                    <th className="pb-2.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Hora</th>
+                    <th className="pb-2.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider text-right">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {stats.turnosRecientes.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="py-10 text-center">
+                        <div className="flex flex-col items-center gap-2">
+                          <div className="w-10 h-10 rounded-xl bg-[#EDE6DD] flex items-center justify-center">
+                            <CalendarDays className="w-5 h-5 text-gray-400" />
+                          </div>
+                          <p className="text-sm font-medium text-gray-500">Sin turnos registrados</p>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : (
+                    stats.turnosRecientes.map((turno) => {
+                      const initials = `${turno.paciente?.nombre?.charAt(0) || ''}${turno.paciente?.apellido?.charAt(0) || ''}`;
+                      const avatarBgs = ['bg-blue-100 text-blue-700', 'bg-emerald-100 text-emerald-700', 'bg-violet-100 text-violet-700', 'bg-amber-100 text-amber-700', 'bg-rose-100 text-rose-700', 'bg-cyan-100 text-cyan-700'];
+                      const avatarStyle = avatarBgs[turno.id % avatarBgs.length];
+
+                      return (
+                        <tr key={turno.id} className="border-b border-gray-50 hover:bg-[#FAFAF7] transition-colors group">
+                          <td className="py-3 pr-4">
+                            <div className="flex items-center gap-2.5">
+                              <div className={`w-8 h-8 rounded-full ${avatarStyle} flex items-center justify-center font-bold text-[10px] shrink-0`}>
+                                {initials}
+                              </div>
+                              <span className="font-semibold text-gray-900 truncate max-w-[120px] text-[13px]">
+                                {turno.paciente?.nombre} {turno.paciente?.apellido}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="py-3">
+                            <span className="text-[13px] text-gray-500 font-medium">{turno.servicio?.nombre || 'General'}</span>
+                          </td>
+                          <td className="py-3">
+                            <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                              turno.estado === 'Atendido' ? 'bg-emerald-100 text-emerald-700' :
+                              turno.estado === 'Confirmado' || turno.estado === 'Confirmado por Whatsapp' ? 'bg-blue-100 text-blue-700' :
+                              turno.estado === 'Pendiente' ? 'bg-amber-100 text-amber-700' :
+                              turno.estado === 'Ausente' ? 'bg-gray-800 text-white' :
+                              'bg-red-100 text-red-700'
+                            }`}>
+                              {turno.estado}
+                            </span>
+                          </td>
+                          <td className="py-3 text-[13px] text-gray-600 font-medium">
+                            {new Date(turno.fecha + 'T00:00:00').toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
+                          </td>
+                          <td className="py-3">
+                            <span className="text-[13px] font-bold text-[#0B1023] bg-[#F5F0EA] px-2 py-0.5 rounded-md">
+                              {turno.hora_inicio}
+                            </span>
+                          </td>
+                          <td className="py-3 text-right">
+                            {turno.estado === 'Pendiente' ? (
+                              <div className="flex justify-end gap-1.5 opacity-50 group-hover:opacity-100 transition-opacity">
+                                <button
+                                  onClick={() => handleUpdateStatus(turno.id, 'Confirmado')}
+                                  className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center hover:bg-emerald-100 transition-all active:scale-95"
+                                  title="Confirmar"
+                                >
+                                  <Check className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  onClick={() => handleUpdateStatus(turno.id, 'Cancelado')}
+                                  className="w-7 h-7 rounded-lg bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-100 transition-all active:scale-95"
+                                  title="Cancelar"
+                                >
+                                  <X className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            ) : (
+                              <span className="text-[10px] text-gray-300">—</span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
 
-        {/* Appointments Table */}
-        <div className="lg:col-span-8 bg-white rounded-2xl p-6 shadow-card border border-gray-100/80 animate-fade-in" style={{ animationDelay: '320ms' }}>
-          <div className="flex justify-between items-center mb-5">
-            <div>
-              <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
-                <Clock className="w-4.5 h-4.5 text-blue-500" />
-                Próximos Turnos
-              </h2>
-              <p className="text-xs text-gray-400 mt-0.5">Movimientos y citas recientes</p>
-            </div>
+        {/* ═══ RIGHT PANEL ═══ */}
+        <div className="w-full xl:w-[300px] shrink-0 space-y-5">
+
+          {/* Calendar */}
+          <div className="bg-white rounded-2xl p-5 border border-[#E8E0D6]/60 shadow-sm animate-fade-in" style={{ animationDelay: '100ms' }}>
+            <MiniCalendar />
             <button
               onClick={onNavigateToCalendar}
-              className="flex items-center gap-1.5 text-xs font-semibold text-blue-500 hover:text-blue-700 transition-colors"
+              className="w-full mt-4 py-2.5 bg-[#0B1023] text-white text-sm font-semibold rounded-xl hover:bg-[#151d3a] transition-colors active:scale-[0.98]"
             >
-              Ver todos
-              <ArrowRight className="w-3.5 h-3.5" />
+              Agregar turno
             </button>
           </div>
 
-          <div className="overflow-x-auto -mx-6 px-6">
-            <table className="w-full text-left border-collapse text-sm">
-              <thead>
-                <tr className="border-b border-gray-100">
-                  <th className="pb-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Paciente</th>
-                  <th className="pb-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Servicio</th>
-                  <th className="pb-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Estado</th>
-                  <th className="pb-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Fecha</th>
-                  <th className="pb-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Hora</th>
-                  <th className="pb-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider text-right">Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {stats.turnosRecientes.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className="py-12 text-center">
-                      <div className="flex flex-col items-center gap-3">
-                        <div className="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center">
-                          <CalendarDays className="w-6 h-6 text-gray-400" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-semibold text-gray-600">Sin turnos registrados</p>
-                          <p className="text-xs text-gray-400 mt-0.5">Los próximos turnos aparecerán acá</p>
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                ) : (
-                  stats.turnosRecientes.map((turno) => {
-                    const initials = `${turno.paciente?.nombre?.charAt(0) || ''}${turno.paciente?.apellido?.charAt(0) || ''}`;
-                    const colors = [
-                      'from-blue-500 to-blue-600',
-                      'from-emerald-500 to-emerald-600',
-                      'from-violet-500 to-violet-600',
-                      'from-amber-500 to-amber-600',
-                      'from-rose-500 to-rose-600',
-                      'from-cyan-500 to-cyan-600',
-                    ];
-                    const avatarGradient = colors[turno.id % colors.length];
+          {/* Today's Timeline */}
+          <div className="bg-white rounded-2xl p-5 border border-[#E8E0D6]/60 shadow-sm animate-fade-in" style={{ animationDelay: '160ms' }}>
+            <div className="flex items-center justify-between mb-1">
+              <h3 className="text-sm font-bold text-[#0B1023] capitalize">{todayLabel}</h3>
+            </div>
+            <div className="flex items-center gap-2 mb-4">
+              <p className="text-xs text-gray-400">Agenda de hoy</p>
+              <div className="flex-1 h-px bg-gray-100" />
+            </div>
 
-                    return (
-                      <tr key={turno.id} className="border-b border-gray-50 hover:bg-blue-50/30 transition-colors group">
-                        <td className="py-3.5 pr-4">
-                          <div className="flex items-center gap-3">
-                            <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${avatarGradient} text-white flex items-center justify-center font-bold text-[10px] shrink-0 shadow-sm`}>
-                              {initials}
-                            </div>
-                            <span className="font-semibold text-gray-900 truncate max-w-[130px] text-sm">
-                              {turno.paciente?.nombre} {turno.paciente?.apellido}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="py-3.5 text-gray-500 font-medium text-sm">{turno.servicio?.nombre || 'General'}</td>
-                        <td className="py-3.5">
-                          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider ${
-                            turno.estado === 'Atendido' ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200/60' :
-                            turno.estado === 'Confirmado' || turno.estado === 'Confirmado por Whatsapp' ? 'bg-blue-50 text-blue-700 ring-1 ring-blue-200/60' :
-                            turno.estado === 'Pendiente' ? 'bg-amber-50 text-amber-700 ring-1 ring-amber-200/60' :
-                            turno.estado === 'Ausente' ? 'bg-gray-900 text-white' :
-                            'bg-red-50 text-red-700 ring-1 ring-red-200/60'
-                          }`}>
-                            <span className={`w-1.5 h-1.5 rounded-full ${
-                              turno.estado === 'Pendiente' ? 'bg-amber-500 animate-pulse-soft' : 'bg-current'
-                            }`} />
-                            {turno.estado}
-                          </span>
-                        </td>
-                        <td className="py-3.5 text-gray-600 font-medium text-sm">
-                          {new Date(turno.fecha + 'T00:00:00').toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
-                        </td>
-                        <td className="py-3.5 text-gray-900 font-bold text-sm">{turno.hora_inicio}</td>
-                        <td className="py-3.5 text-right">
-                          {turno.estado === 'Pendiente' ? (
-                            <div className="flex justify-end gap-2 opacity-60 group-hover:opacity-100 transition-opacity">
-                              <button
-                                onClick={() => handleUpdateStatus(turno.id, 'Confirmado')}
-                                className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center hover:bg-emerald-100 hover:shadow-sm transition-all active:scale-95 ring-1 ring-emerald-200/60"
-                                title="Confirmar"
-                              >
-                                <Check className="w-4 h-4" />
-                              </button>
-                              <button
-                                onClick={() => handleUpdateStatus(turno.id, 'Cancelado')}
-                                className="w-8 h-8 rounded-lg bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-100 hover:shadow-sm transition-all active:scale-95 ring-1 ring-red-200/60"
-                                title="Cancelar"
-                              >
-                                <X className="w-4 h-4" />
-                              </button>
-                            </div>
-                          ) : (
-                            <span className="text-[10px] text-gray-300 italic">—</span>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
+            {stats.turnosDeHoy.length === 0 ? (
+              <div className="text-center py-6">
+                <CalendarDays className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                <p className="text-xs text-gray-400">Sin turnos para hoy</p>
+              </div>
+            ) : (
+              <div className="space-y-2.5">
+                {stats.turnosDeHoy.slice(0, 6).map((turno, i) => {
+                  const tc = timelineColors[i % timelineColors.length];
+                  return (
+                    <div
+                      key={turno.id}
+                      className={`${tc.bg} rounded-xl p-3 border-l-[3px] ${tc.border} transition-all hover:scale-[1.02]`}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <p className={`text-xs font-bold ${tc.text}`}>
+                            {turno.servicio?.nombre || 'Consulta'}
+                          </p>
+                          <p className="text-[11px] text-gray-600 mt-0.5">
+                            {turno.paciente?.nombre} {turno.paciente?.apellido}
+                          </p>
+                        </div>
+                        <span className="text-[10px] font-bold text-gray-500 bg-white/60 px-1.5 py-0.5 rounded">
+                          {turno.hora_inicio}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {stats.turnosDeHoy.length > 0 && (
+              <button
+                onClick={onNavigateToCalendar}
+                className="w-full mt-4 py-2 text-xs font-semibold text-[#2563FF] bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors"
+              >
+                Ver todos los detalles
+              </button>
+            )}
           </div>
         </div>
       </div>
