@@ -168,14 +168,14 @@ export const PatientsView: React.FC = () => {
               onClick={handleCreatePatient}
               style={{
                 display: "flex", alignItems: "center", gap: 7,
-                background: tokens.blue, color: tokens.white,
+                background: "#02E3FF", color: tokens.navy,
                 border: "none", borderRadius: 10, padding: "9px 18px",
-                fontSize: 13, fontWeight: 500, cursor: "pointer",
+                fontSize: 13, fontWeight: 700, cursor: "pointer",
                 fontFamily: "Inter, -apple-system, sans-serif",
                 transition: "background 0.15s",
               }}
-              onMouseEnter={e => (e.currentTarget.style.background = tokens.blueHover)}
-              onMouseLeave={e => (e.currentTarget.style.background = tokens.blue)}
+              onMouseEnter={e => (e.currentTarget.style.background = "#00C4DD")}
+              onMouseLeave={e => (e.currentTarget.style.background = "#02E3FF")}
             >
               <Plus size={15} />
               Nuevo Paciente
@@ -671,13 +671,13 @@ export const PatientsView: React.FC = () => {
                 <button
                   type="submit"
                   style={{
-                    padding: "9px 20px", fontSize: 13, fontWeight: 500,
-                    background: tokens.blue, color: tokens.white,
+                    padding: "9px 20px", fontSize: 13, fontWeight: 700,
+                    background: "#02E3FF", color: tokens.navy,
                     border: "none", borderRadius: 9, cursor: "pointer",
                     fontFamily: "Inter, -apple-system, sans-serif", transition: "background 0.15s",
                   }}
-                  onMouseEnter={e => { e.currentTarget.style.background = tokens.blueHover }}
-                  onMouseLeave={e => { e.currentTarget.style.background = tokens.blue }}
+                  onMouseEnter={e => { e.currentTarget.style.background = "#00C4DD" }}
+                  onMouseLeave={e => { e.currentTarget.style.background = "#02E3FF" }}
                 >
                   {modalMode === "create" ? "Crear" : "Actualizar"} Paciente
                 </button>

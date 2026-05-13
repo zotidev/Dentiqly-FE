@@ -613,7 +613,7 @@ export const CalendarView: React.FC = () => {
                     {weekDays.map((day, i) => (
                       <div
                         key={i}
-                        className={`border-r border-[#E8E0D6]/15 last:border-r-0 relative group transition-colors cursor-pointer ${draggingAppointment ? 'bg-[#EEF3FF]/20' : 'hover:bg-[#EEF3FF]/30'} ${i % 2 === 0 ? 'bg-[#F5F0EA]/10' : 'bg-white'}`}
+                        className={`border-r border-[#E8E0D6]/15 last:border-r-0 relative group transition-colors cursor-pointer ${draggingAppointment ? 'bg-[#EEF3FF]/20' : 'hover:bg-[#EEF3FF]/30'} ${i % 2 === 0 ? 'bg-gray-50/10' : 'bg-white'}`}
                         onClick={() => {
                           const y = day.getFullYear()
                           const m = String(day.getMonth() + 1).padStart(2, '0')
@@ -726,7 +726,7 @@ export const CalendarView: React.FC = () => {
       <div className="flex flex-col h-full bg-white relative">
         <div className="grid grid-cols-7 gap-px bg-[#E8E0D6]/30 overflow-hidden h-full">
           {['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'].map((day) => (
-            <div key={day} className="bg-[#F5F0EA]/50 p-2 text-center border-b border-[#E8E0D6]/40">
+            <div key={day} className="bg-gray-50/50 p-2 text-center border-b border-[#E8E0D6]/40">
               <span className="text-[10px] font-bold uppercase tracking-widest text-[#8A93A8]">
                 {day}
               </span>
@@ -740,7 +740,7 @@ export const CalendarView: React.FC = () => {
             return (
               <div
                 key={index}
-                className={`bg-white min-h-[120px] p-2 border-r border-b border-[#E8E0D6]/20 transition-colors hover:bg-[#F5F0EA]/30 ${!day.isCurrentMonth ? 'opacity-40' : ''}`}
+                className={`bg-white min-h-[120px] p-2 border-r border-b border-[#E8E0D6]/20 transition-colors hover:bg-gray-50/30 ${!day.isCurrentMonth ? 'opacity-40' : ''}`}
                 onClick={() => {
                   setCurrentDate(day.date)
                   setViewType('day')
@@ -800,7 +800,7 @@ export const CalendarView: React.FC = () => {
           <h1 className="text-[22px] font-semibold text-[#0B1023] tracking-[-0.3px]">Calendario de Turnos</h1>
           <p className="text-[13px] text-[#8A93A8] mt-1">Gestión de agenda y citas</p>
         </div>
-        <Button onClick={() => setShowBookingModal(true)} className="bg-[#2563FF] hover:bg-[#1E40AF] text-white rounded-xl px-5 py-2.5 flex items-center gap-2 shadow-sm text-[13px] font-medium transition-all">
+        <Button onClick={() => setShowBookingModal(true)} className="bg-[#02E3FF] hover:bg-[#00C4DD] text-[#0B1023] rounded-xl px-5 py-2.5 flex items-center gap-2 shadow-sm text-[13px] font-bold transition-all">
            <Plus className="w-4 h-4" /> Nuevo Turno
         </Button>
       </div>
@@ -810,7 +810,7 @@ export const CalendarView: React.FC = () => {
          <div className="flex flex-wrap items-center gap-2 relative">
             {/* Filters */}
             <div className="group/filter">
-              <button className="flex items-center gap-2 px-4 py-2 bg-white border border-[#E8E0D6] text-[#4B5568] rounded-xl font-medium hover:bg-[#F5F0EA] text-[13px] transition">
+              <button className="flex items-center gap-2 px-4 py-2 bg-white border border-[#E8E0D6] text-[#4B5568] rounded-xl font-medium hover:bg-gray-50 text-[13px] transition">
                 <Filter className="w-4 h-4 text-[#8A93A8]" /> Filtros {(selectedProfessionalId || selectedServiceId) && <span className="w-2 h-2 rounded-full bg-[#2563FF]"></span>}
               </button>
 
@@ -821,7 +821,7 @@ export const CalendarView: React.FC = () => {
                      <select
                        value={selectedProfessionalId || ''}
                        onChange={(e) => setSelectedProfessionalId(e.target.value ? parseInt(e.target.value) : null)}
-                       className="w-full border border-[#E8E0D6] rounded-xl p-2 bg-[#F5F0EA] text-[13px] font-medium text-[#0B1023] focus:border-[#2563FF] outline-none"
+                       className="w-full border border-[#E8E0D6] rounded-xl p-2 bg-gray-50 text-[13px] font-medium text-[#0B1023] focus:border-[#2563FF] outline-none"
                      >
                         <option value="">Todos los profesionales</option>
                         {professionals.map(p => (
@@ -834,7 +834,7 @@ export const CalendarView: React.FC = () => {
                      <select
                        value={selectedServiceId || ''}
                        onChange={(e) => setSelectedServiceId(e.target.value ? parseInt(e.target.value) : null)}
-                       className="w-full border border-[#E8E0D6] rounded-xl p-2 bg-[#F5F0EA] text-[13px] font-medium text-[#0B1023] focus:border-[#2563FF] outline-none"
+                       className="w-full border border-[#E8E0D6] rounded-xl p-2 bg-gray-50 text-[13px] font-medium text-[#0B1023] focus:border-[#2563FF] outline-none"
                      >
                         <option value="">Todos los servicios</option>
                         {servicios.map(s => (
@@ -855,11 +855,11 @@ export const CalendarView: React.FC = () => {
               </div>
             </div>
             <div className="flex items-center bg-white border border-[#E8E0D6] rounded-xl overflow-hidden h-[38px] text-[13px] font-medium">
-               <button onClick={() => setViewType('day')} className={`px-4 h-full transition ${viewType === 'day' ? 'bg-[#0B1023] text-white font-semibold' : 'text-[#8A93A8] hover:bg-[#F5F0EA] hover:text-[#4B5568]'}`}>Diario</button>
-               <button onClick={() => setViewType('week')} className={`px-4 h-full border-l border-[#E8E0D6] transition ${viewType === 'week' ? 'bg-[#0B1023] text-white font-semibold' : 'text-[#8A93A8] hover:bg-[#F5F0EA] hover:text-[#4B5568]'}`}>Semanal</button>
-               <button onClick={() => setViewType('month')} className={`px-4 h-full border-l border-[#E8E0D6] transition ${viewType === 'month' ? 'bg-[#0B1023] text-white font-semibold' : 'text-[#8A93A8] hover:bg-[#F5F0EA] hover:text-[#4B5568]'}`}>Mensual</button>
+               <button onClick={() => setViewType('day')} className={`px-4 h-full transition ${viewType === 'day' ? 'bg-[#0B1023] text-white font-semibold' : 'text-[#8A93A8] hover:bg-gray-50 hover:text-[#4B5568]'}`}>Diario</button>
+               <button onClick={() => setViewType('week')} className={`px-4 h-full border-l border-[#E8E0D6] transition ${viewType === 'week' ? 'bg-[#0B1023] text-white font-semibold' : 'text-[#8A93A8] hover:bg-gray-50 hover:text-[#4B5568]'}`}>Semanal</button>
+               <button onClick={() => setViewType('month')} className={`px-4 h-full border-l border-[#E8E0D6] transition ${viewType === 'month' ? 'bg-[#0B1023] text-white font-semibold' : 'text-[#8A93A8] hover:bg-gray-50 hover:text-[#4B5568]'}`}>Mensual</button>
             </div>
-            <button className="flex items-center gap-2 px-4 py-2 bg-white border border-[#E8E0D6] text-[#4B5568] rounded-xl font-medium hover:bg-[#F5F0EA] text-[13px] transition">
+            <button className="flex items-center gap-2 px-4 py-2 bg-white border border-[#E8E0D6] text-[#4B5568] rounded-xl font-medium hover:bg-gray-50 text-[13px] transition">
               <Download className="w-4 h-4 text-[#8A93A8]" /> Exportar
             </button>
          </div>
@@ -885,7 +885,7 @@ export const CalendarView: React.FC = () => {
                           setShowSearchResults(false)
                           setSelectedAppointment(turno)
                         }}
-                        className="p-3 hover:bg-[#F5F0EA] rounded-xl cursor-pointer transition-colors border-b border-[#E8E0D6]/30 last:border-0"
+                        className="p-3 hover:bg-gray-50 rounded-xl cursor-pointer transition-colors border-b border-[#E8E0D6]/30 last:border-0"
                       >
                         <div className="text-[12px] font-semibold text-[#0B1023] capitalize">
                           {turno.paciente?.nombre} {turno.paciente?.apellido}
@@ -916,7 +916,7 @@ export const CalendarView: React.FC = () => {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 sm:p-5 border-b border-[#E8E0D6]/60 gap-4 bg-white">
                <div className="flex flex-wrap items-center gap-4">
                   <h2 className="text-lg font-semibold text-[#0B1023] capitalize min-w-[150px]">{getViewTitle()}</h2>
-                  <div className="flex items-center bg-[#F5F0EA] rounded-xl p-1 border border-[#E8E0D6]">
+                  <div className="flex items-center bg-gray-50 rounded-xl p-1 border border-[#E8E0D6]">
                      <button onClick={goToToday} className="px-3 py-1 text-[11px] font-semibold text-[#4B5568] hover:bg-white rounded-lg transition-colors">Hoy</button>
                      <button onClick={() => navigate('prev')} className="p-1 hover:bg-white rounded-lg transition-colors"><ChevronLeft className="w-4 h-4 text-[#8A93A8]" /></button>
                      <button onClick={() => navigate('next')} className="p-1 hover:bg-white rounded-lg transition-colors"><ChevronRight className="w-4 h-4 text-[#8A93A8]" /></button>
@@ -1032,7 +1032,7 @@ export const CalendarView: React.FC = () => {
                 </div>
 
                 {selectedAppointment.observaciones && (
-                  <div className="bg-[#F5F0EA] rounded-xl p-3 mt-2">
+                  <div className="bg-gray-50 rounded-xl p-3 mt-2">
                     <p className="text-[11px] font-semibold text-[#8A93A8] uppercase tracking-wider mb-1">
                       Notas
                     </p>
@@ -1053,13 +1053,13 @@ export const CalendarView: React.FC = () => {
                 <div className="flex-1" />
                 <button
                   onClick={() => setSelectedAppointment(null)}
-                  className="px-4 py-2 text-[13px] font-medium text-[#4B5568] bg-white border border-[#E8E0D6] rounded-xl hover:bg-[#F5F0EA] transition-all"
+                  className="px-4 py-2 text-[13px] font-medium text-[#4B5568] bg-white border border-[#E8E0D6] rounded-xl hover:bg-gray-50 transition-all"
                 >
                   Cerrar
                 </button>
                 <button
                   onClick={() => setShowEditModal(true)}
-                  className="px-4 py-2 text-[13px] font-medium text-white bg-[#2563FF] rounded-xl hover:bg-[#1E40AF] transition-all"
+                  className="px-4 py-2 text-[13px] font-bold text-[#0B1023] bg-[#02E3FF] rounded-xl hover:bg-[#00C4DD] transition-all"
                 >
                   Editar Turno
                 </button>

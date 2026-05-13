@@ -100,7 +100,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
   const sidebarWidth = collapsed ? 'w-[72px]' : 'w-[250px]'
 
   return (
-    <div className="min-h-screen bg-[#F5F0EA] flex flex-col lg:flex-row">
+    <div className="min-h-screen bg-white flex flex-col lg:flex-row">
       {/* ═══ MOBILE TOP BAR ═══ */}
       <div className="lg:hidden h-14 bg-[#0B1023] flex items-center justify-between px-4 sticky top-0 z-[45]">
         <div className="flex items-center gap-2">
@@ -236,7 +236,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
       {/* ═══ MAIN CONTENT AREA ═══ */}
       <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
         {/* Header */}
-        <header className="hidden lg:flex h-[60px] items-center justify-between px-8 sticky top-0 z-30 bg-[#F5F0EA] border-b border-[#E8E0D6]/50">
+        <header className="hidden lg:flex h-[60px] items-center justify-between px-8 sticky top-0 z-30 bg-white border-b border-gray-200/50">
           <div className="flex items-center gap-3 flex-1 max-w-2xl">
             <div className="relative flex-1 max-w-sm">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#9C9489]" />
@@ -245,7 +245,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Buscar..."
-                className="w-full pl-9 pr-4 py-2 bg-white border border-[#E8E0D6] rounded-xl text-sm text-gray-700 placeholder:text-[#B5AFA8] focus:outline-none focus:border-[#2563FF] focus:ring-2 focus:ring-[#2563FF]/10 transition-all"
+                className="w-full pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-xl text-sm text-gray-700 placeholder:text-[#B5AFA8] focus:outline-none focus:border-[#2563FF] focus:ring-2 focus:ring-[#2563FF]/10 transition-all"
               />
             </div>
             <div className="flex items-center gap-1.5">
@@ -256,7 +256,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
                   className={`px-3 py-1.5 text-[11px] font-semibold rounded-lg transition-all whitespace-nowrap ${
                     currentView === chip.view
                       ? 'bg-[#0B1023] text-white'
-                      : 'text-[#9C9489] bg-white border border-[#E8E0D6] hover:bg-[#EBE4DB] hover:text-[#6B6560]'
+                      : 'text-[#9C9489] bg-white border border-gray-200 hover:bg-gray-50 hover:text-[#6B6560]'
                   }`}
                 >
                   {chip.label}
@@ -268,12 +268,12 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
           <div className="flex items-center gap-2 ml-6">
             <button
               onClick={() => onViewChange('recordatorios')}
-              className="relative p-2 bg-white border border-[#E8E0D6] rounded-xl hover:bg-[#EBE4DB] transition-all"
+              className="relative p-2 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all"
             >
               <Bell className="h-4 w-4 text-[#9C9489]" />
               <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-[#2563FF] rounded-full" />
             </button>
-            <div className="flex items-center gap-2 pl-1.5 pr-3 py-1.5 bg-white border border-[#E8E0D6] rounded-xl">
+            <div className="flex items-center gap-2 pl-1.5 pr-3 py-1.5 bg-white border border-gray-200 rounded-xl">
               <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#2563FF] to-[#7C3AED] flex items-center justify-center text-white text-[10px] font-bold">
                 {userInitials}
               </div>

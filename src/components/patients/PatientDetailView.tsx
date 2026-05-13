@@ -150,7 +150,7 @@ export const PatientDetailView: React.FC<PatientDetailViewProps> = ({
           <div className="flex items-center gap-3">
             <Button
               onClick={onBookTurno}
-              className="bg-[#2563FF] hover:bg-[#1E40AF] text-white font-medium rounded-xl px-5 py-2.5 h-auto text-[13px] shadow-sm transition-all"
+              className="bg-[#02E3FF] hover:bg-[#00C4DD] text-[#0B1023] font-bold rounded-xl px-5 py-2.5 h-auto text-[13px] shadow-sm transition-all"
             >
               Agendar Turno
             </Button>

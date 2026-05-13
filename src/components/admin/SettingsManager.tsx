@@ -215,10 +215,12 @@ export const SettingsManager: React.FC = () => {
               <button
                 type="submit" disabled={saving}
                 style={{
-                  display: "flex", alignItems: "center", gap: 8, background: tokens.blue, color: tokens.white,
-                  border: "none", borderRadius: 10, padding: "10px 24px", fontSize: 13, fontWeight: 600,
+                  display: "flex", alignItems: "center", gap: 8, background: "#02E3FF", color: tokens.navy,
+                  border: "none", borderRadius: 10, padding: "10px 24px", fontSize: 13, fontWeight: 700,
                   cursor: "pointer", transition: "background 0.15s", opacity: saving ? 0.7 : 1
                 }}
+                onMouseEnter={e => { if(!saving) e.currentTarget.style.background = "#00C4DD" }}
+                onMouseLeave={e => { if(!saving) e.currentTarget.style.background = "#02E3FF" }}
               >
                 {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
                 Guardar Configuración
@@ -275,10 +277,12 @@ export const SettingsManager: React.FC = () => {
               <button
                 type="submit" disabled={saving}
                 style={{
-                  display: "flex", alignItems: "center", gap: 8, background: tokens.blue, color: tokens.white,
-                  border: "none", borderRadius: 10, padding: "10px 24px", fontSize: 13, fontWeight: 600,
+                  display: "flex", alignItems: "center", gap: 8, background: "#02E3FF", color: tokens.navy,
+                  border: "none", borderRadius: 10, padding: "10px 24px", fontSize: 13, fontWeight: 700,
                   cursor: "pointer", transition: "background 0.15s", opacity: saving ? 0.7 : 1
                 }}
+                onMouseEnter={e => { if(!saving) e.currentTarget.style.background = "#00C4DD" }}
+                onMouseLeave={e => { if(!saving) e.currentTarget.style.background = "#02E3FF" }}
               >
                 {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
                 Actualizar Datos de Pago

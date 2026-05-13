@@ -205,7 +205,7 @@ export const AdminApp: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F5F0EA]">
+      <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="flex flex-col items-center gap-3">
           <img src="/assets/dentiqly-logo.png" alt="Dentiqly" className="h-10 w-auto animate-pulse-soft" />
           <div className="w-8 h-8 border-2 border-[#2563FF] border-t-transparent rounded-full animate-spin" />
