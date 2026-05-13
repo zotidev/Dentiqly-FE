@@ -22,6 +22,7 @@ import { ConfirmationModal } from "../ui/ConfirmationModal"
 import type { Paciente, CrearPacienteData, ObraSocial } from "../../types"
 import { PatientDetailView } from "./PatientDetailView"
 import { AdminAppointmentModal } from "../admin/AdminAppointmentModal"
+import { ImageCropper } from "../ui/ImageCropper"
 import { tokens as sharedTokens, labelStyle as sharedLabelStyle, inputStyle as sharedInputStyle, pageWrapper, getInitials, getAvatarStyle } from '../admin/adminDesign'
 
 /* ─── Dentiqly design tokens ─────────────────────────────────────────── */
@@ -60,6 +61,7 @@ export const PatientsView: React.FC = () => {
   const [confirmDelete, setConfirmDelete] = useState<{ isOpen: boolean; id: string | null }>({ isOpen: false, id: null })
   const [showBookingModal, setShowBookingModal] = useState(false)
   const [focusedField, setFocusedField] = useState<string | null>(null)
+  const [cropperData, setCropperData] = useState<{ imageSrc: string; patientId: string } | null>(null)
 
   const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api"
 
@@ -122,9 +124,24 @@ export const PatientsView: React.FC = () => {
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>, patientId: string) => {
     const file = e.target.files?.[0]; if (!file) return
+    // Read file and open cropper instead of uploading directly
+    const reader = new FileReader()
+    reader.onload = () => {
+      setCropperData({ imageSrc: reader.result as string, patientId })
+    }
+    reader.readAsDataURL(file)
+    // Reset the input so the same file can be selected again
+    e.target.value = ''
+  }
+
+  const handleCroppedUpload = async (croppedBlob: Blob) => {
+    if (!cropperData) return
+    const { patientId } = cropperData
+    setCropperData(null)
     try {
       setUploadingPhoto(true)
-      const fd = new FormData(); fd.append("foto", file)
+      const fd = new FormData()
+      fd.append("foto", croppedBlob, "foto-recortada.jpg")
       const updated = await apiClient.put<Paciente>(`/pacientes/${patientId}/foto`, fd)
       if (selectedPatient?.id === patientId)
         setSelectedPatient({ ...selectedPatient, foto_url: updated.foto_url })
@@ -470,7 +487,7 @@ export const PatientsView: React.FC = () => {
         }}>
           <div style={{
             background: tokens.white, borderRadius: 16,
-            maxWidth: 640, width: "100%", maxHeight: "90vh", overflowY: "auto",
+            maxWidth: 720, width: "100%", maxHeight: "90vh", overflowY: "auto",
             boxShadow: "0 24px 48px rgba(11,16,35,0.12)",
           }}>
             {/* Modal header */}
@@ -650,6 +667,78 @@ export const PatientsView: React.FC = () => {
                     <option value="Inactivo">Inactivo</option>
                   </select>
                 </div>
+
+                {/* Dirección */}
+                <div>
+                  <label style={labelStyle}>Dirección</label>
+                  <input
+                    type="text"
+                    value={formData.direccion || ""}
+                    onChange={e => setFormData({ ...formData, direccion: e.target.value })}
+                    placeholder="Ej: Av. Corrientes 1234"
+                    style={{ ...inputStyle, borderColor: focusedField === "dir" ? tokens.blue : tokens.grayBorder }}
+                    onFocus={() => setFocusedField("dir")}
+                    onBlur={() => setFocusedField(null)}
+                  />
+                </div>
+
+                {/* Ocupación */}
+                <div>
+                  <label style={labelStyle}>Ocupación</label>
+                  <input
+                    type="text"
+                    value={formData.ocupacion || ""}
+                    onChange={e => setFormData({ ...formData, ocupacion: e.target.value })}
+                    placeholder="Ej: Ingeniero, Estudiante"
+                    style={{ ...inputStyle, borderColor: focusedField === "ocup" ? tokens.blue : tokens.grayBorder }}
+                    onFocus={() => setFocusedField("ocup")}
+                    onBlur={() => setFocusedField(null)}
+                  />
+                </div>
+
+                {/* Número de Afiliado */}
+                <div>
+                  <label style={labelStyle}>Número de Afiliado</label>
+                  <input
+                    type="text"
+                    value={formData.numero_afiliado || ""}
+                    onChange={e => setFormData({ ...formData, numero_afiliado: e.target.value })}
+                    placeholder="Nº de afiliado"
+                    style={{ ...inputStyle, borderColor: focusedField === "afil" ? tokens.blue : tokens.grayBorder }}
+                    onFocus={() => setFocusedField("afil")}
+                    onBlur={() => setFocusedField(null)}
+                  />
+                </div>
+
+                {/* Tipo de Facturación */}
+                <div>
+                  <label style={labelStyle}>Tipo de Facturación</label>
+                  <select
+                    value={formData.tipo_facturacion || "B"}
+                    onChange={e => setFormData({ ...formData, tipo_facturacion: e.target.value })}
+                    style={{ ...inputStyle, borderColor: focusedField === "factu" ? tokens.blue : tokens.grayBorder }}
+                    onFocus={() => setFocusedField("factu")}
+                    onBlur={() => setFocusedField(null)}
+                  >
+                    <option value="A">Factura A</option>
+                    <option value="B">Factura B</option>
+                    <option value="C">Factura C</option>
+                  </select>
+                </div>
+
+                {/* Información Adicional — full width */}
+                <div style={{ gridColumn: "1 / -1" }}>
+                  <label style={labelStyle}>Información Adicional / Notas</label>
+                  <textarea
+                    value={formData.informacion_adicional || ""}
+                    onChange={e => setFormData({ ...formData, informacion_adicional: e.target.value })}
+                    placeholder="Notas internas sobre el paciente..."
+                    rows={3}
+                    style={{ ...inputStyle, resize: "vertical", minHeight: 60, borderColor: focusedField === "info" ? tokens.blue : tokens.grayBorder }}
+                    onFocus={() => setFocusedField("info")}
+                    onBlur={() => setFocusedField(null)}
+                  />
+                </div>
               </div>
 
               {/* Form actions */}
@@ -707,6 +796,17 @@ export const PatientsView: React.FC = () => {
           }}
           onClose={() => setShowBookingModal(false)}
           onCreate={() => { setShowBookingModal(false); fetchPatients() }}
+        />
+      )}
+
+      {/* ── Image Cropper ── */}
+      {cropperData && (
+        <ImageCropper
+          imageSrc={cropperData.imageSrc}
+          onCropComplete={handleCroppedUpload}
+          onCancel={() => setCropperData(null)}
+          aspectRatio={1}
+          cropShape="round"
         />
       )}
     </div>
