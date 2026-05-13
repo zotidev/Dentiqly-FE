@@ -24,33 +24,12 @@ import {
 } from 'lucide-react'
 import { turnosApi, recordatoriosApi } from '../../api'
 import type { Turno } from '../../types'
+import { tokens as sharedTokens, labelStyle as sharedLabelStyle, inputStyle as sharedInputStyle, pageWrapper } from './adminDesign'
 
 /* ─── Dentiqly design tokens ─────────────────────────────────────────── */
-const tokens = {
-  blue: "#2563FF",
-  blueHover: "#1E40AF",
-  blueFaint: "#EEF3FF",
-  navy: "#0B1023",
-  grayText: "#4B5568",
-  grayMuted: "#8A93A8",
-  grayBorder: "#E2E6EF",
-  grayBg: "#F5F7FA",
-  grayRow: "#F0F2F7",
-  rowHover: "#F5F8FF",
-  white: "#FFFFFF",
-
-  green: "#22C55E",
-  greenFaint: "#EDFAF4",
-  greenText: "#15803D",
-
-  red: "#EF4444",
-  redFaint: "#FEF2F2",
-  redText: "#B91C1C",
-
-  orange: "#F59E0B",
-  orangeFaint: "#FFF7ED",
-  orangeText: "#92400E",
-}
+const tokens = sharedTokens
+const labelStyle = sharedLabelStyle
+const inputStyle = sharedInputStyle
 
 export const RemindersView: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState(() => {
@@ -216,10 +195,9 @@ export const RemindersView: React.FC = () => {
   const turnosWithEmail = turnos.filter(t => t.paciente?.email)
 
   const pageStyle: React.CSSProperties = {
+    ...pageWrapper,
     background: tokens.grayBg,
-    minHeight: "100vh",
     padding: "28px 32px",
-    fontFamily: "Poppins, -apple-system, sans-serif",
   }
 
   return (
@@ -244,7 +222,7 @@ export const RemindersView: React.FC = () => {
               border: showTemplateEditor ? `0.5px solid ${tokens.blue}` : `0.5px solid ${tokens.grayBorder}`,
               borderRadius: 10, padding: "9px 18px",
               fontSize: 13, fontWeight: 500, cursor: "pointer",
-              fontFamily: "Poppins, -apple-system, sans-serif",
+              fontFamily: "Inter, -apple-system, sans-serif",
               transition: "all 0.15s",
             }}
           >
@@ -259,7 +237,7 @@ export const RemindersView: React.FC = () => {
               background: tokens.blue, color: tokens.white,
               border: "none", borderRadius: 10, padding: "9px 18px",
               fontSize: 13, fontWeight: 500, cursor: "pointer",
-              fontFamily: "Poppins, -apple-system, sans-serif",
+              fontFamily: "Inter, -apple-system, sans-serif",
               transition: "background 0.15s",
               opacity: (sendingAll || turnosWithEmail.length === 0) ? 0.6 : 1
             }}
@@ -293,7 +271,7 @@ export const RemindersView: React.FC = () => {
                 style={{
                   width: "100%", height: 100, padding: 12, borderRadius: 10,
                   border: `0.5px solid ${tokens.grayBorder}`, fontSize: 13,
-                  fontFamily: "Poppins, -apple-system, sans-serif", outline: "none", resize: "none"
+                  fontFamily: "Inter, -apple-system, sans-serif", outline: "none", resize: "none"
                 }}
               />
               <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 12 }}>
@@ -329,7 +307,7 @@ export const RemindersView: React.FC = () => {
               style={{
                 border: "none", outline: "none", background: "transparent",
                 fontSize: 13, color: tokens.navy, flex: 1,
-                fontFamily: "Poppins, -apple-system, sans-serif",
+                fontFamily: "Inter, -apple-system, sans-serif",
               }}
             />
           </div>
@@ -337,7 +315,7 @@ export const RemindersView: React.FC = () => {
           <div style={{ display: "flex", alignItems: "center", gap: 3, background: tokens.white, border: `0.5px solid ${tokens.grayBorder}`, borderRadius: 10, padding: "3px" }}>
             <button onClick={() => navigateDate('prev')} style={{ width: 34, height: 34, borderRadius: 8, border: "none", background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: tokens.grayMuted }} onMouseEnter={e => e.currentTarget.style.background = tokens.grayBg} onMouseLeave={e => e.currentTarget.style.background = "transparent"}><ChevronLeft size={16} /></button>
             <div style={{ position: "relative", padding: "0 8px" }}>
-              <input type="date" value={selectedDate} onChange={e => setSelectedDate(e.target.value)} style={{ border: "none", outline: "none", fontSize: 13, fontWeight: 600, color: tokens.navy, fontFamily: "Poppins, -apple-system, sans-serif", cursor: "pointer" }} />
+              <input type="date" value={selectedDate} onChange={e => setSelectedDate(e.target.value)} style={{ border: "none", outline: "none", fontSize: 13, fontWeight: 600, color: tokens.navy, fontFamily: "Inter, -apple-system, sans-serif", cursor: "pointer" }} />
             </div>
             <button onClick={() => navigateDate('next')} style={{ width: 34, height: 34, borderRadius: 8, border: "none", background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: tokens.grayMuted }} onMouseEnter={e => e.currentTarget.style.background = tokens.grayBg} onMouseLeave={e => e.currentTarget.style.background = "transparent"}><ChevronRight size={16} /></button>
           </div>

@@ -123,9 +123,9 @@ const timelineColors = [
 ];
 
 export const Dashboard: React.FC<{
-  onNavigateToCalendar?: () => void,
+  onNavigate?: (view: string) => void,
   slug?: string
-}> = ({ onNavigateToCalendar, slug }) => {
+}> = ({ onNavigate, slug }) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
@@ -444,7 +444,7 @@ export const Dashboard: React.FC<{
                 Lista de pacientes
               </h2>
               <button
-                onClick={onNavigateToCalendar}
+                onClick={() => onNavigate?.('calendar')}
                 className="flex items-center gap-1 text-xs font-semibold text-[#2563FF] hover:text-blue-700 transition-colors"
               >
                 Ver todos
@@ -555,7 +555,7 @@ export const Dashboard: React.FC<{
           <div className="bg-white rounded-2xl p-5 border border-[#E8E0D6]/60 shadow-sm animate-fade-in" style={{ animationDelay: '100ms' }}>
             <MiniCalendar />
             <button
-              onClick={onNavigateToCalendar}
+              onClick={() => onNavigate?.('calendar')}
               className="w-full mt-4 py-2.5 bg-[#0B1023] text-white text-sm font-semibold rounded-xl hover:bg-[#151d3a] transition-colors active:scale-[0.98]"
             >
               Agregar turno
@@ -607,7 +607,7 @@ export const Dashboard: React.FC<{
 
             {stats.turnosDeHoy.length > 0 && (
               <button
-                onClick={onNavigateToCalendar}
+                onClick={() => onNavigate?.('calendar')}
                 className="w-full mt-4 py-2 text-xs font-semibold text-[#2563FF] bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors"
               >
                 Ver todos los detalles

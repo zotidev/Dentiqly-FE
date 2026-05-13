@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState, useEffect } from "react"
+import { tokens as sharedTokens, labelStyle as sharedLabelStyle, inputStyle as sharedInputStyle, pageWrapper } from './adminDesign'
 import { configuracionApi, Setting } from "../../api/configuracion"
 import { 
   Save, 
@@ -21,51 +22,12 @@ import {
 import { useToast } from "../../hooks/use-toast"
 
 /* ─── Dentiqly design tokens ─────────────────────────────────────────── */
-const tokens = {
-  blue: "#2563FF",
-  blueHover: "#1E40AF",
-  blueFaint: "#EEF3FF",
-  navy: "#0B1023",
-  grayText: "#4B5568",
-  grayMuted: "#8A93A8",
-  grayBorder: "#E2E6EF",
-  grayBg: "#F5F7FA",
-  grayRow: "#F0F2F7",
-  rowHover: "#F5F8FF",
-  white: "#FFFFFF",
-
-  green: "#22C55E",
-  greenFaint: "#EDFAF4",
-  greenText: "#15803D",
-
-  red: "#EF4444",
-  redFaint: "#FEF2F2",
-  redText: "#B91C1C",
-}
+const tokens = sharedTokens
 
 /* ─── Label styles ────────────────────────────────────────────────────── */
-const labelStyle: React.CSSProperties = {
-  display: "block",
-  fontSize: 12,
-  fontWeight: 600,
-  color: tokens.grayMuted,
-  textTransform: "uppercase",
-  letterSpacing: "0.5px",
-  marginBottom: 6,
-}
+const labelStyle = sharedLabelStyle
 
-const inputStyle: React.CSSProperties = {
-  width: "100%",
-  padding: "10px 14px",
-  fontSize: 13,
-  border: `0.5px solid ${tokens.grayBorder}`,
-  borderRadius: 10,
-  outline: "none",
-  color: tokens.navy,
-  background: tokens.white,
-  fontFamily: "Poppins, -apple-system, sans-serif",
-  transition: "all 0.15s",
-}
+const inputStyle = sharedInputStyle
 
 export const SettingsManager: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"general" | "banking" | "booking">("general")
@@ -161,13 +123,6 @@ export const SettingsManager: React.FC = () => {
     }
   }
 
-  const pageStyle: React.CSSProperties = {
-    background: tokens.grayBg,
-    minHeight: "100vh",
-    padding: "28px 32px",
-    fontFamily: "Poppins, -apple-system, sans-serif",
-  }
-
   if (loading) {
     return (
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "100px 0", gap: 12 }}>
@@ -178,7 +133,7 @@ export const SettingsManager: React.FC = () => {
   }
 
   return (
-    <div style={pageStyle}>
+    <div style={pageWrapper}>
       {/* ── Header ── */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 28 }}>
         <div>
@@ -207,7 +162,7 @@ export const SettingsManager: React.FC = () => {
               color: activeTab === tab.id ? tokens.blue : tokens.grayMuted,
               fontSize: 13, fontWeight: activeTab === tab.id ? 600 : 500, cursor: "pointer",
               boxShadow: activeTab === tab.id ? "0 2px 8px rgba(0,0,0,0.04)" : "none",
-              transition: "all 0.15s", fontFamily: "Poppins, -apple-system, sans-serif"
+              transition: "all 0.15s", fontFamily: "Inter, -apple-system, sans-serif"
             }}
           >
             <tab.icon size={15} />

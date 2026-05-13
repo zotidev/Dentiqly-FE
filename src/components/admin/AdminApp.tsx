@@ -205,8 +205,11 @@ export const AdminApp: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen flex items-center justify-center bg-[#F5F0EA]">
+        <div className="flex flex-col items-center gap-3">
+          <img src="/assets/dentiqly-logo.png" alt="Dentiqly" className="h-10 w-auto animate-pulse-soft" />
+          <div className="w-8 h-8 border-2 border-[#2563FF] border-t-transparent rounded-full animate-spin" />
+        </div>
       </div>
     )
   }
@@ -218,9 +221,9 @@ export const AdminApp: React.FC = () => {
   const renderCurrentView = () => {
     switch (currentView) {
       case 'dashboard':
-        return <Dashboard 
-          slug={subscriptionStatus?.slug} 
-          onNavigateToCalendar={() => setCurrentView('calendar')} 
+        return <Dashboard
+          slug={subscriptionStatus?.slug}
+          onNavigate={setCurrentView}
         />
       case 'calendar':
         return <CalendarView />

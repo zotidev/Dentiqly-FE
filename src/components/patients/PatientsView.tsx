@@ -22,47 +22,10 @@ import { ConfirmationModal } from "../ui/ConfirmationModal"
 import type { Paciente, CrearPacienteData, ObraSocial } from "../../types"
 import { PatientDetailView } from "./PatientDetailView"
 import { AdminAppointmentModal } from "../admin/AdminAppointmentModal"
+import { tokens as sharedTokens, labelStyle as sharedLabelStyle, inputStyle as sharedInputStyle, pageWrapper, getInitials, getAvatarStyle } from '../admin/adminDesign'
 
 /* ─── Dentiqly design tokens ─────────────────────────────────────────── */
-const tokens = {
-  blue: "#2563FF",
-  blueHover: "#1E40AF",
-  blueFaint: "#EEF3FF",
-  navy: "#0B1023",
-  grayText: "#4B5568",
-  grayMuted: "#8A93A8",
-  grayBorder: "#E2E6EF",
-  grayBg: "#F5F7FA",
-  grayRow: "#F0F2F7",
-  rowHover: "#F5F8FF",
-  white: "#FFFFFF",
-
-  green: "#22C55E",
-  greenFaint: "#EDFAF4",
-  greenText: "#15803D",
-
-  grayDot: "#CBD5E1",
-  grayPill: "#F1F5F9",
-  grayPillTx: "#64748B",
-
-  avatarColors: [
-    { bg: "#EEF3FF", color: "#2563FF" },
-    { bg: "#EDFAF4", color: "#16A34A" },
-    { bg: "#F3EEFF", color: "#7C3AED" },
-    { bg: "#FFF8EB", color: "#B45309" },
-    { bg: "#FEF2F2", color: "#DC2626" },
-    { bg: "#F0FDFA", color: "#0D9488" },
-  ],
-}
-
-/* ─── Tiny helpers ────────────────────────────────────────────────────── */
-const getInitials = (nombre: string, apellido: string) =>
-  `${(nombre || "").charAt(0)}${(apellido || "").charAt(0)}`.toUpperCase()
-
-const getAvatarStyle = (id: string) => {
-  const idx = id.charCodeAt(id.length - 1) % tokens.avatarColors.length
-  return tokens.avatarColors[idx]
-}
+const tokens = sharedTokens
 
 const calculateAge = (birthDate: string) => {
   if (!birthDate) return "—"
@@ -75,28 +38,9 @@ const calculateAge = (birthDate: string) => {
 }
 
 /* ─── Label styles ────────────────────────────────────────────────────── */
-const labelStyle: React.CSSProperties = {
-  display: "block",
-  fontSize: 12,
-  fontWeight: 600,
-  color: tokens.grayMuted,
-  textTransform: "uppercase",
-  letterSpacing: "0.5px",
-  marginBottom: 6,
-}
+const labelStyle = sharedLabelStyle
 
-const inputStyle: React.CSSProperties = {
-  width: "100%",
-  padding: "9px 12px",
-  fontSize: 13,
-  border: `0.5px solid ${tokens.grayBorder}`,
-  borderRadius: 9,
-  outline: "none",
-  color: tokens.navy,
-  background: tokens.white,
-  fontFamily: "Poppins, -apple-system, sans-serif",
-  transition: "border-color 0.15s",
-}
+const inputStyle = sharedInputStyle
 
 /* ═══════════════════════════════════════════════════════════════════════ */
 export const PatientsView: React.FC = () => {
@@ -195,17 +139,9 @@ export const PatientsView: React.FC = () => {
     return `${API_BASE_URL.replace(/\/api$/, "")}/${patient.foto_url.replace(/^src\//, "")}`
   }
 
-  /* ── styles ── */
-  const page: React.CSSProperties = {
-    background: tokens.grayBg,
-    minHeight: "100vh",
-    padding: "28px 32px",
-    fontFamily: "Poppins, -apple-system, sans-serif",
-  }
-
   /* ── render ── */
   return (
-    <div style={page}>
+    <div style={pageWrapper}>
       {viewMode === "detail" && selectedPatient ? (
         <PatientDetailView
           patient={selectedPatient}
@@ -235,7 +171,7 @@ export const PatientsView: React.FC = () => {
                 background: tokens.blue, color: tokens.white,
                 border: "none", borderRadius: 10, padding: "9px 18px",
                 fontSize: 13, fontWeight: 500, cursor: "pointer",
-                fontFamily: "Poppins, -apple-system, sans-serif",
+                fontFamily: "Inter, -apple-system, sans-serif",
                 transition: "background 0.15s",
               }}
               onMouseEnter={e => (e.currentTarget.style.background = tokens.blueHover)}
@@ -263,7 +199,7 @@ export const PatientsView: React.FC = () => {
                 style={{
                   border: "none", outline: "none", background: "transparent",
                   fontSize: 13, color: tokens.navy, flex: 1,
-                  fontFamily: "Poppins, -apple-system, sans-serif",
+                  fontFamily: "Inter, -apple-system, sans-serif",
                 }}
               />
             </div>
@@ -725,7 +661,7 @@ export const PatientsView: React.FC = () => {
                     padding: "9px 18px", fontSize: 13, fontWeight: 500,
                     border: `0.5px solid ${tokens.grayBorder}`, borderRadius: 9,
                     background: tokens.white, color: tokens.grayText, cursor: "pointer",
-                    fontFamily: "Poppins, -apple-system, sans-serif", transition: "all 0.12s",
+                    fontFamily: "Inter, -apple-system, sans-serif", transition: "all 0.12s",
                   }}
                   onMouseEnter={e => { e.currentTarget.style.background = tokens.grayBg }}
                   onMouseLeave={e => { e.currentTarget.style.background = tokens.white }}
@@ -738,7 +674,7 @@ export const PatientsView: React.FC = () => {
                     padding: "9px 20px", fontSize: 13, fontWeight: 500,
                     background: tokens.blue, color: tokens.white,
                     border: "none", borderRadius: 9, cursor: "pointer",
-                    fontFamily: "Poppins, -apple-system, sans-serif", transition: "background 0.15s",
+                    fontFamily: "Inter, -apple-system, sans-serif", transition: "background 0.15s",
                   }}
                   onMouseEnter={e => { e.currentTarget.style.background = tokens.blueHover }}
                   onMouseLeave={e => { e.currentTarget.style.background = tokens.blue }}

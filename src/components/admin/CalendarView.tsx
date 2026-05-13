@@ -793,7 +793,7 @@ export const CalendarView: React.FC = () => {
   }
 
   return (
-    <div className="bg-[#f0f2f5] h-full flex flex-col rounded-3xl p-4 sm:p-6 font-sans">
+    <div className="h-full flex flex-col p-4 sm:p-6 font-sans">
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <h1 className="text-2xl font-bold text-[#2563FF]">Turnos</h1>

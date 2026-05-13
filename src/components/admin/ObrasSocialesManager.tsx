@@ -13,56 +13,18 @@ import {
   ShieldCheck,
   Zap
 } from 'lucide-react'
+import { tokens as sharedTokens, labelStyle as sharedLabelStyle, inputStyle as sharedInputStyle, pageWrapper } from './adminDesign'
 import { obrasSocialesApi } from '../../api/obras-sociales'
 import { ConfirmationModal } from '../ui/ConfirmationModal'
 import type { ObraSocial } from '../../types'
 
 /* ─── Dentiqly design tokens ─────────────────────────────────────────── */
-const tokens = {
-  blue: "#2563FF",
-  blueHover: "#1E40AF",
-  blueFaint: "#EEF3FF",
-  navy: "#0B1023",
-  grayText: "#4B5568",
-  grayMuted: "#8A93A8",
-  grayBorder: "#E2E6EF",
-  grayBg: "#F5F7FA",
-  grayRow: "#F0F2F7",
-  rowHover: "#F5F8FF",
-  white: "#FFFFFF",
-
-  green: "#22C55E",
-  greenFaint: "#EDFAF4",
-  greenText: "#15803D",
-
-  red: "#EF4444",
-  redFaint: "#FEF2F2",
-  redText: "#B91C1C",
-}
+const tokens = sharedTokens
 
 /* ─── Label styles ────────────────────────────────────────────────────── */
-const labelStyle: React.CSSProperties = {
-  display: "block",
-  fontSize: 12,
-  fontWeight: 600,
-  color: tokens.grayMuted,
-  textTransform: "uppercase",
-  letterSpacing: "0.5px",
-  marginBottom: 6,
-}
+const labelStyle = sharedLabelStyle
 
-const inputStyle: React.CSSProperties = {
-  width: "100%",
-  padding: "9px 12px",
-  fontSize: 13,
-  border: `0.5px solid ${tokens.grayBorder}`,
-  borderRadius: 9,
-  outline: "none",
-  color: tokens.navy,
-  background: tokens.white,
-  fontFamily: "Poppins, -apple-system, sans-serif",
-  transition: "all 0.15s",
-}
+const inputStyle = sharedInputStyle
 
 export const ObrasSocialesManager: React.FC = () => {
   const [obrasSociales, setObrasSociales] = useState<ObraSocial[]>([])
@@ -145,15 +107,8 @@ export const ObrasSocialesManager: React.FC = () => {
     os.nombre.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
-  const pageStyle: React.CSSProperties = {
-    background: tokens.grayBg,
-    minHeight: "100vh",
-    padding: "28px 32px",
-    fontFamily: "Poppins, -apple-system, sans-serif",
-  }
-
   return (
-    <div style={pageStyle}>
+    <div style={pageWrapper}>
       {/* ── Header ── */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 }}>
         <div>
@@ -171,7 +126,7 @@ export const ObrasSocialesManager: React.FC = () => {
             background: tokens.blue, color: tokens.white,
             border: "none", borderRadius: 10, padding: "9px 18px",
             fontSize: 13, fontWeight: 500, cursor: "pointer",
-            fontFamily: "Poppins, -apple-system, sans-serif",
+            fontFamily: "Inter, -apple-system, sans-serif",
             transition: "background 0.15s",
           }}
           onMouseEnter={e => (e.currentTarget.style.background = tokens.blueHover)}
@@ -198,7 +153,7 @@ export const ObrasSocialesManager: React.FC = () => {
             style={{
               border: "none", outline: "none", background: "transparent",
               fontSize: 13, color: tokens.navy, flex: 1,
-              fontFamily: "Poppins, -apple-system, sans-serif",
+              fontFamily: "Inter, -apple-system, sans-serif",
             }}
           />
         </div>
@@ -415,7 +370,7 @@ export const ObrasSocialesManager: React.FC = () => {
                     padding: "9px 18px", fontSize: 13, fontWeight: 500,
                     border: `0.5px solid ${tokens.grayBorder}`, borderRadius: 9,
                     background: tokens.white, color: tokens.grayText, cursor: "pointer",
-                    fontFamily: "Poppins, -apple-system, sans-serif", transition: "all 0.12s",
+                    fontFamily: "Inter, -apple-system, sans-serif", transition: "all 0.12s",
                   }}
                   onMouseEnter={e => { e.currentTarget.style.background = tokens.grayBg }}
                   onMouseLeave={e => { e.currentTarget.style.background = tokens.white }}
@@ -428,7 +383,7 @@ export const ObrasSocialesManager: React.FC = () => {
                     padding: "9px 20px", fontSize: 13, fontWeight: 500,
                     background: tokens.blue, color: tokens.white,
                     border: "none", borderRadius: 9, cursor: "pointer",
-                    fontFamily: "Poppins, -apple-system, sans-serif", transition: "background 0.15s",
+                    fontFamily: "Inter, -apple-system, sans-serif", transition: "background 0.15s",
                     opacity: saving ? 0.7 : 1
                   }}
                   onMouseEnter={e => { if(!saving) e.currentTarget.style.background = tokens.blueHover }}

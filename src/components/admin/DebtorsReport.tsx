@@ -16,6 +16,7 @@ import {
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { getDeudores } from '../../api/cuenta-corriente';
+import { tokens as sharedTokens, labelStyle as sharedLabelStyle, inputStyle as sharedInputStyle, pageWrapper } from './adminDesign'
 
 interface Deudor {
     paciente: {
@@ -29,31 +30,9 @@ interface Deudor {
 }
 
 /* ─── Dentiqly design tokens ─────────────────────────────────────────── */
-const tokens = {
-  blue: "#2563FF",
-  blueHover: "#1E40AF",
-  blueFaint: "#EEF3FF",
-  navy: "#0B1023",
-  grayText: "#4B5568",
-  grayMuted: "#8A93A8",
-  grayBorder: "#E2E6EF",
-  grayBg: "#F5F7FA",
-  grayRow: "#F0F2F7",
-  rowHover: "#F5F8FF",
-  white: "#FFFFFF",
-
-  green: "#22C55E",
-  greenFaint: "#EDFAF4",
-  greenText: "#15803D",
-
-  red: "#EF4444",
-  redFaint: "#FEF2F2",
-  redText: "#B91C1C",
-
-  orange: "#F59E0B",
-  orangeFaint: "#FFF7ED",
-  orangeText: "#92400E",
-}
+const tokens = sharedTokens
+const labelStyle = sharedLabelStyle
+const inputStyle = sharedInputStyle
 
 const DebtorsReport = () => {
     const [deudores, setDeudores] = useState<Deudor[]>([]);
@@ -114,15 +93,8 @@ const DebtorsReport = () => {
         };
     }, [filteredDeudores, currentPage]);
 
-    const pageStyle: React.CSSProperties = {
-      background: tokens.grayBg,
-      minHeight: "100vh",
-      padding: "28px 32px",
-      fontFamily: "Poppins, -apple-system, sans-serif",
-    }
-
     return (
-        <div style={pageStyle}>
+        <div style={pageWrapper}>
             {/* ── Header ── */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 }}>
                 <div>
@@ -164,7 +136,7 @@ const DebtorsReport = () => {
                     style={{
                       border: "none", outline: "none", background: "transparent",
                       fontSize: 13, color: tokens.navy, flex: 1,
-                      fontFamily: "Poppins, -apple-system, sans-serif",
+                      fontFamily: "Inter, -apple-system, sans-serif",
                     }}
                   />
                 </div>
