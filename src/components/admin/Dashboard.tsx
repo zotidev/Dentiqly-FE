@@ -260,8 +260,58 @@ export const Dashboard: React.FC<{
   const todayLabel = new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'long' });
 
   return (
-    <div className="min-h-screen font-sans">
-      <div className="flex flex-col xl:flex-row gap-6">
+    <div className="min-h-screen font-sans relative overflow-hidden">
+      {/* ── Decorative background reliefs ── */}
+      <div className="absolute inset-0 pointer-events-none select-none" aria-hidden="true">
+        {/* Large gradient wash — top right corner */}
+        <div className="absolute -top-40 -right-40 w-[700px] h-[700px] rounded-full opacity-100"
+          style={{ background: 'radial-gradient(circle, rgba(37,99,255,0.07) 0%, rgba(11,16,35,0.04) 40%, transparent 70%)' }}
+        />
+        {/* Medium blob — bottom left */}
+        <div className="absolute -bottom-20 -left-20 w-[500px] h-[500px] rounded-full opacity-100"
+          style={{ background: 'radial-gradient(circle, rgba(11,16,35,0.05) 0%, rgba(37,99,255,0.03) 40%, transparent 70%)' }}
+        />
+        {/* Accent glow — mid-right */}
+        <div className="absolute top-[40%] -right-10 w-[350px] h-[350px] rounded-full opacity-100"
+          style={{ background: 'radial-gradient(circle, rgba(37,99,255,0.05) 0%, transparent 60%)' }}
+        />
+
+        {/* Dot grid pattern */}
+        <svg className="absolute inset-0 w-full h-full opacity-[0.07]">
+          <defs>
+            <pattern id="dashboard-dots" width="24" height="24" patternUnits="userSpaceOnUse">
+              <circle cx="2" cy="2" r="1" fill="#0B1023" />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#dashboard-dots)" />
+        </svg>
+
+        {/* Dashed circle — top left area */}
+        <svg className="absolute top-20 left-4 w-[160px] h-[160px] opacity-[0.06]" viewBox="0 0 160 160" fill="none">
+          <circle cx="80" cy="80" r="72" stroke="#0B1023" strokeWidth="1.5" strokeDasharray="10 8" />
+          <circle cx="80" cy="80" r="45" stroke="#2563FF" strokeWidth="1" strokeDasharray="6 5" />
+          <circle cx="80" cy="80" r="20" stroke="#0B1023" strokeWidth="0.8" strokeDasharray="3 4" />
+        </svg>
+
+        {/* Rounded rect — bottom right */}
+        <svg className="absolute bottom-24 right-24 w-[120px] h-[120px] opacity-[0.05]" viewBox="0 0 120 120" fill="none">
+          <rect x="10" y="10" width="100" height="100" rx="24" stroke="#0B1023" strokeWidth="1.5" strokeDasharray="8 6" />
+          <rect x="30" y="30" width="60" height="60" rx="14" stroke="#2563FF" strokeWidth="1" strokeDasharray="5 5" />
+        </svg>
+
+        {/* Diamond shape — mid left */}
+        <svg className="absolute top-[55%] left-10 w-[80px] h-[80px] opacity-[0.045]" viewBox="0 0 80 80" fill="none">
+          <rect x="15" y="15" width="50" height="50" rx="8" stroke="#0B1023" strokeWidth="1.5" transform="rotate(45 40 40)" />
+        </svg>
+
+        {/* Horizontal accent line — top */}
+        <div className="absolute top-[180px] left-0 right-0 h-px opacity-[0.04]"
+          style={{ background: 'linear-gradient(90deg, transparent 0%, #0B1023 30%, #2563FF 50%, #0B1023 70%, transparent 100%)' }}
+        />
+      </div>
+
+      {/* ── Main content (above decorative layer) ── */}
+      <div className="flex flex-col xl:flex-row gap-6 relative z-10">
         {/* ═══ LEFT / MAIN CONTENT ═══ */}
         <div className="flex-1 min-w-0">
 

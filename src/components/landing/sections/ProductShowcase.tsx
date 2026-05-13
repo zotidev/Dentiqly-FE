@@ -1,58 +1,55 @@
 import React, { useEffect, useRef } from "react"
-import { Calendar, Users, Receipt, BarChart3 } from "lucide-react"
+import { Calendar, Users, Bell, Settings, LayoutDashboard } from "lucide-react"
 import gsap from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 
 gsap.registerPlugin(ScrollTrigger)
 
-const products = [
+const screenshots = [
   {
-    icon: Calendar,
-    title: "Agenda Inteligente",
-    desc: "Visualiza tu dia al instante. Arrastra, suelta y confirma turnos por WhatsApp automaticamente sin mover un dedo.",
-    large: true,
-    dark: false,
-    gradient: "from-[#2563FF] to-[#02E3FF]",
-    iconBg: "bg-gradient-to-br from-[#2563FF] to-[#02E3FF]",
-    hasVisual: true,
+    src: "/assets/screenshots/dashboard.png",
+    title: "Dashboard Inteligente",
+    desc: "Métricas, agenda y turnos del día en una vista clara y accionable.",
+    icon: LayoutDashboard,
+    accent: "#2563FF",
   },
   {
+    src: "/assets/screenshots/paciente-detalle.png",
+    title: "Ficha de Paciente",
+    desc: "Historia clínica, odontograma, archivos y tratamientos en un solo lugar.",
     icon: Users,
-    title: "Historia Clinica Digital",
-    desc: "Toda la informacion de tus pacientes asegurada y accesible desde cualquier dispositivo, en cualquier lugar del mundo.",
-    large: false,
-    dark: true,
-    gradient: "",
-    iconBg: "bg-white/10",
-    hasVisual: false,
+    accent: "#7C3AED",
   },
   {
-    icon: Receipt,
-    title: "Facturacion Simplificada",
-    desc: "Emite facturas y controla los pagos de multiples profesionales sin dolores de cabeza financieros.",
-    large: false,
-    dark: false,
-    gradient: "",
-    iconBg: "bg-purple-50",
-    hasVisual: false,
+    src: "/assets/screenshots/calendario.png",
+    title: "Calendario de Turnos",
+    desc: "Vista semanal con código de colores, estados y sobreturnos.",
+    icon: Calendar,
+    accent: "#059669",
   },
   {
-    icon: BarChart3,
-    title: "Metricas en Tiempo Real",
-    desc: "Toma decisiones basadas en datos reales. Entiende de donde vienen tus ingresos y optimiza el rendimiento de tu clinica.",
-    large: true,
-    dark: false,
-    gradient: "",
-    iconBg: "bg-emerald-50",
-    hasVisual: true,
+    src: "/assets/screenshots/recordatorios.png",
+    title: "Recordatorios Automáticos",
+    desc: "Envío masivo de emails para minimizar el ausentismo de pacientes.",
+    icon: Bell,
+    accent: "#F59E0B",
+  },
+  {
+    src: "/assets/screenshots/configuracion.png",
+    title: "Configuración Total",
+    desc: "Personaliza tu clínica, pagos, cuentas y reserva pública en minutos.",
+    icon: Settings,
+    accent: "#6366F1",
   },
 ]
 
 export const ProductShowcase: React.FC = () => {
   const sectionRef = useRef<HTMLElement>(null)
+  const showcaseTrackRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const ctx = gsap.context(() => {
+      // Header animations
       gsap.from(".product-title-reveal", {
         y: 40,
         opacity: 0,
@@ -76,39 +73,80 @@ export const ProductShowcase: React.FC = () => {
         },
       })
 
-      gsap.from(".product-card", {
+      // Featured hero screenshot — parallax float
+      gsap.from(".showcase-hero", {
         y: 80,
         opacity: 0,
-        duration: 1,
-        stagger: 0.12,
+        scale: 0.92,
+        duration: 1.2,
         ease: "power3.out",
         scrollTrigger: {
-          trigger: ".product-grid",
+          trigger: ".showcase-hero",
+          start: "top 85%",
+        },
+      })
+
+      // Subtle parallax on hero image while scrolling
+      gsap.to(".showcase-hero-img", {
+        y: -30,
+        ease: "none",
+        scrollTrigger: {
+          trigger: ".showcase-hero",
+          start: "top bottom",
+          end: "bottom top",
+          scrub: 1.5,
+        },
+      })
+
+      // Secondary cards — staggered reveal
+      gsap.from(".showcase-card", {
+        y: 60,
+        opacity: 0,
+        scale: 0.95,
+        duration: 0.9,
+        stagger: 0.15,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: ".showcase-grid",
           start: "top 80%",
         },
       })
 
-      gsap.from(".bar-animate", {
-        height: 0,
-        duration: 1.2,
-        stagger: 0.1,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: ".bar-container",
-          start: "top 85%",
-        },
+      // Each card image gets a subtle parallax
+      document.querySelectorAll(".showcase-card-img").forEach((img) => {
+        gsap.to(img, {
+          y: -15,
+          ease: "none",
+          scrollTrigger: {
+            trigger: img.closest(".showcase-card"),
+            start: "top bottom",
+            end: "bottom top",
+            scrub: 2,
+          },
+        })
       })
     }, sectionRef)
 
     return () => ctx.revert()
   }, [])
 
+  const hero = screenshots[0]
+  const rest = screenshots.slice(1)
+
   return (
-    <section ref={sectionRef} id="producto" className="py-32 bg-white relative">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-3xl mx-auto mb-20">
+    <section ref={sectionRef} id="producto" className="py-32 bg-white relative overflow-hidden">
+      {/* Subtle bg decor */}
+      <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+        <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full"
+          style={{ background: "radial-gradient(circle, rgba(37,99,255,0.04) 0%, transparent 65%)" }}
+        />
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        {/* ── Header ── */}
+        <div className="text-center max-w-3xl mx-auto mb-16">
           <h2 className="product-title-reveal text-sm font-extrabold text-[#2563FF] tracking-widest uppercase mb-4">
-            Poder sin limites
+            Poder sin límites
           </h2>
           <h3 className="product-subtitle-reveal text-4xl md:text-5xl font-extrabold text-[#0B1023] tracking-tight leading-tight">
             Todo lo que necesitas,
@@ -117,92 +155,89 @@ export const ProductShowcase: React.FC = () => {
           </h3>
         </div>
 
-        <div className="product-grid grid grid-cols-1 md:grid-cols-3 gap-6">
-          {products.map((product, i) => {
-            const Icon = product.icon
-            return (
-              <div
-                key={i}
-                className={`product-card group relative rounded-3xl p-8 overflow-hidden transition-all duration-500 ${
-                  product.large ? "md:col-span-2" : ""
-                } ${
-                  product.dark
-                    ? "bg-[#0B1023] text-white hover:shadow-xl"
-                    : "bg-white border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_50px_rgba(37,99,255,0.1)]"
-                }`}
-              >
-                {product.dark && (
-                  <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-[#2563FF] rounded-full blur-3xl opacity-40 group-hover:scale-150 transition-transform duration-700" />
-                )}
-
-                {!product.dark && product.large && (
-                  <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-[#2563FF]/8 to-transparent rounded-bl-full -z-10 group-hover:scale-110 transition-transform duration-700" />
-                )}
-
+        {/* ── Hero Screenshot (Dashboard — large) ── */}
+        <div className="showcase-hero mb-10" ref={showcaseTrackRef}>
+          <div className="relative group">
+            {/* Outer glow */}
+            <div
+              className="absolute -inset-4 rounded-[28px] opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-2xl"
+              style={{ background: `linear-gradient(135deg, ${hero.accent}22, transparent 60%)` }}
+            />
+            {/* Card */}
+            <div className="relative bg-white rounded-[22px] border border-gray-200/60 shadow-[0_8px_40px_rgba(0,0,0,0.06)] overflow-hidden">
+              {/* Top bar with info */}
+              <div className="flex items-center gap-4 px-8 py-5 border-b border-gray-100 bg-gradient-to-r from-white to-gray-50/40">
                 <div
-                  className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 ${product.iconBg} ${
-                    product.dark ? "border border-white/20 backdrop-blur-md" : ""
-                  } ${!product.dark && product.iconBg.includes("gradient") ? "shadow-lg shadow-blue-500/25" : ""}`}
+                  className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
+                  style={{ background: `${hero.accent}12` }}
                 >
-                  <Icon
-                    className={`w-7 h-7 ${
-                      product.dark
-                        ? "text-white"
-                        : product.iconBg.includes("purple")
-                          ? "text-purple-600"
-                          : product.iconBg.includes("emerald")
-                            ? "text-emerald-600"
-                            : "text-white"
-                    }`}
-                  />
+                  <hero.icon className="w-5 h-5" style={{ color: hero.accent }} />
                 </div>
+                <div>
+                  <h4 className="text-lg font-bold text-[#0B1023]">{hero.title}</h4>
+                  <p className="text-sm text-gray-400">{hero.desc}</p>
+                </div>
+                {/* Dot indicators */}
+                <div className="ml-auto flex gap-1.5">
+                  <span className="w-3 h-3 rounded-full bg-red-400/70" />
+                  <span className="w-3 h-3 rounded-full bg-yellow-400/70" />
+                  <span className="w-3 h-3 rounded-full bg-green-400/70" />
+                </div>
+              </div>
+              {/* Screenshot */}
+              <div className="overflow-hidden">
+                <img
+                  src={hero.src}
+                  alt={hero.title}
+                  loading="lazy"
+                  className="showcase-hero-img w-full h-auto block transition-transform duration-700 group-hover:scale-[1.015]"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
 
-                <h4
-                  className={`text-2xl font-bold mb-3 relative z-10 ${
-                    product.dark ? "" : "text-[#0B1023]"
-                  }`}
-                >
-                  {product.title}
-                </h4>
-                <p
-                  className={`relative z-10 max-w-md ${
-                    product.dark ? "text-gray-400" : "text-gray-600"
-                  } ${product.large ? "mb-8" : ""}`}
-                >
-                  {product.desc}
-                </p>
-
-                {product.hasVisual && i === 0 && (
-                  <div className="w-full h-48 bg-[#FAFCFF] rounded-2xl border border-gray-100 p-4 relative overflow-hidden group-hover:-translate-y-2 transition-transform duration-500 mt-4">
-                    <div className="flex gap-4 h-full">
-                      <div className="w-16 h-full bg-white rounded-xl shadow-sm border border-gray-50 flex flex-col gap-2 p-2">
-                        {[1, 2, 3, 4].map((j) => (
-                          <div key={j} className="w-full h-8 bg-gray-50 rounded-lg" />
-                        ))}
-                      </div>
-                      <div className="flex-1 flex flex-col gap-2">
-                        <div className="w-full h-12 bg-white rounded-xl shadow-sm border border-gray-50 flex items-center px-4">
-                          <div className="w-32 h-3 bg-blue-100 rounded-full" />
-                        </div>
-                        <div className="w-3/4 h-24 bg-gradient-to-r from-[#2563FF]/10 to-[#02E3FF]/10 rounded-xl border border-blue-100/50 relative">
-                          <div className="absolute left-4 top-4 w-2 h-2 bg-[#2563FF] rounded-full" />
-                        </div>
-                      </div>
+        {/* ── Secondary Screenshots Grid ── */}
+        <div className="showcase-grid grid grid-cols-1 md:grid-cols-2 gap-6">
+          {rest.map((shot, i) => {
+            const Icon = shot.icon
+            return (
+              <div key={i} className="showcase-card group relative">
+                {/* Hover glow */}
+                <div
+                  className="absolute -inset-3 rounded-[24px] opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-xl"
+                  style={{ background: `linear-gradient(135deg, ${shot.accent}18, transparent 60%)` }}
+                />
+                {/* Card */}
+                <div className="relative bg-white rounded-2xl border border-gray-200/60 shadow-[0_4px_24px_rgba(0,0,0,0.04)] overflow-hidden transition-shadow duration-500 group-hover:shadow-[0_12px_40px_rgba(0,0,0,0.08)]">
+                  {/* Label bar */}
+                  <div className="flex items-center gap-3 px-5 py-3.5 border-b border-gray-100">
+                    <div
+                      className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
+                      style={{ background: `${shot.accent}12` }}
+                    >
+                      <Icon className="w-4 h-4" style={{ color: shot.accent }} />
+                    </div>
+                    <div className="min-w-0">
+                      <h4 className="text-sm font-bold text-[#0B1023] truncate">{shot.title}</h4>
+                      <p className="text-xs text-gray-400 truncate">{shot.desc}</p>
+                    </div>
+                    <div className="ml-auto flex gap-1">
+                      <span className="w-2.5 h-2.5 rounded-full bg-red-400/60" />
+                      <span className="w-2.5 h-2.5 rounded-full bg-yellow-400/60" />
+                      <span className="w-2.5 h-2.5 rounded-full bg-green-400/60" />
                     </div>
                   </div>
-                )}
-
-                {product.hasVisual && i === 3 && (
-                  <div className="bar-container w-full md:w-1/2 h-40 bg-gray-50 rounded-2xl relative flex items-end justify-between p-4 group-hover:bg-emerald-50/30 transition-colors mt-4 md:ml-auto">
-                    {[40, 70, 45, 90, 65].map((h, j) => (
-                      <div
-                        key={j}
-                        className="bar-animate w-8 bg-gradient-to-t from-emerald-500 to-emerald-300 rounded-t-lg"
-                        style={{ height: `${h}%` }}
-                      />
-                    ))}
+                  {/* Screenshot */}
+                  <div className="overflow-hidden">
+                    <img
+                      src={shot.src}
+                      alt={shot.title}
+                      loading="lazy"
+                      className="showcase-card-img w-full h-auto block transition-transform duration-700 group-hover:scale-[1.02]"
+                    />
                   </div>
-                )}
+                </div>
               </div>
             )
           })}
