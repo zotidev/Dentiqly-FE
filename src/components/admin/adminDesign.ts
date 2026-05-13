@@ -29,10 +29,14 @@ export const tokens = {
   violet: "#7C3AED",
   violetFaint: "#F3EEFF",
 
+  grayDot: "#CBD5E1",
+  grayPill: "#F1F5F9",
+  grayPillTx: "#64748B",
+
   cardBorder: "#E8E0D6",
   cardBg: "#FFFFFF",
   pageBg: "#F5F0EA",
-  sidebarBg: "#EBE4DB",
+  sidebarBg: "#0B1023",
 
   avatarColors: [
     { bg: "#DBEAFE", color: "#2563FF" },

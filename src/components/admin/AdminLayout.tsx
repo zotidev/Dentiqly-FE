@@ -17,6 +17,8 @@ import {
   Search,
   MapPin as MapIcon,
   LayoutDashboard,
+  ChevronsLeft,
+  ChevronsRight,
 } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 
@@ -37,6 +39,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
   onViewChange
 }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [collapsed, setCollapsed] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const { user } = useAuth()
 
@@ -94,16 +97,18 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
     window.location.href = '/login'
   }
 
+  const sidebarWidth = collapsed ? 'w-[72px]' : 'w-[250px]'
+
   return (
     <div className="min-h-screen bg-[#F5F0EA] flex flex-col lg:flex-row">
       {/* ═══ MOBILE TOP BAR ═══ */}
-      <div className="lg:hidden h-14 bg-[#EBE4DB] border-b border-[#DDD6CC] flex items-center justify-between px-4 sticky top-0 z-[45]">
+      <div className="lg:hidden h-14 bg-[#0B1023] flex items-center justify-between px-4 sticky top-0 z-[45]">
         <div className="flex items-center gap-2">
-          <img src="/assets/dentiqly-logo.png" alt="Dentiqly" className="h-7 w-auto" />
+          <img src="/assets/dentiqly-logo.png" alt="Dentiqly" className="h-7 w-auto brightness-0 invert" />
         </div>
         <button
           onClick={() => setSidebarOpen(true)}
-          className="p-2 hover:bg-[#DDD6CC] rounded-xl text-gray-600 transition-all active:scale-95"
+          className="p-2 hover:bg-white/10 rounded-xl text-white/70 transition-all active:scale-95"
         >
           <Menu className="h-5 w-5" />
         </button>
@@ -112,22 +117,34 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
       {/* ═══ SIDEBAR ═══ */}
       <div className={`fixed inset-y-0 left-0 z-50 transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-      } lg:translate-x-0 lg:static lg:inset-0 flex`}>
-        <div className="w-[250px] bg-[#EBE4DB] flex flex-col overflow-hidden border-r border-[#DDD6CC]">
+      } lg:translate-x-0 lg:sticky lg:top-0 lg:h-screen lg:inset-auto flex`}>
+        <div className={`${sidebarWidth} bg-[#0B1023] flex flex-col overflow-hidden lg:m-3 lg:rounded-2xl transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] lg:h-[calc(100vh-24px)] shadow-xl`}>
 
-          {/* Logo */}
-          <div className="flex items-center px-5 h-[64px] border-b border-[#DDD6CC]">
-            <img src="/assets/dentiqly-logo.png" alt="Dentiqly" className="h-8 w-auto" />
+          {/* Logo + Collapse toggle */}
+          <div className={`flex items-center ${collapsed ? 'justify-center px-2' : 'justify-between px-5'} h-[64px] border-b border-white/[0.06]`}>
+            {!collapsed && (
+              <img src="/assets/dentiqly-logo.png" alt="Dentiqly" className="h-8 w-auto brightness-0 invert" />
+            )}
+            <button
+              onClick={() => setCollapsed(!collapsed)}
+              className="hidden lg:flex items-center justify-center w-7 h-7 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] text-white/40 hover:text-white/70 transition-all"
+              title={collapsed ? 'Expandir sidebar' : 'Colapsar sidebar'}
+            >
+              {collapsed ? <ChevronsRight className="h-3.5 w-3.5" /> : <ChevronsLeft className="h-3.5 w-3.5" />}
+            </button>
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 px-3 overflow-y-auto no-scrollbar pt-4 pb-4">
+          <nav className="flex-1 px-2.5 overflow-y-auto dark-scrollbar pt-4 pb-4">
             <div className="space-y-5">
               {menuGroups.map((group) => (
                 <div key={group.label}>
-                  <p className="px-3 mb-1.5 text-[10px] font-bold text-[#9C9489] uppercase tracking-[0.14em]">
-                    {group.label}
-                  </p>
+                  {!collapsed && (
+                    <p className="px-3 mb-1.5 text-[10px] font-bold text-white/25 uppercase tracking-[0.14em]">
+                      {group.label}
+                    </p>
+                  )}
+                  {collapsed && <div className="h-px bg-white/[0.06] mx-2 mb-2" />}
                   <div className="space-y-0.5">
                     {group.items.map((item) => {
                       const Icon = item.icon
@@ -139,16 +156,17 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
                             onViewChange(item.id)
                             setSidebarOpen(false)
                           }}
-                          className={`w-full flex items-center gap-2.5 px-3 py-2 text-[13px] font-medium rounded-xl transition-all duration-150 ${
+                          title={collapsed ? item.label : undefined}
+                          className={`w-full flex items-center ${collapsed ? 'justify-center' : ''} gap-2.5 ${collapsed ? 'px-0 py-2.5' : 'px-3 py-2'} text-[13px] font-medium rounded-xl transition-all duration-150 ${
                             isActive
-                              ? 'bg-[#0B1023] text-white shadow-sm'
-                              : 'text-[#6B6560] hover:bg-[#DDD6CC] hover:text-[#3D3832]'
+                              ? 'bg-[#2563FF] text-white shadow-md shadow-[#2563FF]/20'
+                              : 'text-white/40 hover:bg-white/[0.06] hover:text-white/70'
                           }`}
                         >
                           <Icon className={`h-[16px] w-[16px] flex-shrink-0 ${
                             isActive ? 'text-white' : ''
                           }`} />
-                          <span className="truncate">{item.label}</span>
+                          {!collapsed && <span className="truncate">{item.label}</span>}
                         </button>
                       )
                     })}
@@ -159,25 +177,42 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
           </nav>
 
           {/* User + Logout */}
-          <div className="px-3 pb-3 border-t border-[#DDD6CC] pt-3">
-            <div className="flex items-center gap-2.5 px-3 py-2 rounded-xl mb-1">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#2563FF] to-[#7C3AED] flex items-center justify-center text-white text-[10px] font-bold shrink-0">
-                {userInitials}
+          <div className="px-2.5 pb-3 border-t border-white/[0.06] pt-3">
+            {!collapsed ? (
+              <>
+                <div className="flex items-center gap-2.5 px-3 py-2 rounded-xl mb-1">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#2563FF] to-[#7C3AED] flex items-center justify-center text-white text-[10px] font-bold shrink-0">
+                    {userInitials}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[12px] font-semibold text-white/80 truncate leading-tight">
+                      {user?.nombre || 'Admin'} {user?.apellido || ''}
+                    </p>
+                    <p className="text-[10px] text-white/30 truncate">{user?.email || ''}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-[13px] font-medium text-white/30 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all"
+                >
+                  <LogOut className="h-[16px] w-[16px]" />
+                  Cerrar Sesión
+                </button>
+              </>
+            ) : (
+              <div className="flex flex-col items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#2563FF] to-[#7C3AED] flex items-center justify-center text-white text-[10px] font-bold">
+                  {userInitials}
+                </div>
+                <button
+                  onClick={handleLogout}
+                  title="Cerrar Sesión"
+                  className="p-2 text-white/30 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all"
+                >
+                  <LogOut className="h-[16px] w-[16px]" />
+                </button>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-[12px] font-semibold text-[#3D3832] truncate leading-tight">
-                  {user?.nombre || 'Admin'} {user?.apellido || ''}
-                </p>
-                <p className="text-[10px] text-[#9C9489] truncate">{user?.email || ''}</p>
-              </div>
-            </div>
-            <button
-              onClick={handleLogout}
-              className="w-full flex items-center gap-2.5 px-3 py-2 text-[13px] font-medium text-[#9C9489] hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
-            >
-              <LogOut className="h-[16px] w-[16px]" />
-              Cerrar Sesión
-            </button>
+            )}
           </div>
         </div>
 
