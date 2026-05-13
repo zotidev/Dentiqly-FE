@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import { patientPortalApi } from "../../api/patient-portal"
-import { dentalColors } from "../../config/colors"
-import { Calendar, Clock, User, MoreVertical } from "lucide-react"
+import { Calendar, Clock, User, ArrowRight } from "lucide-react"
 import { format, parseISO, isAfter } from "date-fns"
 import { es } from "date-fns/locale"
 
@@ -53,23 +52,23 @@ export const MisTurnos: React.FC = () => {
     }
   }
 
-  const getEstadoColor = (estado: string) => {
+  const getEstadoStyles = (estado: string) => {
     switch (estado) {
       case "Confirmado":
       case "Confirmado por email":
       case "Confirmado por SMS":
       case "Confirmado por WhatsApp":
-        return "bg-emerald-100 text-emerald-700"
+        return "bg-emerald-50 text-emerald-700 border-emerald-200"
       case "Pendiente":
-        return "bg-amber-100 text-amber-700"
+        return "bg-amber-50 text-amber-700 border-amber-200"
       case "Cancelado":
-        return "bg-red-100 text-red-700"
+        return "bg-red-50 text-red-600 border-red-200"
       case "Atendido":
-        return "bg-blue-100 text-blue-700"
+        return "bg-blue-50 text-blue-700 border-blue-200"
       case "Ausente":
-        return "bg-gray-100 text-gray-700"
+        return "bg-gray-50 text-gray-600 border-gray-200"
       default:
-        return "bg-gray-100 text-gray-700"
+        return "bg-gray-50 text-gray-600 border-gray-200"
     }
   }
 
@@ -85,91 +84,96 @@ export const MisTurnos: React.FC = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-lg" style={{ color: dentalColors.primary }}>Cargando...</div>
+        <div className="flex items-center gap-3">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#2563FF]" />
+          <span className="text-[#8A93A8] font-medium">Cargando...</span>
+        </div>
       </div>
     )
   }
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold" style={{ color: dentalColors.gray800 }}>
-        Mis Turnos
-      </h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-extrabold text-[#0B1023]">Mis Turnos</h1>
+      </div>
 
-      <div className="flex gap-2 overflow-x-auto pb-2">
+      {/* Filters */}
+      <div className="flex gap-2 overflow-x-auto pb-1">
         {(["todos", "proximos", "pasados", "cancelados"] as const).map((f) => (
           <button
             key={f}
             onClick={() => setFiltro(f)}
-            className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition-colors ${
+            className={`px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition-all ${
               filtro === f
-                ? "text-white"
-                : "bg-white"
+                ? "bg-[#2563FF] text-white shadow-[0_4px_15px_rgba(37,99,255,0.25)]"
+                : "bg-white text-[#5A6178] border border-gray-100 hover:border-[#2563FF]/30 hover:text-[#2563FF]"
             }`}
-            style={filtro === f ? { backgroundColor: dentalColors.primary } : { color: dentalColors.gray700 }}
           >
             {f.charAt(0).toUpperCase() + f.slice(1)}
           </button>
         ))}
       </div>
 
+      {/* Turnos list */}
       {turnosFiltrados.length === 0 ? (
-        <div className="bg-white rounded-xl shadow-md p-8 text-center">
-          <Calendar size={48} className="mx-auto mb-4" style={{ color: dentalColors.gray400 }} />
-          <h3 className="text-lg font-medium mb-2" style={{ color: dentalColors.gray700 }}>
-            No hay turnos en esta categoria
-          </h3>
+        <div className="bg-white rounded-2xl border border-gray-100 p-8 text-center">
+          <div className="w-16 h-16 rounded-2xl bg-[#F7F8FA] flex items-center justify-center mx-auto mb-4">
+            <Calendar size={28} className="text-[#8A93A8]" />
+          </div>
+          <h3 className="text-lg font-bold text-[#0B1023] mb-2">No hay turnos en esta categoria</h3>
           <Link
             to="/"
-            className="inline-block mt-4 px-6 py-2 rounded-lg text-white font-medium"
-            style={{ backgroundColor: dentalColors.primary }}
+            className="inline-flex items-center gap-2 mt-4 px-6 py-3 bg-[#2563FF] text-white rounded-xl font-bold text-sm hover:bg-[#1D4ED8] transition-all shadow-[0_8px_20px_rgba(37,99,255,0.25)]"
           >
             Reservar Turno
+            <ArrowRight size={16} />
           </Link>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-3">
           {turnosFiltrados.map((turno) => (
             <div
               key={turno.id}
-              className="bg-white rounded-xl shadow-md p-4 lg:p-6"
+              className="bg-white rounded-2xl border border-gray-100 p-5 lg:p-6 hover:border-gray-200 transition-colors"
             >
               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-3">
                     <span
-                      className={`px-3 py-1 rounded-full text-sm font-medium ${getEstadoColor(turno.estado)}`}
+                      className={`px-3 py-1 rounded-lg text-xs font-bold border ${getEstadoStyles(turno.estado)}`}
                     >
                       {turno.estado}
                     </span>
+                    {turno.servicio?.nombre && (
+                      <span className="px-3 py-1 rounded-lg bg-[#F7F8FA] text-[#5A6178] text-xs font-medium">
+                        {turno.servicio.nombre}
+                      </span>
+                    )}
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="flex items-center gap-2">
-                      <Calendar size={18} style={{ color: dentalColors.primary }} />
-                      <span className="font-medium">{formatearFecha(turno.fecha)}</span>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="flex items-center gap-2.5">
+                      <Calendar size={16} className="text-[#8A93A8]" />
+                      <span className="text-sm font-semibold text-[#0B1023] capitalize">{formatearFecha(turno.fecha)}</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Clock size={18} style={{ color: dentalColors.primary }} />
-                      <span>{turno.hora_inicio} - {turno.hora_fin}</span>
+                    <div className="flex items-center gap-2.5">
+                      <Clock size={16} className="text-[#8A93A8]" />
+                      <span className="text-sm text-[#5A6178]">{turno.hora_inicio} - {turno.hora_fin}</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <User size={18} style={{ color: dentalColors.gray600 }} />
-                      <span>
+                    <div className="flex items-center gap-2.5">
+                      <User size={16} className="text-[#8A93A8]" />
+                      <span className="text-sm text-[#5A6178]">
                         {turno.profesional?.nombre} {turno.profesional?.apellido}
                       </span>
-                    </div>
-                    <div className="text-sm" style={{ color: dentalColors.gray600 }}>
-                      {turno.servicio?.nombre}
                     </div>
                   </div>
                 </div>
 
-                <div className="flex gap-2">
+                <div className="flex gap-2 shrink-0">
                   <Link
                     to={`/paciente/turnos/${turno.id}`}
-                    className="px-4 py-2 rounded-lg font-medium border"
-                    style={{ borderColor: dentalColors.gray300, color: dentalColors.gray700 }}
+                    className="px-4 py-2 rounded-xl font-bold text-sm border border-gray-200 text-[#5A6178] hover:border-[#2563FF]/30 hover:text-[#2563FF] transition-all"
                   >
                     Ver
                   </Link>
@@ -177,14 +181,13 @@ export const MisTurnos: React.FC = () => {
                     <>
                       <Link
                         to={`/paciente/turnos/${turno.id}/reprogramar`}
-                        className="px-4 py-2 rounded-lg font-medium text-white"
-                        style={{ backgroundColor: dentalColors.primary }}
+                        className="px-4 py-2 rounded-xl font-bold text-sm bg-[#2563FF] text-white hover:bg-[#1D4ED8] transition-colors"
                       >
                         Reprogramar
                       </Link>
                       <Link
                         to={`/paciente/turnos/${turno.id}/cancelar`}
-                        className="px-4 py-2 rounded-lg font-medium text-white bg-red-500 hover:bg-red-600"
+                        className="px-4 py-2 rounded-xl font-bold text-sm bg-red-500 text-white hover:bg-red-600 transition-colors"
                       >
                         Cancelar
                       </Link>

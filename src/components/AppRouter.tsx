@@ -12,6 +12,10 @@ import { LandingPage } from './landing/LandingPage'
 import { LoginPage } from './auth/LoginPage'
 import { RegisterPage } from './auth/RegisterPage'
 import { SuperAdminApp } from './superadmin/SuperAdminApp'
+import { PrivacyPage } from './legal/PrivacyPage'
+import { TermsPage } from './legal/TermsPage'
+import { CookiesPage } from './legal/CookiesPage'
+import { AboutPage } from './legal/AboutPage'
 
 // Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -134,6 +138,10 @@ export const AppRouter: React.FC = () => {
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+      <Route path="/privacidad" element={<PrivacyPage />} />
+      <Route path="/terminos" element={<TermsPage />} />
+      <Route path="/cookies" element={<CookiesPage />} />
+      <Route path="/sobre-nosotros" element={<AboutPage />} />
       
       {/* Booking público por slug de clínica */}
       <Route path="/booking/:slug" element={<BookingWithSlug />} />

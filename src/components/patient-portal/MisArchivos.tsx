@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react"
 import { patientPortalApi } from "../../api/patient-portal"
-import { dentalColors } from "../../config/colors"
 import { Folder, Download, FileText, Image, File } from "lucide-react"
 import { format, parseISO } from "date-fns"
 import { es } from "date-fns/locale"
@@ -40,30 +39,31 @@ export const MisArchivos: React.FC = () => {
   const getFileColor = (tipo: string) => {
     if (tipo?.includes("pdf")) return "#EF4444"
     if (tipo?.includes("image")) return "#10B981"
-    return "#6B7280"
+    return "#8A93A8"
   }
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-lg" style={{ color: dentalColors.primary }}>Cargando...</div>
+        <div className="flex items-center gap-3">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#2563FF]" />
+          <span className="text-[#8A93A8] font-medium">Cargando...</span>
+        </div>
       </div>
     )
   }
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold" style={{ color: dentalColors.gray800 }}>
-        Mis Archivos
-      </h1>
+      <h1 className="text-2xl font-extrabold text-[#0B1023]">Mis Archivos</h1>
 
       {archivos.length === 0 ? (
-        <div className="bg-white rounded-xl shadow-md p-8 text-center">
-          <Folder size={48} className="mx-auto mb-4" style={{ color: dentalColors.gray400 }} />
-          <h3 className="text-lg font-medium mb-2" style={{ color: dentalColors.gray700 }}>
-            No hay archivos cargados
-          </h3>
-          <p className="text-sm" style={{ color: dentalColors.gray600 }}>
+        <div className="bg-white rounded-2xl border border-gray-100 p-8 text-center">
+          <div className="w-16 h-16 rounded-2xl bg-[#F7F8FA] flex items-center justify-center mx-auto mb-4">
+            <Folder size={28} className="text-[#8A93A8]" />
+          </div>
+          <h3 className="text-lg font-bold text-[#0B1023] mb-2">No hay archivos cargados</h3>
+          <p className="text-sm text-[#8A93A8]">
             Los documentos de tus consultas apareceran aqui.
           </p>
         </div>
@@ -76,20 +76,20 @@ export const MisArchivos: React.FC = () => {
             return (
               <div
                 key={archivo.id}
-                className="bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition-shadow"
+                className="bg-white rounded-2xl border border-gray-100 p-5 hover:border-gray-200 hover:shadow-[0_4px_20px_rgb(0,0,0,0.04)] transition-all"
               >
                 <div className="flex items-start gap-3">
                   <div
-                    className="p-3 rounded-lg"
-                    style={{ backgroundColor: `${iconColor}15` }}
+                    className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
+                    style={{ backgroundColor: `${iconColor}12` }}
                   >
-                    <FileIcon size={24} style={{ color: iconColor }} />
+                    <FileIcon size={22} style={{ color: iconColor }} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium truncate" style={{ color: dentalColors.gray800 }}>
+                    <p className="font-bold text-sm text-[#0B1023] truncate">
                       {archivo.nombre || "Archivo"}
                     </p>
-                    <p className="text-sm" style={{ color: dentalColors.gray600 }}>
+                    <p className="text-xs text-[#8A93A8] mt-0.5">
                       {formatearFecha(archivo.createdAt)}
                     </p>
                   </div>
@@ -100,10 +100,9 @@ export const MisArchivos: React.FC = () => {
                     href={archivo.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-4 flex items-center justify-center gap-2 w-full px-4 py-2 rounded-lg border transition-colors hover:bg-gray-50"
-                    style={{ borderColor: dentalColors.gray300, color: dentalColors.gray700 }}
+                    className="mt-4 flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-bold text-[#5A6178] hover:border-[#2563FF]/30 hover:text-[#2563FF] hover:bg-[#2563FF]/5 transition-all"
                   >
-                    <Download size={16} />
+                    <Download size={15} />
                     Descargar
                   </a>
                 )}

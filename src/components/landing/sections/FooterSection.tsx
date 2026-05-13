@@ -1,4 +1,5 @@
 import React from "react"
+import { Link } from "react-router-dom"
 import { Twitter, Linkedin, Instagram, Facebook } from "lucide-react"
 
 export const FooterSection: React.FC = () => {
@@ -85,12 +86,12 @@ export const FooterSection: React.FC = () => {
             <h4 className="font-bold text-[#0B1023] mb-6">Compania</h4>
             <ul className="space-y-4 text-sm text-gray-500">
               <li>
-                <a href="#" className="hover:text-[#2563FF] transition-colors">
+                <Link to="/sobre-nosotros" className="hover:text-[#2563FF] transition-colors">
                   Sobre nosotros
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-[#2563FF] transition-colors">
+                <a href="mailto:hola@dentiqly.com" className="hover:text-[#2563FF] transition-colors">
                   Contacto
                 </a>
               </li>
@@ -112,12 +113,15 @@ export const FooterSection: React.FC = () => {
             reservados.
           </p>
           <div className="flex gap-6 text-sm text-gray-400">
-            <a href="#" className="hover:text-gray-600 transition-colors">
+            <Link to="/privacidad" className="hover:text-[#2563FF] transition-colors">
               Privacidad
-            </a>
-            <a href="#" className="hover:text-gray-600 transition-colors">
+            </Link>
+            <Link to="/terminos" className="hover:text-[#2563FF] transition-colors">
               Terminos
-            </a>
+            </Link>
+            <Link to="/cookies" className="hover:text-[#2563FF] transition-colors">
+              Cookies
+            </Link>
           </div>
         </div>
       </div>

@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import { dentalColors } from '../../config/colors';
-import { Shield, CheckCircle2, ArrowRight, Building2, User, Mail, Lock, Loader2 } from 'lucide-react';
+import { Shield, CheckCircle2, ArrowRight, Building2, User, Mail, Lock, Loader2, Phone, Globe } from 'lucide-react';
 import { useToast } from '../../hooks/use-toast';
 
 export const RegisterPage: React.FC = () => {
@@ -27,8 +26,8 @@ export const RegisterPage: React.FC = () => {
     try {
       const response = await register(formData);
       toast({
-        title: "¡Bienvenido a Dentiqly!",
-        description: "Tu clínica ha sido registrada exitosamente. Ya puedes empezar a trabajar.",
+        title: "Bienvenido a Dentiqly!",
+        description: "Tu clinica ha sido registrada exitosamente. Ya puedes empezar a trabajar.",
       });
       if (response.tenant?.slug) {
         navigate(`/${response.tenant.slug}/admin`);
@@ -38,7 +37,7 @@ export const RegisterPage: React.FC = () => {
     } catch (error: any) {
       toast({
         title: "Error al registrarse",
-        description: error.message || "Ocurrió un problema durante el registro. Revisa los datos.",
+        description: error.message || "Ocurrio un problema durante el registro. Revisa los datos.",
         variant: "destructive",
       });
     } finally {
@@ -51,212 +50,222 @@ export const RegisterPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-stretch bg-white">
-      {/* Lado Izquierdo: Información/Marketing */}
-      <div className="hidden lg:flex lg:w-1/2 bg-[#0A0F2D] relative overflow-hidden flex-col justify-center px-16">
-        <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }}></div>
-        
+    <div className="min-h-screen flex items-stretch">
+      {/* Left — Dark branding panel */}
+      <div className="hidden lg:flex lg:w-[45%] bg-[#0B1023] relative overflow-hidden flex-col justify-between p-16">
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute -top-[20%] -right-[20%] w-[60%] h-[60%] bg-[#2563FF]/10 rounded-full blur-[120px]" />
+          <div className="absolute bottom-[10%] -left-[10%] w-[40%] h-[40%] bg-[#02E3FF]/8 rounded-full blur-[100px]" />
+        </div>
+
         <div className="relative z-10">
           <Link to="/">
-            <img src="/assets/dentiqly-logo.png" alt="Dentiqly" className="h-12 w-auto mb-12 brightness-0 invert" />
+            <img src="/assets/dentiqly-logo.png" alt="Dentiqly" className="h-10 w-auto brightness-0 invert" />
           </Link>
-          
-          <h2 className="text-4xl font-bold text-white mb-6 leading-tight">
-            Comienza tu transformación digital con Dentiqly
+        </div>
+
+        <div className="relative z-10 max-w-md">
+          <h2 className="text-4xl font-extrabold text-white mb-4 tracking-tight leading-tight">
+            Comienza tu transformacion digital con Dentiqly
           </h2>
-          
-          <div className="space-y-6 mb-12">
+          <p className="text-white/40 text-lg leading-relaxed mb-10">
+            Configura tu clinica en minutos y comienza a gestionar pacientes, turnos y facturacion desde el dia uno.
+          </p>
+
+          <div className="space-y-4">
             {[
-              'Activación en minutos tras suscripción',
-              'Setup automático de servicios y configuración',
-              'Migración simple de datos',
-              'Soporte prioritario durante el onboarding'
+              'Activacion en minutos tras suscripcion',
+              'Setup automatico de servicios y configuracion',
+              'Migracion simple de datos',
+              'Soporte prioritario durante el onboarding',
             ].map((text, i) => (
-              <div key={i} className="flex items-center gap-3 text-blue-100">
-                <CheckCircle2 className="h-6 w-6 text-dental-secondary" />
-                <span className="text-lg">{text}</span>
+              <div key={i} className="flex items-center gap-3">
+                <div className="w-6 h-6 rounded-full bg-[#02E3FF]/15 flex items-center justify-center shrink-0">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-[#02E3FF]" />
+                </div>
+                <span className="text-white/60 text-sm font-medium">{text}</span>
               </div>
             ))}
           </div>
+        </div>
 
-          <div className="p-6 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-sm">
-            <div className="flex gap-4 items-center mb-4">
-              <div className="p-3 bg-[#2563FF] rounded-xl">
-                <Shield className="h-6 w-6 text-white" />
-              </div>
-              <p className="text-white font-bold text-lg italic">"Dentiqly nos permitió crecer un 30% en los primeros 6 meses."</p>
+        <div className="relative z-10">
+          <div className="p-5 bg-white/[0.04] rounded-2xl border border-white/[0.06]">
+            <div className="flex items-center gap-2 mb-3">
+              <Shield className="h-5 w-5 text-[#02E3FF]" />
+              <span className="text-white/80 text-sm font-bold">Seguridad empresarial</span>
             </div>
-            <p className="text-blue-200 text-sm">- Dra. Claudia Ruiz, Dental Care</p>
+            <p className="text-white/40 text-sm">
+              Tus datos protegidos con encriptacion AES-256. Copias de seguridad automaticas cada hora.
+            </p>
           </div>
         </div>
       </div>
 
-      {/* Lado Derecho: Formulario */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 lg:p-12">
-        <div className="w-full max-w-md">
-          <div className="mb-6 lg:hidden">
-            <img src="/assets/dentiqly-logo.png" alt="Dentiqly" className="h-10 w-auto" />
+      {/* Right — Registration form */}
+      <div className="w-full lg:w-[55%] flex items-center justify-center p-8 sm:p-12 bg-[#FAFCFF]">
+        <div className="w-full max-w-lg">
+          <div className="lg:hidden mb-8">
+            <Link to="/">
+              <img src="/assets/dentiqly-logo.png" alt="Dentiqly" className="h-10 w-auto" />
+            </Link>
           </div>
 
           <div className="mb-6">
-            <h1 className="text-2xl font-bold text-gray-900 mb-1">Crear nueva clínica</h1>
-            <p className="text-gray-500 font-medium text-sm">Configura tu espacio de trabajo en segundos.</p>
+            <h1 className="text-2xl font-extrabold text-[#0B1023] mb-1">Crear nueva clinica</h1>
+            <p className="text-[#8A93A8] font-medium text-sm">Configura tu espacio de trabajo en segundos.</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100/80 p-8">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-[#0B1023] mb-1.5 uppercase tracking-wider">Clinica</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Building2 className="h-4 w-4 text-[#8A93A8]" />
+                    </div>
+                    <input
+                      type="text"
+                      name="nombre_clinica"
+                      required
+                      value={formData.nombre_clinica}
+                      onChange={handleChange}
+                      className="block w-full pl-9 pr-3 py-3 text-sm bg-[#F7F8FA] border border-transparent rounded-xl focus:ring-2 focus:ring-[#2563FF]/20 focus:border-[#2563FF] focus:bg-white transition-all text-[#0B1023]"
+                      placeholder="Ej: Clinica Dental"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-[#0B1023] mb-1.5 uppercase tracking-wider">Administrador</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <User className="h-4 w-4 text-[#8A93A8]" />
+                    </div>
+                    <input
+                      type="text"
+                      name="nombre_admin"
+                      required
+                      value={formData.nombre_admin}
+                      onChange={handleChange}
+                      className="block w-full pl-9 pr-3 py-3 text-sm bg-[#F7F8FA] border border-transparent rounded-xl focus:ring-2 focus:ring-[#2563FF]/20 focus:border-[#2563FF] focus:bg-white transition-all text-[#0B1023]"
+                      placeholder="Tu nombre"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-[#0B1023] mb-1.5 uppercase tracking-wider">Telefono</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Phone className="h-4 w-4 text-[#8A93A8]" />
+                    </div>
+                    <input
+                      type="tel"
+                      name="telefono"
+                      value={formData.telefono}
+                      onChange={handleChange}
+                      className="block w-full pl-9 pr-3 py-3 text-sm bg-[#F7F8FA] border border-transparent rounded-xl focus:ring-2 focus:ring-[#2563FF]/20 focus:border-[#2563FF] focus:bg-white transition-all text-[#0B1023]"
+                      placeholder="+54 11 ..."
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-[#0B1023] mb-1.5 uppercase tracking-wider">URL / Web</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Globe className="h-4 w-4 text-[#8A93A8]" />
+                    </div>
+                    <input
+                      type="url"
+                      name="web_url"
+                      value={formData.web_url}
+                      onChange={handleChange}
+                      className="block w-full pl-9 pr-3 py-3 text-sm bg-[#F7F8FA] border border-transparent rounded-xl focus:ring-2 focus:ring-[#2563FF]/20 focus:border-[#2563FF] focus:bg-white transition-all text-[#0B1023]"
+                      placeholder="https://..."
+                    />
+                  </div>
+                </div>
+              </div>
+
               <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1 uppercase tracking-wider">Clínica</label>
+                <label className="block text-xs font-bold text-[#0B1023] mb-1.5 uppercase tracking-wider">Email profesional</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Building2 className="h-4 w-4 text-gray-400" />
+                    <Mail className="h-4 w-4 text-[#8A93A8]" />
                   </div>
                   <input
-                    type="text"
-                    name="nombre_clinica"
+                    type="email"
+                    name="email_admin"
                     required
-                    value={formData.nombre_clinica}
+                    value={formData.email_admin}
                     onChange={handleChange}
-                    className="block w-full pl-9 pr-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#2563FF] focus:border-[#2563FF] transition-all"
-                    placeholder="Ej: Clínica Dental"
+                    className="block w-full pl-9 pr-3 py-3 text-sm bg-[#F7F8FA] border border-transparent rounded-xl focus:ring-2 focus:ring-[#2563FF]/20 focus:border-[#2563FF] focus:bg-white transition-all text-[#0B1023]"
+                    placeholder="ejemplo@clinica.com"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1 uppercase tracking-wider">Administrador</label>
+                <label className="block text-xs font-bold text-[#0B1023] mb-1.5 uppercase tracking-wider">Contrasena</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <User className="h-4 w-4 text-gray-400" />
+                    <Lock className="h-4 w-4 text-[#8A93A8]" />
                   </div>
                   <input
-                    type="text"
-                    name="nombre_admin"
+                    type="password"
+                    name="password"
                     required
-                    value={formData.nombre_admin}
+                    value={formData.password}
                     onChange={handleChange}
-                    className="block w-full pl-9 pr-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#2563FF] focus:border-[#2563FF] transition-all"
-                    placeholder="Tu nombre"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1 uppercase tracking-wider">Teléfono de contacto</label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                    </svg>
-                  </div>
-                  <input
-                    type="tel"
-                    name="telefono"
-                    value={formData.telefono}
-                    onChange={handleChange}
-                    className="block w-full pl-9 pr-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#2563FF] focus:border-[#2563FF] transition-all"
-                    placeholder="+54 11 ..."
+                    className="block w-full pl-9 pr-3 py-3 text-sm bg-[#F7F8FA] border border-transparent rounded-xl focus:ring-2 focus:ring-[#2563FF]/20 focus:border-[#2563FF] focus:bg-white transition-all text-[#0B1023]"
+                    placeholder="Minimo 6 caracteres"
                   />
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1 uppercase tracking-wider">URL / Web</label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-                    </svg>
-                  </div>
-                  <input
-                    type="url"
-                    name="web_url"
-                    value={formData.web_url}
-                    onChange={handleChange}
-                    className="block w-full pl-9 pr-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#2563FF] focus:border-[#2563FF] transition-all"
-                    placeholder="https://..."
-                  />
-                </div>
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-[#2563FF] text-white py-3.5 px-6 rounded-xl font-bold text-sm hover:bg-[#1D4ED8] transition-all shadow-[0_8px_20px_rgba(37,99,255,0.25)] hover:shadow-[0_12px_30px_rgba(37,99,255,0.35)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2.5"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="h-4.5 w-4.5 animate-spin" />
+                      Creando tu clinica...
+                    </>
+                  ) : (
+                    <>
+                      Comenzar prueba gratuita
+                      <ArrowRight className="h-4.5 w-4.5" />
+                    </>
+                  )}
+                </button>
               </div>
-            </div>
 
-            <div>
-              <label className="block text-xs font-bold text-gray-700 mb-1 uppercase tracking-wider">Email profesional</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-4 w-4 text-gray-400" />
-                </div>
-                <input
-                  type="email"
-                  name="email_admin"
-                  required
-                  value={formData.email_admin}
-                  onChange={handleChange}
-                  className="block w-full pl-9 pr-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#2563FF] focus:border-[#2563FF] transition-all"
-                  placeholder="ejemplo@clinica.com"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-gray-700 mb-1 uppercase tracking-wider">Contraseña</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-4 w-4 text-gray-400" />
-                </div>
-                <input
-                  type="password"
-                  name="password"
-                  required
-                  value={formData.password}
-                  onChange={handleChange}
-                  className="block w-full pl-9 pr-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#2563FF] focus:border-[#2563FF] transition-all"
-                  placeholder="Mínimo 6 caracteres"
-                />
-              </div>
-            </div>
-
-            <div className="pt-4">
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-[#2563FF] text-white py-4 px-6 rounded-xl font-bold text-lg hover:bg-[#1D4ED8] transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                    Creando tu clínica...
-                  </>
-                ) : (
-                  <>
-                    Comenzar prueba gratuita
-                    <ArrowRight className="h-5 w-5" />
-                  </>
-                )}
-              </button>
-            </div>
-
-            <p className="text-center text-sm text-gray-500 mt-6">
-              Al registrarte, aceptas nuestros{' '}
-              <a href="#" className="text-[#2563FF] hover:underline font-semibold">Términos de Servicio</a> y{' '}
-              <a href="#" className="text-[#2563FF] hover:underline font-semibold">Política de Privacidad</a>.
-            </p>
-
-            <div className="mt-8 pt-8 border-t border-gray-100 text-center">
-              <p className="text-sm text-gray-600">
-                ¿Ya tienes una cuenta?{' '}
-                <Link to="/login" className="text-[#2563FF] font-bold hover:underline">
-                  Inicia sesión aquí
-                </Link>
+              <p className="text-center text-xs text-[#8A93A8] mt-4">
+                Al registrarte, aceptas nuestros{' '}
+                <Link to="/terminos" className="text-[#2563FF] hover:text-[#1D4ED8] font-semibold transition-colors">Terminos de Servicio</Link> y{' '}
+                <Link to="/privacidad" className="text-[#2563FF] hover:text-[#1D4ED8] font-semibold transition-colors">Politica de Privacidad</Link>.
               </p>
-            </div>
-          </form>
+            </form>
+          </div>
+
+          <div className="mt-6 text-center">
+            <p className="text-sm text-[#8A93A8]">
+              Ya tienes una cuenta?{' '}
+              <Link to="/login" className="text-[#2563FF] font-bold hover:text-[#1D4ED8] transition-colors">
+                Inicia sesion aqui
+              </Link>
+            </p>
+          </div>
         </div>
       </div>
     </div>
   );
 };
-
-
