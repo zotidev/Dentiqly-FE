@@ -72,7 +72,7 @@ export const SecuritySection: React.FC = () => {
   }, [])
 
   return (
-    <section ref={sectionRef} className="py-28 sm:py-36 bg-[#0B1023] relative overflow-hidden">
+    <section ref={sectionRef} id="seguridad" className="py-28 sm:py-36 bg-[#0B1023] relative overflow-hidden">
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-0 right-0 w-[40%] h-[40%] bg-[#2563FF]/5 rounded-full blur-[120px]" />
         <div className="absolute bottom-0 left-0 w-[30%] h-[30%] bg-[#02E3FF]/5 rounded-full blur-[100px]" />

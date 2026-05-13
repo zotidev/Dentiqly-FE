@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from "react"
-import { Link } from "react-router-dom"
+import React, { useCallback, useEffect, useRef, useState } from "react"
+import { Link, useLocation, useNavigate } from "react-router-dom"
 import { Menu, X, ArrowRight } from "lucide-react"
 import gsap from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
@@ -11,6 +11,34 @@ export const Navbar: React.FC = () => {
   const [scrolled, setScrolled] = useState(false)
   const navRef = useRef<HTMLElement>(null)
   const mobileMenuRef = useRef<HTMLDivElement>(null)
+  const location = useLocation()
+  const navigate = useNavigate()
+
+  const isLanding = location.pathname === "/"
+
+  const handleAnchorClick = useCallback(
+    (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+      e.preventDefault()
+      setMobileMenuOpen(false)
+
+      if (isLanding) {
+        const el = document.querySelector(href)
+        if (el) el.scrollIntoView({ behavior: "smooth" })
+      } else {
+        navigate("/" + href)
+      }
+    },
+    [isLanding, navigate]
+  )
+
+  useEffect(() => {
+    if (isLanding && location.hash) {
+      setTimeout(() => {
+        const el = document.querySelector(location.hash)
+        if (el) el.scrollIntoView({ behavior: "smooth" })
+      }, 100)
+    }
+  }, [location, isLanding])
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -79,6 +107,7 @@ export const Navbar: React.FC = () => {
               <a
                 key={item.label}
                 href={item.href}
+                onClick={(e) => handleAnchorClick(e, item.href)}
                 className="px-4 py-2 text-sm font-semibold text-gray-600 hover:text-[#2563FF] hover:bg-blue-50/50 rounded-full transition-all"
               >
                 {item.label}
@@ -124,7 +153,7 @@ export const Navbar: React.FC = () => {
               <a
                 key={item.label}
                 href={item.href}
-                onClick={() => setMobileMenuOpen(false)}
+                onClick={(e) => handleAnchorClick(e, item.href)}
                 className="mobile-nav-link text-2xl font-bold text-white/80 hover:text-[#02E3FF] py-4 border-b border-white/5 transition-colors"
               >
                 {item.label}

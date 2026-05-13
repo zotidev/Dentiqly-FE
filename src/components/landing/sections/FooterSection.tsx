@@ -1,12 +1,37 @@
-import React from "react"
-import { Link } from "react-router-dom"
+import React, { useCallback } from "react"
+import { Link, useLocation, useNavigate } from "react-router-dom"
 import { Twitter, Linkedin, Instagram, Facebook } from "lucide-react"
 
 export const FooterSection: React.FC = () => {
+  const location = useLocation()
+  const navigate = useNavigate()
+  const isLanding = location.pathname === "/"
+
+  const handleAnchorClick = useCallback(
+    (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+      e.preventDefault()
+      if (isLanding) {
+        const el = document.querySelector(href)
+        if (el) el.scrollIntoView({ behavior: "smooth" })
+      } else {
+        navigate("/" + href)
+      }
+    },
+    [isLanding, navigate]
+  )
+
+  const sectionLinks = [
+    { label: "Producto", href: "#producto" },
+    { label: "Funcionalidades", href: "#funcionalidades" },
+    { label: "Seguridad", href: "#seguridad" },
+    { label: "Precios", href: "#precios" },
+    { label: "Preguntas Frecuentes", href: "#faq" },
+  ]
+
   return (
     <footer className="bg-[#FAFCFF] border-t border-gray-100 pt-20 pb-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-16">
           <div>
             <img
               src="/assets/dentiqly-logo.png"
@@ -33,52 +58,17 @@ export const FooterSection: React.FC = () => {
           <div>
             <h4 className="font-bold text-[#0B1023] mb-6">Plataforma</h4>
             <ul className="space-y-4 text-sm text-gray-500">
-              <li>
-                <a href="#funcionalidades" className="hover:text-[#2563FF] transition-colors">
-                  Funcionalidades
-                </a>
-              </li>
-              <li>
-                <a href="#precios" className="hover:text-[#2563FF] transition-colors">
-                  Precios
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-[#2563FF] transition-colors">
-                  Seguridad
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-[#2563FF] transition-colors">
-                  Actualizaciones
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="font-bold text-[#0B1023] mb-6">Recursos</h4>
-            <ul className="space-y-4 text-sm text-gray-500">
-              <li>
-                <a href="#" className="hover:text-[#2563FF] transition-colors">
-                  Blog
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-[#2563FF] transition-colors">
-                  Centro de Ayuda
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-[#2563FF] transition-colors">
-                  Guias
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-[#2563FF] transition-colors">
-                  API
-                </a>
-              </li>
+              {sectionLinks.map((item) => (
+                <li key={item.href}>
+                  <a
+                    href={item.href}
+                    onClick={(e) => handleAnchorClick(e, item.href)}
+                    className="hover:text-[#2563FF] transition-colors"
+                  >
+                    {item.label}
+                  </a>
+                </li>
+              ))}
             </ul>
           </div>
 

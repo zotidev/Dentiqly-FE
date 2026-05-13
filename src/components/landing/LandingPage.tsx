@@ -9,6 +9,7 @@ import { MetricsSection } from "./sections/MetricsSection"
 import { FeatureDeepDive } from "./sections/FeatureDeepDive"
 import { TestimonialSection } from "./sections/TestimonialSection"
 import { SecuritySection } from "./sections/SecuritySection"
+import { FaqSection } from "./sections/FaqSection"
 import { PricingSection } from "./sections/PricingSection"
 import { CtaSection } from "./sections/CtaSection"
 import { FooterSection } from "./sections/FooterSection"
@@ -32,6 +33,7 @@ export const LandingPage: React.FC = () => {
       <TestimonialSection />
       <SecuritySection />
       <PricingSection />
+      <FaqSection />
       <CtaSection />
       <FooterSection />
     </div>

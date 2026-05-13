@@ -1,5 +1,15 @@
 import React, { useEffect, useState } from 'react'
 import { Routes, Route, Navigate, useLocation, useParams } from 'react-router-dom'
+
+const ScrollToTop: React.FC = () => {
+  const { pathname, hash } = useLocation()
+  useEffect(() => {
+    if (!hash) {
+      window.scrollTo(0, 0)
+    }
+  }, [pathname, hash])
+  return null
+}
 import { dentalColors } from '../config/colors'
 import { useAuth } from '../hooks/useAuth'
 import { apiClient } from '../lib/api-client'
@@ -134,6 +144,8 @@ const BookingLayout: React.FC = () => {
 
 export const AppRouter: React.FC = () => {
   return (
+    <>
+    <ScrollToTop />
     <Routes>
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<LoginPage />} />
@@ -172,5 +184,6 @@ export const AppRouter: React.FC = () => {
       <Route path="/paciente/*" element={<PatientApp />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </>
   )
 }
