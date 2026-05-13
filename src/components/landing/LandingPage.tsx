@@ -52,7 +52,7 @@ export const LandingPage: React.FC = () => {
             <Link to="/login" className="px-5 py-2.5 text-sm font-bold text-gray-700 hover:text-[#2563FF] transition-colors">Ingresar</Link>
             <Link to="/register" className="relative group px-6 py-2.5 bg-[#0A0F2D] text-white rounded-full text-sm font-bold overflow-hidden transition-all hover:scale-105 hover:shadow-[0_0_40px_-10px_rgba(37,99,255,0.6)]">
               <span className="relative z-10 flex items-center gap-2">Probar gratis <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" /></span>
-              <div className="absolute inset-0 bg-gradient-to-r from-[#2563FF] to-[#02E3FF] opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-[#2563FF] to-[var(--brand-secondary)] opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </Link>
           </div>
 
@@ -68,7 +68,7 @@ export const LandingPage: React.FC = () => {
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10">
           <motion.div 
             style={{ y }}
-            className="absolute -top-[20%] -right-[10%] w-[70%] h-[70%] bg-gradient-to-b from-[#2563FF]/10 to-[#02E3FF]/5 rounded-full blur-[120px]" 
+            className="absolute -top-[20%] -right-[10%] w-[70%] h-[70%] bg-gradient-to-b from-[#2563FF]/10 to-[var(--brand-secondary)]/5 rounded-full blur-[120px]" 
           />
           <div className="absolute top-[20%] -left-[10%] w-[50%] h-[50%] bg-gradient-to-tr from-[#8B5CF6]/10 to-transparent rounded-full blur-[100px]" />
         </div>
@@ -84,7 +84,7 @@ export const LandingPage: React.FC = () => {
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-gray-200 shadow-sm mb-8"
               >
                 <Sparkles className="w-4 h-4 text-[#2563FF]" />
-                <span className="text-sm font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#2563FF] to-[#02E3FF]">La nueva era de la gestión dental</span>
+                <span className="text-sm font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#2563FF] to-[var(--brand-secondary)]">La nueva era de la gestión dental</span>
               </motion.div>
 
               <motion.h1 
@@ -95,7 +95,7 @@ export const LandingPage: React.FC = () => {
               >
                 Software dental <br/>
                 <span className="relative whitespace-nowrap">
-                  <span className="relative z-10 text-transparent bg-clip-text bg-gradient-to-r from-[#2563FF] to-[#02E3FF]">todo en uno</span>
+                  <span className="relative z-10 text-transparent bg-clip-text bg-gradient-to-r from-[#2563FF] to-[var(--brand-secondary)]">todo en uno</span>
                   <motion.span 
                     initial={{ scaleX: 0 }}
                     animate={{ scaleX: 1 }}
@@ -181,7 +181,7 @@ export const LandingPage: React.FC = () => {
             {/* Bento Item 1 - Large */}
             <FadeIn delay={0.1} className="md:col-span-2 group relative bg-white rounded-3xl p-8 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_50px_rgb(37,99,255,0.1)] transition-all duration-500 overflow-hidden overflow-hidden">
               <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-[#2563FF]/10 to-transparent rounded-bl-full -z-10 group-hover:scale-110 transition-transform duration-700"></div>
-              <div className="w-14 h-14 bg-gradient-to-br from-[#2563FF] to-[#02E3FF] rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-blue-500/30">
+              <div className="w-14 h-14 bg-gradient-to-br from-[#2563FF] to-[var(--brand-secondary)] rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-blue-500/30">
                 <Calendar className="text-white w-7 h-7" />
               </div>
               <h4 className="text-2xl font-bold text-[#0A0F2D] mb-3">Agenda Inteligente</h4>
@@ -197,7 +197,7 @@ export const LandingPage: React.FC = () => {
                     <div className="w-full h-12 bg-white rounded-xl shadow-sm border border-gray-50 flex items-center px-4">
                       <div className="w-32 h-3 bg-blue-100 rounded-full"></div>
                     </div>
-                    <div className="w-3/4 h-24 bg-gradient-to-r from-[#2563FF]/10 to-[#02E3FF]/10 rounded-xl border border-blue-100/50 relative">
+                    <div className="w-3/4 h-24 bg-gradient-to-r from-[#2563FF]/10 to-[var(--brand-secondary)]/10 rounded-xl border border-blue-100/50 relative">
                       <div className="absolute left-4 top-4 w-2 h-2 bg-[#2563FF] rounded-full"></div>
                     </div>
                   </div>
@@ -301,7 +301,7 @@ export const LandingPage: React.FC = () => {
                   {['Usuarios y profesionales ilimitados', 'Gestión de turnos y agenda online', 'Historias clínicas y odontogramas', 'Facturación y control de caja', 'Recordatorios por WhatsApp', 'Soporte prioritario 24/7'].map((feat, i) => (
                     <div key={i} className="flex items-start gap-3">
                       <div className="w-6 h-6 rounded-full bg-[#2563FF]/20 flex items-center justify-center shrink-0 mt-0.5">
-                        <Check className="w-3.5 h-3.5 text-[#02E3FF]" />
+                        <Check className="w-3.5 h-3.5 text-dental-secondary" />
                       </div>
                       <span className="text-blue-50/80">{feat}</span>
                     </div>
@@ -320,7 +320,7 @@ export const LandingPage: React.FC = () => {
       {/* Final CTA */}
       <div className="py-24 bg-white relative overflow-hidden">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <FadeIn className="relative rounded-[2.5rem] bg-gradient-to-br from-[#2563FF] to-[#02E3FF] p-12 md:p-20 text-center overflow-hidden shadow-[0_20px_60px_rgba(37,99,255,0.2)]">
+          <FadeIn className="relative rounded-[2.5rem] bg-gradient-to-br from-[#2563FF] to-[var(--brand-secondary)] p-12 md:p-20 text-center overflow-hidden shadow-[0_20px_60px_rgba(37,99,255,0.2)]">
             {/* Abstract background shapes inside CTA */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl mix-blend-overlay"></div>
             <div className="absolute bottom-0 left-0 w-64 h-64 bg-black/10 rounded-full blur-3xl mix-blend-overlay"></div>
@@ -394,3 +394,6 @@ export const LandingPage: React.FC = () => {
     </div>
   );
 };
+
+
+

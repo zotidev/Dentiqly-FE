@@ -101,7 +101,7 @@ export const SuperAdminApp: React.FC = () => {
       {/* Sidebar SuperAdmin */}
       <div className="w-64 bg-[#0A0F2D] text-white flex flex-col h-screen fixed">
         <div className="p-6 border-b border-white/10 flex items-center gap-3">
-          <ShieldAlert className="w-8 h-8 text-[#02E3FF]" />
+          <ShieldAlert className="w-8 h-8 text-dental-secondary" />
           <div>
             <h1 className="font-bold text-xl">Dentiqly</h1>
             <p className="text-xs text-blue-200 uppercase tracking-widest">SuperAdmin</p>
@@ -252,3 +252,5 @@ export const SuperAdminApp: React.FC = () => {
     </div>
   );
 };
+
+

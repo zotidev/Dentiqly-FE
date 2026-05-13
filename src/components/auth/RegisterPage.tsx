@@ -73,7 +73,7 @@ export const RegisterPage: React.FC = () => {
               'Soporte prioritario durante el onboarding'
             ].map((text, i) => (
               <div key={i} className="flex items-center gap-3 text-blue-100">
-                <CheckCircle2 className="h-6 w-6 text-[#02E3FF]" />
+                <CheckCircle2 className="h-6 w-6 text-dental-secondary" />
                 <span className="text-lg">{text}</span>
               </div>
             ))}
@@ -258,3 +258,5 @@ export const RegisterPage: React.FC = () => {
     </div>
   );
 };
+
+

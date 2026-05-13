@@ -800,7 +800,7 @@ export const CalendarView: React.FC = () => {
           <h1 className="text-[22px] font-semibold text-[#0B1023] tracking-[-0.3px]">Calendario de Turnos</h1>
           <p className="text-[13px] text-[#8A93A8] mt-1">Gestión de agenda y citas</p>
         </div>
-        <Button onClick={() => setShowBookingModal(true)} className="bg-[#02E3FF] hover:bg-[#00C4DD] text-[#0B1023] rounded-xl px-5 py-2.5 flex items-center gap-2 shadow-sm text-[13px] font-bold transition-all">
+        <Button onClick={() => setShowBookingModal(true)} className="bg-dental-secondary hover:opacity-90 text-white rounded-xl px-5 py-2.5 flex items-center gap-2 shadow-sm text-[13px] font-bold transition-all">
            <Plus className="w-4 h-4" /> Nuevo Turno
         </Button>
       </div>
@@ -1059,7 +1059,7 @@ export const CalendarView: React.FC = () => {
                 </button>
                 <button
                   onClick={() => setShowEditModal(true)}
-                  className="px-4 py-2 text-[13px] font-bold text-[#0B1023] bg-[#02E3FF] rounded-xl hover:bg-[#00C4DD] transition-all"
+                  className="px-4 py-2 text-[13px] font-bold text-white bg-dental-secondary rounded-xl hover:opacity-90 transition-all"
                 >
                   Editar Turno
                 </button>

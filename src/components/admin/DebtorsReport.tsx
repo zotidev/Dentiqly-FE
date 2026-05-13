@@ -260,7 +260,7 @@ const DebtorsReport = () => {
                                     border: `0.5px solid ${tokens.grayBorder}`, borderRadius: 6,
                                     cursor: "pointer", transition: "all 0.12s"
                                   }}
-                                  onMouseEnter={e => { e.currentTarget.style.background = "#02E3FF"; e.currentTarget.style.color = tokens.navy; e.currentTarget.style.borderColor = "#02E3FF" }}
+                                  onMouseEnter={e => { e.currentTarget.style.background = tokens.blue; e.currentTarget.style.color = tokens.navy; e.currentTarget.style.borderColor = tokens.blue }}
                                   onMouseLeave={e => { e.currentTarget.style.background = tokens.white; e.currentTarget.style.color = tokens.navy; e.currentTarget.style.borderColor = tokens.grayBorder }}
                                   >
                                     VER CUENTA
@@ -303,3 +303,4 @@ const DebtorsReport = () => {
 };
 
 export default DebtorsReport;
+

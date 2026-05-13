@@ -96,7 +96,7 @@ const MiniCalendar: React.FC<{ turnosDeHoy?: Turno[] }> = () => {
                 <span
                   className={`inline-flex items-center justify-center w-7 h-7 text-xs font-medium rounded-lg transition-colors ${
                     isToday(day)
-                      ? 'bg-[#02E3FF] text-[#0B1023] font-bold'
+                      ? 'bg-dental-secondary text-white font-bold'
                       : 'text-white/60 hover:bg-white/10 cursor-pointer'
                   }`}
                 >
@@ -403,49 +403,49 @@ export const Dashboard: React.FC<{
 
           {/* ═══ BOOKING BANNER ═══ */}
           {!hideBanner && slug && (
-            <div className="bg-[#0B1023] rounded-2xl p-5 flex items-center justify-between mb-6 relative overflow-hidden animate-fade-in">
-              <div className="absolute inset-0 opacity-10 pointer-events-none">
+            <div className="bg-white rounded-2xl p-5 border border-gray-100 flex items-center justify-between mb-6 relative overflow-hidden animate-fade-in shadow-sm">
+              <div className="absolute inset-0 opacity-[0.03] pointer-events-none">
                 <svg viewBox="0 0 400 120" className="w-full h-full">
                   <circle cx="350" cy="20" r="80" fill="#2563FF" />
-                  <circle cx="380" cy="100" r="40" fill="#02E3FF" />
+                  <circle cx="380" cy="100" r="40" fill="var(--brand-secondary)" />
                 </svg>
               </div>
               <div className="relative z-10 flex items-center gap-4">
-                <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
-                  <Link2 className="w-5 h-5 text-[#02E3FF]" />
+                <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
+                  <Link2 className="w-5 h-5 text-dental-secondary" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-white">Compartí tu portal de reservas automático</h3>
+                  <h3 className="text-sm font-bold text-[#0B1023]">Compartí tu portal de reservas automático</h3>
                   <p className="text-xs text-gray-400 mt-0.5">Tus pacientes pueden reservar online 24/7</p>
                 </div>
               </div>
               <div className="relative z-10 flex items-center gap-2">
                 <button
                   onClick={handleCopyLink}
-                  className="flex items-center gap-2 text-sm font-semibold bg-white/10 hover:bg-white/15 text-white px-4 py-2 rounded-xl transition-all active:scale-[0.98]"
+                  className="flex items-center gap-2 text-sm font-semibold bg-gray-50 hover:bg-gray-100 text-[#0B1023] px-4 py-2 rounded-xl transition-all active:scale-[0.98] border border-gray-100"
                 >
-                  {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                  {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4 text-gray-400" />}
                   {copied ? '¡Copiado!' : 'Copiar enlace'}
                 </button>
                 <button
                   onClick={() => setHideBanner(true)}
-                  className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                  className="p-2 hover:bg-gray-50 rounded-lg transition-colors"
                 >
-                  <X className="w-4 h-4 text-gray-500" />
+                  <X className="w-4 h-4 text-gray-300" />
                 </button>
               </div>
             </div>
           )}
 
           {/* ═══ PATIENT LIST ═══ */}
-          <div className="bg-[#0B1023] rounded-2xl p-5 shadow-lg animate-fade-in" style={{ animationDelay: '200ms' }}>
+          <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm animate-fade-in" style={{ animationDelay: '200ms' }}>
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-sm font-bold text-white flex items-center gap-2">
+              <h2 className="text-sm font-bold text-[#0B1023] flex items-center gap-2">
                 Lista de pacientes
               </h2>
               <button
                 onClick={() => onNavigate?.('calendar')}
-                className="flex items-center gap-1 text-xs font-semibold text-[#02E3FF] hover:text-[#00C4DD] transition-colors"
+                className="flex items-center gap-1 text-xs font-semibold text-dental-secondary hover:opacity-80 transition-opacity"
               >
                 Ver todos
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -455,13 +455,13 @@ export const Dashboard: React.FC<{
             <div className="overflow-x-auto -mx-5 px-5">
               <table className="w-full text-left text-sm">
                 <thead>
-                  <tr className="border-b border-white/[0.06]">
-                    <th className="pb-2.5 text-[10px] font-semibold text-white/30 uppercase tracking-wider">Paciente</th>
-                    <th className="pb-2.5 text-[10px] font-semibold text-white/30 uppercase tracking-wider">Servicio</th>
-                    <th className="pb-2.5 text-[10px] font-semibold text-white/30 uppercase tracking-wider">Estado</th>
-                    <th className="pb-2.5 text-[10px] font-semibold text-white/30 uppercase tracking-wider">Fecha</th>
-                    <th className="pb-2.5 text-[10px] font-semibold text-white/30 uppercase tracking-wider">Hora</th>
-                    <th className="pb-2.5 text-[10px] font-semibold text-white/30 uppercase tracking-wider text-right">Acciones</th>
+                  <tr className="border-b border-gray-100">
+                    <th className="pb-2.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Paciente</th>
+                    <th className="pb-2.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Servicio</th>
+                    <th className="pb-2.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Estado</th>
+                    <th className="pb-2.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Fecha</th>
+                    <th className="pb-2.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Hora</th>
+                    <th className="pb-2.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider text-right">Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -469,10 +469,10 @@ export const Dashboard: React.FC<{
                     <tr>
                       <td colSpan={6} className="py-10 text-center">
                         <div className="flex flex-col items-center gap-2">
-                          <div className="w-10 h-10 rounded-xl bg-white/[0.06] flex items-center justify-center">
-                            <CalendarDays className="w-5 h-5 text-white/20" />
+                          <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center">
+                            <CalendarDays className="w-5 h-5 text-gray-200" />
                           </div>
-                          <p className="text-sm font-medium text-white/30">Sin turnos registrados</p>
+                          <p className="text-sm font-medium text-gray-400">Sin turnos registrados</p>
                         </div>
                       </td>
                     </tr>
@@ -483,36 +483,36 @@ export const Dashboard: React.FC<{
                       const avatarStyle = avatarBgs[turno.id % avatarBgs.length];
 
                       return (
-                        <tr key={turno.id} className="border-b border-white/[0.04] hover:bg-white/[0.04] transition-colors group">
+                        <tr key={turno.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors group">
                           <td className="py-3 pr-4">
                             <div className="flex items-center gap-2.5">
-                              <div className={`w-8 h-8 rounded-full ${avatarStyle} flex items-center justify-center font-bold text-[10px] shrink-0`}>
+                              <div className={`w-8 h-8 rounded-full ${avatarStyle.split(' ')[0].replace('/20', '/10')} ${avatarStyle.split(' ')[1]} flex items-center justify-center font-bold text-[10px] shrink-0`}>
                                 {initials}
                               </div>
-                              <span className="font-semibold text-white truncate max-w-[120px] text-[13px]">
+                              <span className="font-semibold text-[#0B1023] truncate max-w-[120px] text-[13px]">
                                 {turno.paciente?.nombre} {turno.paciente?.apellido}
                               </span>
                             </div>
                           </td>
                           <td className="py-3">
-                            <span className="text-[13px] text-white/50 font-medium">{turno.servicio?.nombre || 'General'}</span>
+                            <span className="text-[13px] text-gray-500 font-medium">{turno.servicio?.nombre || 'General'}</span>
                           </td>
                           <td className="py-3">
                             <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                              turno.estado === 'Atendido' ? 'bg-emerald-500/20 text-emerald-400' :
-                              turno.estado === 'Confirmado' || turno.estado === 'Confirmado por Whatsapp' ? 'bg-blue-500/20 text-blue-400' :
-                              turno.estado === 'Pendiente' ? 'bg-amber-500/20 text-amber-400' :
-                              turno.estado === 'Ausente' ? 'bg-white/10 text-white/60' :
-                              'bg-red-500/20 text-red-400'
+                              turno.estado === 'Atendido' ? 'bg-emerald-50 text-emerald-600' :
+                              turno.estado === 'Confirmado' || turno.estado === 'Confirmado por Whatsapp' ? 'bg-blue-50 text-blue-600' :
+                              turno.estado === 'Pendiente' ? 'bg-amber-50 text-amber-600' :
+                              turno.estado === 'Ausente' ? 'bg-gray-100 text-gray-500' :
+                              'bg-red-50 text-red-600'
                             }`}>
                               {turno.estado}
                             </span>
                           </td>
-                          <td className="py-3 text-[13px] text-white/50 font-medium">
+                          <td className="py-3 text-[13px] text-gray-500 font-medium">
                             {new Date(turno.fecha + 'T00:00:00').toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
                           </td>
                           <td className="py-3">
-                            <span className="text-[13px] font-bold text-[#02E3FF] bg-[#02E3FF]/10 px-2 py-0.5 rounded-md">
+                            <span className="text-[13px] font-bold text-dental-secondary bg-dental-secondary/5 px-2 py-0.5 rounded-md border border-dental-secondary/10">
                               {turno.hora_inicio}
                             </span>
                           </td>
@@ -535,7 +535,7 @@ export const Dashboard: React.FC<{
                                 </button>
                               </div>
                             ) : (
-                              <span className="text-[10px] text-white/20">—</span>
+                              <span className="text-[10px] text-gray-300">—</span>
                             )}
                           </td>
                         </tr>
@@ -552,51 +552,52 @@ export const Dashboard: React.FC<{
         <div className="w-full xl:w-[300px] shrink-0 space-y-5">
 
           {/* Calendar */}
+          {/* Calendar Wrapper */}
           <div className="bg-[#0B1023] rounded-2xl p-5 shadow-lg animate-fade-in" style={{ animationDelay: '100ms' }}>
             <MiniCalendar />
             <button
               onClick={() => onNavigate?.('calendar')}
-              className="w-full mt-4 py-2.5 bg-[#02E3FF] text-[#0B1023] text-sm font-bold rounded-xl hover:bg-[#00C4DD] transition-colors active:scale-[0.98]"
+              className="w-full mt-4 py-2.5 bg-dental-secondary text-white text-sm font-bold rounded-xl hover:opacity-90 transition-all active:scale-[0.98]"
             >
               Agregar turno
             </button>
           </div>
 
           {/* Today's Timeline */}
-          <div className="bg-[#0B1023] rounded-2xl p-5 shadow-lg animate-fade-in" style={{ animationDelay: '160ms' }}>
+          {/* Today's Timeline */}
+          <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm animate-fade-in" style={{ animationDelay: '160ms' }}>
             <div className="flex items-center justify-between mb-1">
-              <h3 className="text-sm font-bold text-white capitalize">{todayLabel}</h3>
+              <h3 className="text-sm font-bold text-[#0B1023] capitalize">{todayLabel}</h3>
             </div>
             <div className="flex items-center gap-2 mb-4">
-              <p className="text-xs text-white/30">Agenda de hoy</p>
-              <div className="flex-1 h-px bg-white/[0.06]" />
+              <p className="text-xs text-gray-400">Agenda de hoy</p>
+              <div className="flex-1 h-px bg-gray-100" />
             </div>
 
             {stats.turnosDeHoy.length === 0 ? (
               <div className="text-center py-6">
-                <CalendarDays className="w-8 h-8 text-white/20 mx-auto mb-2" />
-                <p className="text-xs text-white/30">Sin turnos para hoy</p>
+                <CalendarDays className="w-8 h-8 text-gray-100 mx-auto mb-2" />
+                <p className="text-xs text-gray-400">Sin turnos para hoy</p>
               </div>
             ) : (
               <div className="space-y-2.5">
                 {stats.turnosDeHoy.slice(0, 6).map((turno, i) => {
-                  const tc = timelineColors[i % timelineColors.length];
                   return (
                     <div
                       key={turno.id}
-                      className="bg-white/[0.06] rounded-xl p-3 border-l-[3px] transition-all hover:bg-white/[0.1] hover:scale-[1.02]"
+                      className="bg-gray-50 rounded-xl p-3 border-l-[3px] transition-all hover:bg-gray-100 hover:scale-[1.02]"
                       style={{ borderLeftColor: ['#60A5FA','#34D399','#A78BFA','#FBBF24','#FB7185','#22D3EE'][i % 6] }}
                     >
                       <div className="flex items-start justify-between">
                         <div>
-                          <p className="text-xs font-bold text-white">
+                          <p className="text-xs font-bold text-[#0B1023]">
                             {turno.servicio?.nombre || 'Consulta'}
                           </p>
-                          <p className="text-[11px] text-white/50 mt-0.5">
+                          <p className="text-[11px] text-gray-500 mt-0.5">
                             {turno.paciente?.nombre} {turno.paciente?.apellido}
                           </p>
                         </div>
-                        <span className="text-[10px] font-bold text-[#02E3FF] bg-[#02E3FF]/10 px-1.5 py-0.5 rounded">
+                        <span className="text-[10px] font-bold text-dental-secondary bg-dental-secondary/5 px-1.5 py-0.5 rounded border border-dental-secondary/10">
                           {turno.hora_inicio}
                         </span>
                       </div>
@@ -609,7 +610,7 @@ export const Dashboard: React.FC<{
             {stats.turnosDeHoy.length > 0 && (
               <button
                 onClick={() => onNavigate?.('calendar')}
-                className="w-full mt-4 py-2 text-xs font-semibold text-[#02E3FF] bg-[#02E3FF]/10 rounded-xl hover:bg-[#02E3FF]/20 transition-colors"
+                className="w-full mt-4 py-2 text-xs font-semibold text-dental-secondary bg-dental-secondary/5 rounded-xl hover:bg-dental-secondary/10 transition-colors border border-dental-secondary/10"
               >
                 Ver todos los detalles
               </button>

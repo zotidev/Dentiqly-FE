@@ -55,7 +55,7 @@ export const Hero3D: React.FC = () => {
       >
         {/* Decorative background circles that also tilt */}
         <div 
-          className="absolute inset-0 bg-gradient-to-tr from-[#2563FF]/20 to-[#02E3FF]/20 rounded-full blur-3xl -z-10 transform-gpu"
+          className="absolute inset-0 bg-gradient-to-tr from-[#2563FF]/20 to-[var(--brand-secondary)]/20 rounded-full blur-3xl -z-10 transform-gpu"
           style={{ transform: "translateZ(-50px)" }}
         />
         
@@ -69,3 +69,6 @@ export const Hero3D: React.FC = () => {
     </div>
   );
 };
+
+
+

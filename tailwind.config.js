@@ -5,8 +5,8 @@ export default {
     extend: {
       colors: {
         dental: {
-          primary: '#2563FF',
-          secondary: '#02E3FF',
+          primary: 'var(--brand-primary, #2563FF)',
+          secondary: 'var(--brand-secondary, #02E3FF)',
           'primary-light': '#5A8BFF',
           'primary-dark': '#1D4ED8',
           navy: '#0B1023',

@@ -1,8 +1,8 @@
 import type React from "react"
 
 export const tokens = {
-  blue: "#2563FF",
-  blueHover: "#1E40AF",
+  blue: "var(--brand-primary, #2563FF)",
+  blueHover: "var(--brand-primary-hover, #1E40AF)",
   blueFaint: "#EEF3FF",
   navy: "#0B1023",
 
@@ -38,7 +38,7 @@ export const tokens = {
   pageBg: "#FFFFFF",
   sidebarBg: "#0B1023",
 
-  celeste: "#02E3FF",
+  celeste: "var(--brand-secondary, #2563FF)",
   celesteHover: "#00C4DD",
 
   avatarColors: [
@@ -107,8 +107,8 @@ export const btnPrimary: React.CSSProperties = {
   alignItems: "center",
   gap: 8,
   padding: "10px 20px",
-  background: tokens.celeste,
-  color: tokens.navy,
+  background: "var(--admin-button-bg, #2563FF)",
+  color: "var(--admin-button-text, #FFFFFF)",
   border: "none",
   borderRadius: 12,
   fontSize: 13,
@@ -206,3 +206,4 @@ export const statusBadge = (estado: string): React.CSSProperties => {
     color: s.color,
   }
 }
+

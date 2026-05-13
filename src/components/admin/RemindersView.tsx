@@ -234,15 +234,15 @@ export const RemindersView: React.FC = () => {
             disabled={sendingAll || turnosWithEmail.length === 0}
             style={{
               display: "flex", alignItems: "center", gap: 7,
-              background: "#02E3FF", color: tokens.navy,
+              background: tokens.blue, color: tokens.white,
               border: "none", borderRadius: 10, padding: "9px 18px",
               fontSize: 13, fontWeight: 700, cursor: "pointer",
               fontFamily: "Inter, -apple-system, sans-serif",
               transition: "background 0.15s",
               opacity: (sendingAll || turnosWithEmail.length === 0) ? 0.6 : 1
             }}
-            onMouseEnter={e => { if(!sendingAll && turnosWithEmail.length > 0) e.currentTarget.style.background = "#00C4DD" }}
-            onMouseLeave={e => { if(!sendingAll && turnosWithEmail.length > 0) e.currentTarget.style.background = "#02E3FF" }}
+            onMouseEnter={e => { if(!sendingAll && turnosWithEmail.length > 0) e.currentTarget.style.background = tokens.blueHover }}
+            onMouseLeave={e => { if(!sendingAll && turnosWithEmail.length > 0) e.currentTarget.style.background = tokens.blue }}
           >
             <Send size={15} />
             {sendingAll ? 'Enviando...' : `Enviar a todos (${turnosWithEmail.length})`}
@@ -276,7 +276,7 @@ export const RemindersView: React.FC = () => {
               />
               <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 12 }}>
                 <button onClick={() => handlePreview()} style={{ padding: "7px 14px", borderRadius: 8, border: `0.5px solid ${tokens.grayBorder}`, background: tokens.white, fontSize: 12, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}><Eye size={14} /> Vista Previa</button>
-                <button onClick={handleSaveTemplate} disabled={savingTemplate} style={{ padding: "7px 14px", borderRadius: 8, border: "none", background: "#02E3FF", color: tokens.navy, fontSize: 12, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }} onMouseEnter={e => { if(!savingTemplate) e.currentTarget.style.background = "#00C4DD" }} onMouseLeave={e => { if(!savingTemplate) e.currentTarget.style.background = "#02E3FF" }}><Save size={14} /> {savingTemplate ? 'Guardando...' : 'Guardar Mensaje'}</button>
+                <button onClick={handleSaveTemplate} disabled={savingTemplate} style={{ padding: "7px 14px", borderRadius: 8, border: "none", background: tokens.blue, color: tokens.white, fontSize: 12, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }} onMouseEnter={e => { if(!savingTemplate) e.currentTarget.style.background = tokens.blueHover }} onMouseLeave={e => { if(!savingTemplate) e.currentTarget.style.background = tokens.blue }}><Save size={14} /> {savingTemplate ? 'Guardando...' : 'Guardar Mensaje'}</button>
               </div>
             </div>
             <div style={{ width: 220, background: tokens.grayBg, borderRadius: 12, padding: 16 }}>
@@ -465,12 +465,12 @@ export const RemindersView: React.FC = () => {
                               disabled={isSending}
                               style={{
                                 padding: "6px 12px", borderRadius: 8, border: "none",
-                                background: "#02E3FF", color: tokens.navy,
+                                background: tokens.blue, color: tokens.white,
                                 fontSize: 11, fontWeight: 700, cursor: "pointer",
                                 opacity: isSending ? 0.6 : 1
                               }}
-                              onMouseEnter={e => { if(!isSending) e.currentTarget.style.background = "#00C4DD" }}
-                              onMouseLeave={e => { if(!isSending) e.currentTarget.style.background = "#02E3FF" }}
+                              onMouseEnter={e => { if(!isSending) e.currentTarget.style.background = tokens.blueHover }}
+                              onMouseLeave={e => { if(!isSending) e.currentTarget.style.background = tokens.blue }}
                             >
                               {isSending ? '...' : 'ENVIAR'}
                             </button>
@@ -521,3 +521,4 @@ export const RemindersView: React.FC = () => {
     </div>
   )
 }
+

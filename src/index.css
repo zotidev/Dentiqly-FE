@@ -21,6 +21,21 @@
    DENTIQLY ADMIN — PREMIUM UI SYSTEM
    ═══════════════════════════════════════════════════════════════════════ */
 
+:root {
+  /* Brand Colors */
+  --brand-primary: #2563FF;
+  --brand-primary-hover: #1D4ED8;
+  --brand-secondary: #2563FF; /* Updated to match sidebar blue */
+  
+  /* Semantic Mappings */
+  --admin-button-bg: var(--brand-primary);
+  --admin-button-text: #FFFFFF;
+  --admin-button-hover: var(--brand-primary-hover);
+  
+  --admin-sidebar-bg: #0B1023;
+  --admin-card-bg: #FFFFFF;
+}
+
 html {
   scroll-behavior: smooth;
 }
@@ -192,7 +207,7 @@ html {
 }
 
 .gradient-accent {
-  background: linear-gradient(135deg, #2563FF 0%, #02E3FF 100%);
+  background: linear-gradient(135deg, #2563FF 0%, var(--brand-secondary) 100%);
 }
 
 .gradient-card-blue {
@@ -250,7 +265,7 @@ html {
   width: 3px;
   height: 60%;
   border-radius: 0 4px 4px 0;
-  background: linear-gradient(180deg, #2563FF, #02E3FF);
+  background: linear-gradient(180deg, #2563FF, var(--brand-secondary));
   transition: all 0.3s ease;
 }
 
@@ -296,3 +311,4 @@ html {
     display: none !important;
   }
 }
+

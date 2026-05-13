@@ -1,6 +1,6 @@
 export const dentalColors = {
-  primary: "#2563FF", // Electric Blue
-  secondary: "#02E3FF", // Soft Cyan
+  primary: "var(--brand-primary, #2563FF)", // Electric Blue
+  secondary: "var(--brand-secondary, #2563FF)", // Soft Cyan (Now Blue)
   white: "#FFFFFF", // Pure White
   // Variaciones del color principal para diferentes usos
   primaryLight: "#5A8BFF", // Azul más claro para hover
