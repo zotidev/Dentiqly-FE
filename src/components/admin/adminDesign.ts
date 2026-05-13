@@ -75,7 +75,6 @@ export const inputStyle: React.CSSProperties = {
 }
 
 export const pageWrapper: React.CSSProperties = {
-  minHeight: "100vh",
   fontFamily: "Inter, -apple-system, sans-serif",
 }
 

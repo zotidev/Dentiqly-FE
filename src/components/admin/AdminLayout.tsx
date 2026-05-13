@@ -100,7 +100,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
   const sidebarWidth = collapsed ? 'w-[72px]' : 'w-[250px]'
 
   return (
-    <div className="min-h-screen bg-white flex flex-col lg:flex-row">
+    <div className="h-screen bg-white flex flex-col lg:flex-row overflow-hidden">
       {/* ═══ MOBILE TOP BAR ═══ */}
       <div className="lg:hidden h-14 bg-[#0B1023] flex items-center justify-between px-4 sticky top-0 z-[45]">
         <div className="flex items-center gap-2">

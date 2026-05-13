@@ -200,11 +200,11 @@ export const BookingForm: React.FC = () => {
   ]
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] font-sans selection:bg-blue-100 selection:text-[#026498]">
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+    <div className="h-screen bg-[#f8fafc] font-sans selection:bg-blue-100 selection:text-[#026498] flex flex-col overflow-hidden">
+      <div className="flex-1 max-w-[1400px] mx-auto px-4 sm:px-6 py-4 sm:py-6 w-full overflow-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 h-full overflow-hidden">
           {/* Main Content: Accordion Steps */}
-          <div className="lg:col-span-8 space-y-4">
+          <div className="lg:col-span-8 space-y-3 overflow-y-auto pr-1 no-scrollbar">
             {stepTitles.map((title, index) => {
               const stepNumber = index + 1
               const isCompleted = step > stepNumber
@@ -294,7 +294,7 @@ export const BookingForm: React.FC = () => {
           </div>
 
           {/* Sidebar */}
-          <div className="lg:col-span-4 lg:sticky lg:top-8 h-fit">
+          <div className="lg:col-span-4 overflow-y-auto no-scrollbar">
             <BookingSummary />
           </div>
         </div>

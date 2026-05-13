@@ -260,7 +260,7 @@ export const Dashboard: React.FC<{
   const todayLabel = new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'long' });
 
   return (
-    <div className="min-h-screen font-sans relative overflow-hidden">
+    <div className="font-sans relative">
       {/* ── Decorative background reliefs ── */}
       <div className="absolute inset-0 pointer-events-none select-none" aria-hidden="true">
         {/* Large gradient wash — top right corner */}
