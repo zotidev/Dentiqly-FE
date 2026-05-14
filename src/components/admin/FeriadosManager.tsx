@@ -7,10 +7,7 @@ import {
   Trash2, 
   Plus, 
   X, 
-  ArrowUpDown, 
-  ChevronLeft, 
-  ChevronRight,
-  AlertCircle
+  ArrowUpDown
 } from "lucide-react"
 import { feriadosApi, type Feriado } from "../../api/feriados"
 import { tokens as sharedTokens, labelStyle as sharedLabelStyle, inputStyle as sharedInputStyle, pageWrapper } from './adminDesign'

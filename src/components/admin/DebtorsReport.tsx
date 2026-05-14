@@ -31,8 +31,6 @@ interface Deudor {
 
 /* ─── Dentiqly design tokens ─────────────────────────────────────────── */
 const tokens = sharedTokens
-const labelStyle = sharedLabelStyle
-const inputStyle = sharedInputStyle
 
 const DebtorsReport = () => {
     const [deudores, setDeudores] = useState<Deudor[]>([]);

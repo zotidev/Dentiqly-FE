@@ -24,7 +24,7 @@ import {
   Hourglass
 } from 'lucide-react'
 import { turnosApi, adminApi } from '../../api'
-import type { Turno, Profesional } from '../../types'
+import type { Turno, Profesional, Servicio } from '../../types'
 import { EditAppointmentModal } from './EditAppointmentModal'
 import { AdminAppointmentModal } from './AdminAppointmentModal'
 import { AdminBookingModal } from './AdminBookingModal'
@@ -91,7 +91,7 @@ export const CalendarView: React.FC = () => {
   const [professionals, setProfessionals] = useState<Profesional[]>([])
   const [selectedProfessionalId, setSelectedProfessionalId] = useState<number | null>(null)
   const [selectedServiceId, setSelectedServiceId] = useState<number | null>(null)
-  const [servicios, setServicios] = useState<any[]>([])
+  const [servicios, setServicios] = useState<Servicio[]>([])
 
   const [selectedAppointment, setSelectedAppointment] = useState<Turno | null>(null)
   const [showEditModal, setShowEditModal] = useState(false)
@@ -104,7 +104,7 @@ export const CalendarView: React.FC = () => {
   const [newAppointmentData, setNewAppointmentData] = useState<{ fecha: string, hora_inicio: string, sobre_turno: boolean } | null>(null)
   const [draggingAppointment, setDraggingAppointment] = useState<Turno | null>(null)
 
-  const TIME_SLOTS = []
+  const TIME_SLOTS: string[] = []
   for (let h = 8; h <= 20; h++) {
     TIME_SLOTS.push(`${String(h).padStart(2, '0')}:00`)
     TIME_SLOTS.push(`${String(h).padStart(2, '0')}:30`)

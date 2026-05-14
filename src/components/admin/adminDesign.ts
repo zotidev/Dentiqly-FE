@@ -96,7 +96,7 @@ export const tableHeaderStyle: React.CSSProperties = {
   borderBottom: `1px solid ${tokens.cardBorder}40`,
 }
 
-export const tableRowStyle = (isEven: boolean): React.CSSProperties => ({
+export const tableRowStyle = (): React.CSSProperties => ({
   borderBottom: `1px solid ${tokens.cardBorder}30`,
   transition: "background 0.15s",
 })

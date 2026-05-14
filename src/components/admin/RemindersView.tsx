@@ -5,9 +5,6 @@ import {
   Bell,
   Send,
   Clock,
-  Calendar,
-  User,
-  Briefcase,
   CheckCircle,
   AlertCircle,
   Mail,
@@ -18,18 +15,14 @@ import {
   Settings,
   Save,
   X,
-  Info,
   ArrowUpDown,
-  MailWarning
 } from 'lucide-react'
 import { turnosApi, recordatoriosApi } from '../../api'
 import type { Turno } from '../../types'
-import { tokens as sharedTokens, labelStyle as sharedLabelStyle, inputStyle as sharedInputStyle, pageWrapper } from './adminDesign'
+import { tokens as sharedTokens, pageWrapper } from './adminDesign'
 
 /* ─── Dentiqly design tokens ─────────────────────────────────────────── */
 const tokens = sharedTokens
-const labelStyle = sharedLabelStyle
-const inputStyle = sharedInputStyle
 
 export const RemindersView: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState(() => {

@@ -19,6 +19,7 @@ export interface AuthUser {
   id: string // UUID
   email: string
   nombre: string
+  apellido?: string
   role?: string
   clinicaId?: string // UUID del tenant
 }

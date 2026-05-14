@@ -14,13 +14,9 @@ import {
   Clock,
   Briefcase,
   X,
-  ChevronLeft,
-  ChevronRight,
   ArrowUpDown,
-  Check,
-  UserPlus
 } from "lucide-react"
-import { tokens as sharedTokens, labelStyle as sharedLabelStyle, inputStyle as sharedInputStyle, pageWrapper, cardStyle, btnPrimary, btnSecondary, btnDanger, getInitials, getAvatarStyle } from './adminDesign'
+import { tokens as sharedTokens, labelStyle as sharedLabelStyle, inputStyle as sharedInputStyle, pageWrapper, getInitials, getAvatarStyle } from './adminDesign'
 import { adminApi } from "../../api/admin"
 import { ScheduleManager } from "../schedule/ScheduleManager"
 import { ServiceAssignment } from "./ServiceAssignment"
@@ -208,9 +204,9 @@ export const ProfessionalsManager: React.FC = () => {
   }
 
   const handleChange = (field: keyof CrearProfesionalData, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
+    setFormData((prev: CrearProfesionalData) => ({ ...prev, [field]: value }))
     if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: undefined }))
+      setErrors((prev: any) => ({ ...prev, [field]: undefined }))
     }
   }
 

@@ -10,9 +10,7 @@ import {
   Mail, 
   Search, 
   X, 
-  ArrowUpDown, 
-  Building2, 
-  ExternalLink 
+  Building2 
 } from 'lucide-react';
 import { sucursalesApi } from '../../api';
 import { useToast } from '../../hooks/use-toast';

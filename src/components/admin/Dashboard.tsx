@@ -1,10 +1,10 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-  Plus, Users, Check, X, Copy,
-  Clock, Stethoscope, Link2,
-  CalendarDays, Activity, BarChart3, ArrowRight,
-  TrendingUp, TrendingDown, ChevronLeft, ChevronRight,
-  ClipboardList, Sparkles, UserPlus,
+  Users, Check, X, Copy,
+  Link2,
+  CalendarDays, Activity, ArrowRight,
+  ChevronLeft, ChevronRight,
+  ClipboardList, Sparkles,
 } from 'lucide-react';
 import { turnosApi, profesionalesApi, serviciosApi, pacientesApi } from '../../api';
 import { useAuth } from '../../hooks/useAuth';
@@ -113,14 +113,6 @@ const MiniCalendar: React.FC<{ turnosDeHoy?: Turno[] }> = () => {
   );
 };
 
-const timelineColors = [
-  { bg: 'bg-blue-100', border: 'border-l-blue-500', text: 'text-blue-700' },
-  { bg: 'bg-emerald-100', border: 'border-l-emerald-500', text: 'text-emerald-700' },
-  { bg: 'bg-violet-100', border: 'border-l-violet-500', text: 'text-violet-700' },
-  { bg: 'bg-amber-100', border: 'border-l-amber-500', text: 'text-amber-700' },
-  { bg: 'bg-rose-100', border: 'border-l-rose-500', text: 'text-rose-700' },
-  { bg: 'bg-cyan-100', border: 'border-l-cyan-500', text: 'text-cyan-700' },
-];
 
 export const Dashboard: React.FC<{
   onNavigate?: (view: string) => void,

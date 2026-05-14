@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useEffect } from 'react'
-import { Plus, Search, Edit, Trash2, Briefcase, Clock, DollarSign, Tag, X, ArrowUpDown, Layers } from 'lucide-react'
+import { Plus, Search, Edit, Trash2, Briefcase, Clock, Tag, X, ArrowUpDown, Layers } from 'lucide-react'
 import { adminApi } from '../../api/admin'
 import { ConfirmationModal } from '../ui/ConfirmationModal'
 import type { Servicio, CrearServicioData } from '../../types'
@@ -152,9 +152,9 @@ export const ServicesManager: React.FC = () => {
   }
 
   const handleChange = (field: keyof CrearServicioData, value: string | number) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
+    setFormData((prev: CrearServicioData) => ({ ...prev, [field]: value }))
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: undefined }))
+      setErrors((prev: any) => ({ ...prev, [field]: undefined }))
     }
   }
 

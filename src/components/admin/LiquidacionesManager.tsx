@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useMemo } from "react"
 import { 
-  Users, 
   Plus, 
   Search, 
   ArrowUpDown, 
@@ -10,11 +9,8 @@ import {
   ChevronRight, 
   FileText, 
   Download, 
-  Trash2, 
   CheckCircle2, 
-  Clock, 
-  X,
-  CreditCard
+  Clock,
 } from "lucide-react"
 import { liquidacionesApi } from "../../api/liquidaciones"
 import { exportApi } from "../../api/export"
@@ -26,8 +22,6 @@ import { LiquidacionDetailModal } from "./liquidaciones/LiquidacionDetailModal"
 
 /* ─── Dentiqly design tokens ─────────────────────────────────────────── */
 const tokens = sharedTokens
-const labelStyle = sharedLabelStyle
-const inputStyle = sharedInputStyle
 
 export function LiquidacionesManager() {
   const [liquidaciones, setLiquidaciones] = useState<Liquidacion[]>([])

@@ -10,8 +10,7 @@ import {
   Search,
   Check,
   ArrowUpDown,
-  ShieldCheck,
-  Zap
+  ShieldCheck
 } from 'lucide-react'
 import { tokens as sharedTokens, labelStyle as sharedLabelStyle, inputStyle as sharedInputStyle, pageWrapper } from './adminDesign'
 import { obrasSocialesApi } from '../../api/obras-sociales'
