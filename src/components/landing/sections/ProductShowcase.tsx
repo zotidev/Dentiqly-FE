@@ -13,34 +13,6 @@ const screenshots = [
     icon: LayoutDashboard,
     accent: "#2563FF",
   },
-  {
-    src: "/assets/screenshots/paciente-detalle.png",
-    title: "Ficha de Paciente",
-    desc: "Historia clínica, odontograma, archivos y tratamientos en un solo lugar.",
-    icon: Users,
-    accent: "#7C3AED",
-  },
-  {
-    src: "/assets/screenshots/calendario.png",
-    title: "Calendario de Turnos",
-    desc: "Vista semanal con código de colores, estados y sobreturnos.",
-    icon: Calendar,
-    accent: "#059669",
-  },
-  {
-    src: "/assets/screenshots/recordatorios.png",
-    title: "Recordatorios Automáticos",
-    desc: "Envío masivo de emails para minimizar el ausentismo de pacientes.",
-    icon: Bell,
-    accent: "#F59E0B",
-  },
-  {
-    src: "/assets/screenshots/configuracion.png",
-    title: "Configuración Total",
-    desc: "Personaliza tu clínica, pagos, cuentas y reserva pública en minutos.",
-    icon: Settings,
-    accent: "#6366F1",
-  },
 ]
 
 export const ProductShowcase: React.FC = () => {

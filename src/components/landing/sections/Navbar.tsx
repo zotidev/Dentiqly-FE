@@ -59,7 +59,7 @@ export const Navbar: React.FC = () => {
             className="w-full max-w-[700px] flex items-center justify-between px-6"
             style={{
               background: "#0B1023",
-              height: "44px",
+              height: "54px",
             }}
           >
             {/* Logo */}
@@ -100,14 +100,14 @@ export const Navbar: React.FC = () => {
           <div className="hidden md:flex items-center gap-[10px]">
             <Link
               to="/login"
-              className="px-5 py-[6px] text-[13px] font-semibold text-white bg-[#0B1023] hover:bg-[#161d3a] transition-all whitespace-nowrap btn-hexagon flex items-center gap-1.5"
+              className="px-5 py-[12px] text-[12px] font-semibold text-white bg-[#0B1023] hover:bg-[#161d3a] transition-all whitespace-nowrap btn-hexagon flex items-center gap-1.5"
             >
               <User size={14} />
               Ingresar
             </Link>
             <Link
               to="/register"
-              className="px-5 py-[6px] text-[13px] font-semibold text-[#0B1023] bg-[#02E3FF] hover:bg-[#02E3FF]/90 transition-all whitespace-nowrap btn-hexagon flex items-center gap-1.5"
+              className="px-5 py-[12px] text-[12px] font-semibold text-[#0B1023] bg-[#02E3FF] hover:bg-[#02E3FF]/90 transition-all whitespace-nowrap btn-hexagon flex items-center gap-1.5"
             >
               Registrarse
               <ArrowRight size={14} />
