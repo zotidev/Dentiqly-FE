@@ -377,3 +377,8 @@ html.lenis, html.lenis body {
 .lenis.lenis-stopped {
   overflow: hidden;
 }
+
+/* ─── Button Shape Helpers ─────────────────────────────────────────── */
+.btn-hexagon {
+  clip-path: polygon(12px 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 12px 100%, 0 50%);
+}
