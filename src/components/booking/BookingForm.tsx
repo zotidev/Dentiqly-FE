@@ -291,10 +291,15 @@ export const BookingForm: React.FC = () => {
                 </div>
               )
             })}
+
+            {/* Mobile: clinic info at bottom */}
+            <div className="lg:hidden mt-4">
+              <BookingSummary />
+            </div>
           </div>
 
-          {/* Sidebar */}
-          <div className="lg:col-span-4 overflow-y-auto no-scrollbar">
+          {/* Sidebar (desktop only) */}
+          <div className="hidden lg:block lg:col-span-4 overflow-y-auto no-scrollbar">
             <BookingSummary />
           </div>
         </div>

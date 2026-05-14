@@ -397,8 +397,8 @@ export function UsersManager() {
       {/* Create / Edit Modal */}
       {showModal && (
         <div style={modalOverlay} onClick={() => setShowModal(false)}>
-          <div style={{ ...modalCard, maxWidth: 480 }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ padding: "20px 24px", borderBottom: `1px solid ${tokens.grayBorder}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div style={{ ...modalCard, maxWidth: 480, display: "flex", flexDirection: "column" }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ padding: "16px 24px", borderBottom: `1px solid ${tokens.grayBorder}`, display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0 }}>
               <h2 style={{ fontSize: 16, fontWeight: 700, color: tokens.navy, margin: 0 }}>
                 {editingUser ? "Editar usuario" : "Invitar usuario"}
               </h2>
@@ -407,8 +407,8 @@ export function UsersManager() {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} style={{ padding: 24 }}>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
+            <form onSubmit={handleSubmit} style={{ padding: "20px 24px", overflowY: "auto", flex: 1 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
                 <div>
                   <label style={labelStyle}>Nombre</label>
                   <input
@@ -433,7 +433,7 @@ export function UsersManager() {
                 </div>
               </div>
 
-              <div style={{ marginBottom: 16 }}>
+              <div style={{ marginBottom: 12 }}>
                 <label style={labelStyle}>Email</label>
                 <input
                   type="email"
@@ -445,15 +445,15 @@ export function UsersManager() {
                 />
               </div>
 
-              <div style={{ marginBottom: 24 }}>
+              <div style={{ marginBottom: 16 }}>
                 <label style={labelStyle}>Rol</label>
-                <div style={{ display: "grid", gap: 8 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
                   {ROLES.map((r) => (
                     <label
                       key={r.value}
                       style={{
-                        display: "flex", alignItems: "center", gap: 12,
-                        padding: "10px 14px", borderRadius: 10, cursor: "pointer",
+                        display: "flex", alignItems: "center", gap: 8,
+                        padding: "8px 10px", borderRadius: 8, cursor: "pointer",
                         border: `1.5px solid ${formData.role === r.value ? tokens.blue : tokens.grayBorder}`,
                         background: formData.role === r.value ? tokens.blueFaint : tokens.white,
                         transition: "all 0.15s",
@@ -469,19 +469,19 @@ export function UsersManager() {
                       />
                       <div
                         style={{
-                          width: 16, height: 16, borderRadius: "50%",
+                          width: 14, height: 14, borderRadius: "50%",
                           border: `2px solid ${formData.role === r.value ? tokens.blue : tokens.grayBorder}`,
                           display: "flex", alignItems: "center", justifyContent: "center",
                           flexShrink: 0,
                         }}
                       >
                         {formData.role === r.value && (
-                          <div style={{ width: 8, height: 8, borderRadius: "50%", background: tokens.blue }} />
+                          <div style={{ width: 7, height: 7, borderRadius: "50%", background: tokens.blue }} />
                         )}
                       </div>
                       <div>
-                        <p style={{ fontSize: 13, fontWeight: 600, color: tokens.navy, margin: 0 }}>{r.label}</p>
-                        <p style={{ fontSize: 11, color: tokens.grayMuted, margin: 0 }}>{r.desc}</p>
+                        <p style={{ fontSize: 12, fontWeight: 600, color: tokens.navy, margin: 0 }}>{r.label}</p>
+                        <p style={{ fontSize: 10, color: tokens.grayMuted, margin: 0 }}>{r.desc}</p>
                       </div>
                     </label>
                   ))}
@@ -491,9 +491,9 @@ export function UsersManager() {
               {!editingUser && (
                 <div
                   style={{
-                    padding: "10px 14px", borderRadius: 10,
-                    background: tokens.blueFaint, marginBottom: 20,
-                    fontSize: 12, color: tokens.blue, lineHeight: 1.5,
+                    padding: "8px 12px", borderRadius: 8,
+                    background: tokens.blueFaint, marginBottom: 16,
+                    fontSize: 11, color: tokens.blue, lineHeight: 1.4,
                   }}
                 >
                   Se enviará un email con las credenciales temporales al usuario invitado.

@@ -1,5 +1,4 @@
 import React from 'react'
-import { dentalColors } from '../../config/colors'
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'outline' | 'destructive' | 'ghost'
@@ -19,11 +18,11 @@ export const Button: React.FC<ButtonProps> = ({
   const baseClasses = 'inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2'
 
   const variantClasses = {
-    primary: `bg-[${dentalColors.primary}] text-white hover:bg-[${dentalColors.primaryDark}] focus:ring-[${dentalColors.primary}]`,
-    secondary: `bg-[${dentalColors.gray200}] text-[${dentalColors.gray800}] hover:bg-[${dentalColors.gray300}] focus:ring-[${dentalColors.gray400}]`,
-    outline: `border-2 border-[${dentalColors.primary}] text-[${dentalColors.primary}] hover:bg-[${dentalColors.primary}] hover:text-white focus:ring-[${dentalColors.primary}]`,
-    destructive: `bg-[${dentalColors.error}] text-white hover:bg-red-700 focus:ring-red-500`,
-    ghost: `bg-transparent text-[${dentalColors.gray700}] hover:bg-[${dentalColors.gray100}] focus:ring-[${dentalColors.gray400}]`
+    primary: 'bg-[#2563FF] text-white hover:bg-[#1D4ED8] focus:ring-[#2563FF]',
+    secondary: 'bg-gray-200 text-gray-800 hover:bg-gray-300 focus:ring-gray-400',
+    outline: 'border-2 border-[#2563FF] text-[#2563FF] hover:bg-[#2563FF] hover:text-white focus:ring-[#2563FF]',
+    destructive: 'bg-[#EF4444] text-white hover:bg-red-700 focus:ring-red-500',
+    ghost: 'bg-transparent text-gray-700 hover:bg-gray-100 focus:ring-gray-400'
   }
 
   const sizeClasses = {

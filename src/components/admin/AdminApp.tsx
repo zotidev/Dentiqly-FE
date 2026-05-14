@@ -105,7 +105,7 @@ export const AdminApp: React.FC = () => {
           onNavigate={setCurrentView}
         />
       case 'calendar':
-        return <CalendarView />
+        return <CalendarView onNavigate={setCurrentView} />
       case 'patients':
         return <PatientsView />
       case 'professionals':

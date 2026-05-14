@@ -23,7 +23,7 @@ import {
   X,
   Hourglass
 } from 'lucide-react'
-import { turnosApi, adminApi } from '../../api'
+import { turnosApi, adminApi, exportApi } from '../../api'
 import type { Turno, Profesional } from '../../types'
 import { EditAppointmentModal } from './EditAppointmentModal'
 import { AdminAppointmentModal } from './AdminAppointmentModal'
@@ -85,7 +85,11 @@ const STATUS_COLORS = {
   'Ausente': '#000000', // Black
 } as const
 
-export const CalendarView: React.FC = () => {
+interface CalendarViewProps {
+  onNavigate?: (view: string) => void
+}
+
+export const CalendarView: React.FC<CalendarViewProps> = ({ onNavigate }) => {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [appointments, setAppointments] = useState<Turno[]>([])
   const [professionals, setProfessionals] = useState<Profesional[]>([])
@@ -793,9 +797,9 @@ export const CalendarView: React.FC = () => {
   }
 
   return (
-    <div className="h-full flex flex-col font-sans">
+    <div className="h-full flex flex-col font-sans min-h-0 overflow-hidden">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-5 gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3 shrink-0">
         <div>
           <h1 className="text-[22px] font-semibold text-[#0B1023] tracking-[-0.3px]">Calendario de Turnos</h1>
           <p className="text-[13px] text-[#8A93A8] mt-1">Gestión de agenda y citas</p>
@@ -806,7 +810,7 @@ export const CalendarView: React.FC = () => {
       </div>
 
       {/* Sub Header */}
-      <div className="flex flex-wrap justify-between items-center mb-5 gap-3">
+      <div className="flex flex-wrap justify-between items-center mb-3 gap-3 shrink-0">
          <div className="flex flex-wrap items-center gap-2 relative">
             {/* Filters */}
             <div className="group/filter">
@@ -859,7 +863,10 @@ export const CalendarView: React.FC = () => {
                <button onClick={() => setViewType('week')} className={`px-4 h-full border-l border-[#E8E0D6] transition ${viewType === 'week' ? 'bg-[#0B1023] text-white font-semibold' : 'text-[#8A93A8] hover:bg-gray-50 hover:text-[#4B5568]'}`}>Semanal</button>
                <button onClick={() => setViewType('month')} className={`px-4 h-full border-l border-[#E8E0D6] transition ${viewType === 'month' ? 'bg-[#0B1023] text-white font-semibold' : 'text-[#8A93A8] hover:bg-gray-50 hover:text-[#4B5568]'}`}>Mensual</button>
             </div>
-            <button className="flex items-center gap-2 px-4 py-2 bg-white border border-[#E8E0D6] text-[#4B5568] rounded-xl font-medium hover:bg-gray-50 text-[13px] transition">
+            <button
+              onClick={() => exportApi.turnos().catch(() => alert('Error al exportar turnos'))}
+              className="flex items-center gap-2 px-4 py-2 bg-white border border-[#E8E0D6] text-[#4B5568] rounded-xl font-medium hover:bg-gray-50 text-[13px] transition"
+            >
               <Download className="w-4 h-4 text-[#8A93A8]" /> Exportar
             </button>
          </div>
@@ -982,19 +989,22 @@ export const CalendarView: React.FC = () => {
                   <div className="w-8 h-8 rounded-xl bg-[#F3EEFF] flex items-center justify-center mr-3 shrink-0">
                     <User className="h-4 w-4 text-[#7C3AED]" />
                   </div>
-                  <div>
+                  <div className="flex-1 min-w-0">
                     <p className="font-medium text-[13px] text-[#0B1023]">
                       {selectedAppointment.paciente?.nombre} {selectedAppointment.paciente?.apellido}
                     </p>
-                    <div className="flex items-center gap-3 mt-0.5">
+                    <div className="flex items-center gap-3 mt-0.5 flex-wrap">
+                      {selectedAppointment.paciente?.numero_documento && (
+                        <span className="text-[11px] text-[#8A93A8] font-medium">DNI: {selectedAppointment.paciente.numero_documento}</span>
+                      )}
                       {selectedAppointment.paciente?.telefono && (
-                        <div className="flex items-center text-[12px] text-[#8A93A8]">
+                        <div className="flex items-center text-[11px] text-[#8A93A8]">
                           <Phone className="h-3 w-3 mr-1" />
                           {selectedAppointment.paciente.telefono}
                         </div>
                       )}
                       {selectedAppointment.paciente?.email && (
-                        <div className="flex items-center text-[12px] text-[#8A93A8]">
+                        <div className="flex items-center text-[11px] text-[#8A93A8]">
                           <Mail className="h-3 w-3 mr-1" />
                           {selectedAppointment.paciente.email}
                         </div>
@@ -1031,8 +1041,14 @@ export const CalendarView: React.FC = () => {
                   </div>
                 </div>
 
+                {selectedAppointment.sobre_turno && (
+                  <div className="bg-amber-50 rounded-xl p-2.5 flex items-center gap-2">
+                    <span className="text-[11px] font-semibold text-amber-700 uppercase tracking-wider">Sobreturno</span>
+                  </div>
+                )}
+
                 {selectedAppointment.observaciones && (
-                  <div className="bg-gray-50 rounded-xl p-3 mt-2">
+                  <div className="bg-gray-50 rounded-xl p-3">
                     <p className="text-[11px] font-semibold text-[#8A93A8] uppercase tracking-wider mb-1">
                       Notas
                     </p>
@@ -1040,6 +1056,19 @@ export const CalendarView: React.FC = () => {
                       {selectedAppointment.observaciones}
                     </p>
                   </div>
+                )}
+
+                {onNavigate && selectedAppointment.paciente_id && (
+                  <button
+                    onClick={() => {
+                      setSelectedAppointment(null)
+                      onNavigate('patients')
+                    }}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-[12px] font-bold text-[#2563FF] bg-[#EEF3FF] border border-[#2563FF]/10 rounded-xl hover:bg-[#2563FF] hover:text-white transition-all"
+                  >
+                    <User className="h-3.5 w-3.5" />
+                    Ver ficha del paciente
+                  </button>
                 )}
               </div>
 
@@ -1059,7 +1088,7 @@ export const CalendarView: React.FC = () => {
                 </button>
                 <button
                   onClick={() => setShowEditModal(true)}
-                  className="px-4 py-2 text-[13px] font-bold text-white bg-dental-secondary rounded-xl hover:opacity-90 transition-all"
+                  className="px-4 py-2 text-[13px] font-bold text-white bg-[#2563FF] rounded-xl hover:bg-[#1D4ED8] transition-all"
                 >
                   Editar Turno
                 </button>

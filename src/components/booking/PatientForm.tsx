@@ -47,6 +47,7 @@ export const PatientForm: React.FC<PatientFormProps> = ({ onPatientData, loading
   ];
 
   const [errors, setErrors] = useState<Partial<Record<keyof CrearPacienteData, string>>>({})
+  const [nombreCompleto, setNombreCompleto] = useState("")
 
   useEffect(() => {
     const fetchObrasSociales = async () => {
@@ -64,8 +65,10 @@ export const PatientForm: React.FC<PatientFormProps> = ({ onPatientData, loading
     if (cached) {
       try {
         const parsedData = JSON.parse(cached)
-        // No cargamos las observaciones anteriores
         setFormData(prev => ({ ...prev, ...parsedData, observaciones: "" }))
+        if (parsedData.nombre || parsedData.apellido) {
+          setNombreCompleto(`${parsedData.nombre || ''} ${parsedData.apellido || ''}`.trim())
+        }
       } catch (e) {
         console.error("Error loading cached patient data:", e)
       }
@@ -81,8 +84,8 @@ export const PatientForm: React.FC<PatientFormProps> = ({ onPatientData, loading
 
   const validateForm = () => {
     const newErrors: Partial<Record<keyof CrearPacienteData, string>> = {}
-    if (!formData.nombre.trim()) newErrors.nombre = "Requerido"
-    if (!formData.apellido.trim()) newErrors.apellido = "Requerido"
+    if (!nombreCompleto.trim()) newErrors.nombre = "Requerido"
+    else if (!nombreCompleto.trim().includes(' ')) newErrors.nombre = "Ingrese nombre y apellido"
     if (!formData.numero_documento.trim()) newErrors.numero_documento = "Requerido"
     if (!formData.fecha_nacimiento) newErrors.fecha_nacimiento = "Requerido"
     if (!formData.telefono?.trim()) newErrors.telefono = "Requerido"
@@ -95,12 +98,28 @@ export const PatientForm: React.FC<PatientFormProps> = ({ onPatientData, loading
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (validateForm()) onPatientData(formData)
+    if (validateForm()) {
+      const parts = nombreCompleto.trim().split(/\s+/)
+      const nombre = parts[0]
+      const apellido = parts.slice(1).join(' ') || nombre
+      onPatientData({ ...formData, nombre, apellido, tipo_documento: 'DNI' })
+    }
   }
 
   const handleChange = (field: keyof CrearPacienteData, value: string | number | undefined) => {
     setFormData(prev => ({ ...prev, [field]: value }))
     if (errors[field]) setErrors(prev => ({ ...prev, [field]: undefined }))
+  }
+
+  const handleNombreCompletoChange = (value: string) => {
+    setNombreCompleto(value)
+    const parts = value.trim().split(/\s+/)
+    setFormData(prev => ({
+      ...prev,
+      nombre: parts[0] || '',
+      apellido: parts.slice(1).join(' ') || ''
+    }))
+    if (errors.nombre) setErrors(prev => ({ ...prev, nombre: undefined }))
   }
 
   const handleObraSocialChange = (value: string) => {
@@ -136,48 +155,24 @@ export const PatientForm: React.FC<PatientFormProps> = ({ onPatientData, loading
            Información Personal
         </h3>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <Input
-            label="Apellido *"
-            value={formData.apellido}
-            onChange={(e) => handleChange("apellido", e.target.value)}
-            error={errors.apellido}
-            placeholder="Tu apellido"
-            className="bg-white"
-          />
-          <Input
-            label="Nombre *"
-            value={formData.nombre}
-            onChange={(e) => handleChange("nombre", e.target.value)}
-            error={errors.nombre}
-            placeholder="Tu nombre"
-            className="bg-white"
-          />
-        </div>
+        <Input
+          label="Nombre Completo *"
+          value={nombreCompleto}
+          onChange={(e) => handleNombreCompletoChange(e.target.value)}
+          error={errors.nombre}
+          placeholder="Nombre y apellido"
+          className="bg-white"
+        />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <Select
-            label="Tipo de Documento *"
-            value={formData.tipo_documento}
-            onChange={(e) => handleChange("tipo_documento", e.target.value)}
-            options={[
-              { value: "DNI", label: "DNI" },
-              { value: "Pasaporte", label: "Pasaporte" },
-              { value: "Cédula", label: "Cédula" },
-            ]}
-            className="bg-white"
-          />
+        <div className="grid grid-cols-2 gap-4">
           <Input
-            label="Número de Documento *"
+            label="DNI *"
             value={formData.numero_documento}
             onChange={(e) => handleChange("numero_documento", e.target.value)}
             error={errors.numero_documento}
             placeholder="12345678"
             className="bg-white"
           />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <Input
             label="Fecha de Nacimiento *"
             type="date"
@@ -186,6 +181,9 @@ export const PatientForm: React.FC<PatientFormProps> = ({ onPatientData, loading
             error={errors.fecha_nacimiento}
             className="bg-white"
           />
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <Select
             label="Sexo *"
             value={formData.sexo || "Masculino"}
@@ -197,10 +195,7 @@ export const PatientForm: React.FC<PatientFormProps> = ({ onPatientData, loading
             ]}
             className="bg-white"
           />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <div className="relative">
+          <div className="relative sm:col-span-2">
             <Mail className="absolute right-3 top-9 text-gray-400" size={16} />
             <Input
               label="E-mail *"
@@ -212,6 +207,9 @@ export const PatientForm: React.FC<PatientFormProps> = ({ onPatientData, loading
               className="bg-white pr-10"
             />
           </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="relative">
             <Phone className="absolute right-3 top-9 text-gray-400" size={16} />
             <Input
@@ -224,17 +222,16 @@ export const PatientForm: React.FC<PatientFormProps> = ({ onPatientData, loading
               className="bg-white pr-10"
             />
           </div>
-        </div>
-
-        <div className="relative">
-          <MapPin className="absolute right-3 top-9 text-gray-400" size={16} />
-          <Input
-            label="Dirección"
-            value={formData.direccion || ""}
-            onChange={(e) => handleChange("direccion", e.target.value)}
-            placeholder="Calle 123, Ciudad"
-            className="bg-white pr-10"
-          />
+          <div className="relative">
+            <MapPin className="absolute right-3 top-9 text-gray-400" size={16} />
+            <Input
+              label="Dirección"
+              value={formData.direccion || ""}
+              onChange={(e) => handleChange("direccion", e.target.value)}
+              placeholder="Calle 123, Ciudad"
+              className="bg-white pr-10"
+            />
+          </div>
         </div>
       </div>
 

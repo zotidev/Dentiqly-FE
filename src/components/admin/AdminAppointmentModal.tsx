@@ -40,6 +40,7 @@ export const AdminAppointmentModal: React.FC<AdminAppointmentModalProps> = ({ on
     const [searchPaciente, setSearchPaciente] = useState(initialData?.paciente_nombre || '')
     const [isNewPatient, setIsNewPatient] = useState(false)
     const [horaFinManual, setHoraFinManual] = useState(false)
+    const [conflictingTurnos, setConflictingTurnos] = useState<any[]>([])
 
     useEffect(() => {
         const fetchInitialData = async () => {
@@ -75,6 +76,34 @@ export const AdminAppointmentModal: React.FC<AdminAppointmentModalProps> = ({ on
         }, 500)
         return () => clearTimeout(delayDebounceFn)
     }, [searchPaciente])
+
+    useEffect(() => {
+        const checkConflicts = async () => {
+            if (!formData.fecha || !formData.hora_inicio || !formData.hora_fin || !formData.profesional_id) {
+                setConflictingTurnos([])
+                return
+            }
+            try {
+                const res = await turnosApi.listar({ fecha_desde: formData.fecha, fecha_hasta: formData.fecha, limit: 200 })
+                const turnos = res.data || []
+                const newStart = formData.hora_inicio
+                const newEnd = formData.hora_fin
+                const conflicts = turnos.filter((t: any) => {
+                    if (t.profesional_id !== formData.profesional_id) return false
+                    if (t.estado === 'Cancelado' || t.estado === 'Ausente') return false
+                    return t.hora_inicio < newEnd && t.hora_fin > newStart
+                })
+                setConflictingTurnos(conflicts)
+                if (conflicts.length > 0 && !formData.sobre_turno) {
+                    setFormData(prev => ({ ...prev, sobre_turno: false }))
+                }
+            } catch {
+                setConflictingTurnos([])
+            }
+        }
+        const timer = setTimeout(checkConflicts, 300)
+        return () => clearTimeout(timer)
+    }, [formData.fecha, formData.hora_inicio, formData.hora_fin, formData.profesional_id])
 
     // Auto-suggest end time based on service duration ONLY if not manually edited
     useEffect(() => {
@@ -340,15 +369,48 @@ export const AdminAppointmentModal: React.FC<AdminAppointmentModalProps> = ({ on
                                         </div>
                                     </div>
 
-                                    <div className="flex items-center gap-3 p-4 bg-white/60 backdrop-blur-sm border border-blue-100 rounded-2xl group cursor-pointer" onClick={() => setFormData(prev => ({ ...prev, sobre_turno: !prev.sobre_turno }))}>
-                                        <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${formData.sobre_turno ? 'bg-red-500 border-red-500 text-white' : 'border-gray-200 bg-white'}`}>
-                                            {formData.sobre_turno && <Check size={14} strokeWidth={4} />}
+                                    {conflictingTurnos.length > 0 && (
+                                        <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl space-y-3">
+                                            <div className="flex items-start gap-2">
+                                                <div className="w-5 h-5 rounded-full bg-amber-400 flex items-center justify-center shrink-0 mt-0.5">
+                                                    <span className="text-white text-[10px] font-black">!</span>
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm font-bold text-amber-900">Este horario coincide con {conflictingTurnos.length} turno{conflictingTurnos.length > 1 ? 's' : ''}</p>
+                                                    <div className="mt-1.5 space-y-1">
+                                                        {conflictingTurnos.slice(0, 3).map((t: any) => (
+                                                            <p key={t.id} className="text-[11px] text-amber-800 font-medium">
+                                                                {t.hora_inicio.substring(0, 5)} - {t.hora_fin.substring(0, 5)} &bull; {t.paciente?.nombre} {t.paciente?.apellido}
+                                                            </p>
+                                                        ))}
+                                                    </div>
+                                                    <p className="text-[11px] text-amber-700 font-semibold mt-2">¿Deseas agendar un sobreturno?</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <button type="button" onClick={() => setFormData(prev => ({ ...prev, sobre_turno: true }))}
+                                                    className={`flex-1 py-2 text-[12px] font-bold rounded-xl transition-all ${formData.sobre_turno ? 'bg-amber-500 text-white' : 'bg-white border border-amber-200 text-amber-700 hover:bg-amber-100'}`}>
+                                                    Sí, agendar sobreturno
+                                                </button>
+                                                <button type="button" onClick={() => setFormData(prev => ({ ...prev, sobre_turno: false }))}
+                                                    className={`flex-1 py-2 text-[12px] font-bold rounded-xl transition-all ${!formData.sobre_turno ? 'bg-gray-700 text-white' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'}`}>
+                                                    No, cambiar horario
+                                                </button>
+                                            </div>
                                         </div>
-                                        <div className="flex-1">
-                                            <span className="text-sm font-black text-gray-900">Forzar agendamiento (Sobre Turno)</span>
-                                            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tight">Ignora restricciones de horario y solapamientos</p>
+                                    )}
+
+                                    {conflictingTurnos.length === 0 && (
+                                        <div className="flex items-center gap-3 p-4 bg-white/60 backdrop-blur-sm border border-blue-100 rounded-2xl group cursor-pointer" onClick={() => setFormData(prev => ({ ...prev, sobre_turno: !prev.sobre_turno }))}>
+                                            <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${formData.sobre_turno ? 'bg-red-500 border-red-500 text-white' : 'border-gray-200 bg-white'}`}>
+                                                {formData.sobre_turno && <Check size={14} strokeWidth={4} />}
+                                            </div>
+                                            <div className="flex-1">
+                                                <span className="text-sm font-black text-gray-900">Forzar agendamiento (Sobre Turno)</span>
+                                                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tight">Ignora restricciones de horario y solapamientos</p>
+                                            </div>
                                         </div>
-                                    </div>
+                                    )}
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
