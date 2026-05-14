@@ -15,8 +15,9 @@ import {
   Calendar,
   Mail,
   ArrowUpDown,
+  Download,
 } from "lucide-react"
-import { pacientesApi, obrasSocialesApi } from "../../api"
+import { pacientesApi, obrasSocialesApi, exportApi } from "../../api"
 import { apiClient } from "../../lib/api-client"
 import { ConfirmationModal } from "../ui/ConfirmationModal"
 import type { Paciente, CrearPacienteData, ObraSocial } from "../../types"
@@ -181,22 +182,40 @@ export const PatientsView: React.FC = () => {
                 Administrá los pacientes registrados en el centro
               </p>
             </div>
-            <button
-              onClick={handleCreatePatient}
-              style={{
-                display: "flex", alignItems: "center", gap: 7,
-                background: tokens.blue, color: tokens.white,
-                border: "none", borderRadius: 10, padding: "9px 18px",
-                fontSize: 13, fontWeight: 700, cursor: "pointer",
-                fontFamily: "Inter, -apple-system, sans-serif",
-                transition: "background 0.15s",
-              }}
-              onMouseEnter={e => (e.currentTarget.style.background = tokens.blueHover)}
-              onMouseLeave={e => (e.currentTarget.style.background = tokens.blue)}
-            >
-              <Plus size={15} />
-              Nuevo Paciente
-            </button>
+            <div style={{ display: "flex", gap: 10 }}>
+              <button
+                onClick={() => exportApi.pacientes().catch(() => alert("Error al exportar"))}
+                style={{
+                  display: "flex", alignItems: "center", gap: 7,
+                  background: tokens.white, color: tokens.grayText,
+                  border: `0.5px solid ${tokens.grayBorder}`, borderRadius: 10, padding: "9px 18px",
+                  fontSize: 13, fontWeight: 500, cursor: "pointer",
+                  fontFamily: "Inter, -apple-system, sans-serif",
+                  transition: "all 0.15s",
+                }}
+                onMouseEnter={e => (e.currentTarget.style.background = tokens.grayBg)}
+                onMouseLeave={e => (e.currentTarget.style.background = tokens.white)}
+              >
+                <Download size={15} />
+                Exportar CSV
+              </button>
+              <button
+                onClick={handleCreatePatient}
+                style={{
+                  display: "flex", alignItems: "center", gap: 7,
+                  background: tokens.blue, color: tokens.white,
+                  border: "none", borderRadius: 10, padding: "9px 18px",
+                  fontSize: 13, fontWeight: 700, cursor: "pointer",
+                  fontFamily: "Inter, -apple-system, sans-serif",
+                  transition: "background 0.15s",
+                }}
+                onMouseEnter={e => (e.currentTarget.style.background = tokens.blueHover)}
+                onMouseLeave={e => (e.currentTarget.style.background = tokens.blue)}
+              >
+                <Plus size={15} />
+                Nuevo Paciente
+              </button>
+            </div>
           </div>
 
           {/* ── Controls ── */}

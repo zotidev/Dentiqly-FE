@@ -241,7 +241,7 @@ export const RegisterPage: React.FC = () => {
                     </>
                   ) : (
                     <>
-                      Comenzar prueba gratuita
+                      Crear mi clínica
                       <ArrowRight className="h-4.5 w-4.5" />
                     </>
                   )}

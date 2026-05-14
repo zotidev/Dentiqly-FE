@@ -105,17 +105,19 @@ const DebtorsReport = () => {
                         Control de pacientes con saldo pendiente y cuentas corrientes
                     </p>
                 </div>
-                <div style={{
-                  display: "flex", alignItems: "center", gap: 10,
-                  background: tokens.redFaint, padding: "8px 16px", borderRadius: 10,
-                  border: `0.5px solid ${tokens.red}33`,
-                }}>
-                  <TrendingDown size={16} color={tokens.red} />
-                  <div>
-                    <p style={{ fontSize: 10, color: tokens.redText, fontWeight: 600, textTransform: "uppercase", margin: 0 }}>Deuda Total</p>
-                    <p style={{ fontSize: 15, fontWeight: 700, color: tokens.redText, margin: 0 }}>
-                      {formatCurrency(deudores.reduce((acc, curr) => acc + curr.deudaTotal, 0))}
-                    </p>
+                <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                  <div style={{
+                    display: "flex", alignItems: "center", gap: 10,
+                    background: tokens.redFaint, padding: "8px 16px", borderRadius: 10,
+                    border: `0.5px solid ${tokens.red}33`,
+                  }}>
+                    <TrendingDown size={16} color={tokens.red} />
+                    <div>
+                      <p style={{ fontSize: 10, color: tokens.redText, fontWeight: 600, textTransform: "uppercase", margin: 0 }}>Deuda Total</p>
+                      <p style={{ fontSize: 15, fontWeight: 700, color: tokens.redText, margin: 0 }}>
+                        {formatCurrency(deudores.reduce((acc, curr) => acc + curr.deudaTotal, 0))}
+                      </p>
+                    </div>
                   </div>
                 </div>
             </div>

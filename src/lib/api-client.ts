@@ -40,7 +40,8 @@ export class ApiClient {
                              endpoint.startsWith('/superadmin') ||
                              endpoint.startsWith('/usuarios-pacientes') ||
                              endpoint.startsWith('/whatsapp') ||
-                             endpoint.startsWith('/cuenta-corriente')
+                             endpoint.startsWith('/cuenta-corriente') ||
+                             endpoint.startsWith('/password-reset')
 
     // Si estamos en modo "Booking" (hay slug de tenant) y NO estamos logueados (sin token),
     // usamos la API pública del tenant para todo lo que no sea global.

@@ -3,21 +3,13 @@
 import React, { useState, useEffect } from "react"
 import { tokens as sharedTokens, labelStyle as sharedLabelStyle, inputStyle as sharedInputStyle, pageWrapper } from './adminDesign'
 import { configuracionApi, Setting } from "../../api/configuracion"
-import { 
-  Save, 
-  Building2, 
-  CreditCard, 
-  Info, 
-  Loader2, 
-  CheckCircle2,
-  AlertCircle,
-  Globe,
-  Settings as SettingsIcon,
+import {
+  Save,
+  Building2,
+  CreditCard,
+  Loader2,
   MessageSquare,
   MapPin,
-  Phone,
-  Layout,
-  ExternalLink
 } from "lucide-react"
 import { useToast } from "../../hooks/use-toast"
 
@@ -30,7 +22,7 @@ const labelStyle = sharedLabelStyle
 const inputStyle = sharedInputStyle
 
 export const SettingsManager: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<"general" | "banking" | "booking">("general")
+  const [activeTab, setActiveTab] = useState<"general" | "banking">("general")
   const [settings, setSettings] = useState<Setting[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -151,7 +143,6 @@ export const SettingsManager: React.FC = () => {
         {[
           { id: "general", label: "General", icon: Building2 },
           { id: "banking", label: "Pagos y Cuentas", icon: CreditCard },
-          { id: "booking", label: "Reserva Pública", icon: Globe }
         ].map(tab => (
           <button
             key={tab.id}
@@ -291,18 +282,6 @@ export const SettingsManager: React.FC = () => {
           </form>
         )}
 
-        {activeTab === "booking" && (
-          <div style={{ padding: "80px 32px", textAlign: "center" }}>
-            <div style={{ width: 56, height: 56, borderRadius: 18, background: tokens.grayRow, color: tokens.grayMuted, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px" }}>
-              <Layout size={28} />
-            </div>
-            <h3 style={{ fontSize: 16, fontWeight: 600, color: tokens.navy, margin: "0 0 8px 0" }}>Configuración del Portal</h3>
-            <p style={{ fontSize: 13, color: tokens.grayMuted, maxWidth: 360, margin: "0 auto", lineHeight: 1.5 }}>
-              Desde aquí podrás personalizar la apariencia de tu portal de reservas online y los requerimientos de seña.
-            </p>
-            <button style={{ marginTop: 24, background: "transparent", border: `0.5px solid ${tokens.grayBorder}`, borderRadius: 10, padding: "8px 20px", fontSize: 12, fontWeight: 600, color: tokens.grayText, cursor: "pointer" }}>Próximamente</button>
-          </div>
-        )}
       </div>
     </div>
   )

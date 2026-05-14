@@ -17,6 +17,7 @@ import {
   CreditCard
 } from "lucide-react"
 import { liquidacionesApi } from "../../api/liquidaciones"
+import { exportApi } from "../../api/export"
 import type { Liquidacion } from "../../types"
 import { tokens as sharedTokens, labelStyle as sharedLabelStyle, inputStyle as sharedInputStyle, pageWrapper } from './adminDesign'
 import { useToast } from "../../hooks/use-toast"
@@ -141,22 +142,40 @@ export function LiquidacionesManager() {
             Gestioná el pago de honorarios a tus profesionales
           </p>
         </div>
-        <button
-          onClick={() => setShowCreateDialog(true)}
-          style={{
-            display: "flex", alignItems: "center", gap: 7,
-            background: tokens.blue, color: tokens.white,
-            border: "none", borderRadius: 10, padding: "9px 18px",
-            fontSize: 13, fontWeight: 700, cursor: "pointer",
-            fontFamily: "Inter, -apple-system, sans-serif",
-            transition: "background 0.15s",
-          }}
-          onMouseEnter={e => (e.currentTarget.style.background = tokens.blueHover)}
-          onMouseLeave={e => (e.currentTarget.style.background = tokens.blue)}
-        >
-          <Plus size={15} />
-          Nueva Liquidación
-        </button>
+        <div style={{ display: "flex", gap: 10 }}>
+          <button
+            onClick={() => exportApi.liquidaciones().catch(() => toast({ variant: "destructive", title: "Error", description: "No se pudo exportar" }))}
+            style={{
+              display: "flex", alignItems: "center", gap: 7,
+              background: tokens.white, color: tokens.grayText,
+              border: `0.5px solid ${tokens.grayBorder}`, borderRadius: 10, padding: "9px 18px",
+              fontSize: 13, fontWeight: 500, cursor: "pointer",
+              fontFamily: "Inter, -apple-system, sans-serif",
+              transition: "all 0.15s",
+            }}
+            onMouseEnter={e => (e.currentTarget.style.background = tokens.grayBg)}
+            onMouseLeave={e => (e.currentTarget.style.background = tokens.white)}
+          >
+            <Download size={15} />
+            Exportar CSV
+          </button>
+          <button
+            onClick={() => setShowCreateDialog(true)}
+            style={{
+              display: "flex", alignItems: "center", gap: 7,
+              background: tokens.blue, color: tokens.white,
+              border: "none", borderRadius: 10, padding: "9px 18px",
+              fontSize: 13, fontWeight: 700, cursor: "pointer",
+              fontFamily: "Inter, -apple-system, sans-serif",
+              transition: "background 0.15s",
+            }}
+            onMouseEnter={e => (e.currentTarget.style.background = tokens.blueHover)}
+            onMouseLeave={e => (e.currentTarget.style.background = tokens.blue)}
+          >
+            <Plus size={15} />
+            Nueva Liquidación
+          </button>
+        </div>
       </div>
 
       {/* ── Controls ── */}

@@ -21,6 +21,8 @@ import { PatientApp } from './patient-portal/PatientApp'
 import { LandingPage } from './landing/LandingPage'
 import { LoginPage } from './auth/LoginPage'
 import { RegisterPage } from './auth/RegisterPage'
+import { ForgotPasswordPage } from './auth/ForgotPasswordPage'
+import { ResetPasswordPage } from './auth/ResetPasswordPage'
 import { SuperAdminApp } from './superadmin/SuperAdminApp'
 import { PrivacyPage } from './legal/PrivacyPage'
 import { TermsPage } from './legal/TermsPage'
@@ -150,6 +152,8 @@ export const AppRouter: React.FC = () => {
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/privacidad" element={<PrivacyPage />} />
       <Route path="/terminos" element={<TermsPage />} />
       <Route path="/cookies" element={<CookiesPage />} />

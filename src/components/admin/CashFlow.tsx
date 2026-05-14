@@ -1,23 +1,25 @@
 "use client"
 
 import { useState, useEffect, useMemo } from 'react';
-import { 
-  Plus, 
-  Minus, 
-  Search, 
-  ArrowUpDown, 
-  ChevronLeft, 
-  ChevronRight, 
-  TrendingUp, 
-  TrendingDown, 
+import {
+  Plus,
+  Minus,
+  Search,
+  ArrowUpDown,
+  ChevronLeft,
+  ChevronRight,
+  TrendingUp,
+  TrendingDown,
   Calendar,
   CreditCard,
   FileText,
-  DollarSign
+  DollarSign,
+  Download,
 } from "lucide-react"
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { cuentaCorrienteApi } from '../../api/cuenta-corriente';
+import { exportApi } from '../../api/export';
 import { NewMovementModal } from './cashflow/NewMovementModal';
 import { tokens as sharedTokens, labelStyle as sharedLabelStyle, inputStyle as sharedInputStyle, pageWrapper } from './adminDesign'
 
@@ -103,6 +105,22 @@ export default function CashFlow() {
                     </p>
                 </div>
                 <div style={{ display: "flex", gap: 10 }}>
+                    <button
+                      onClick={() => exportApi.flujoCaja().catch(() => console.error("Error al exportar"))}
+                      style={{
+                        display: "flex", alignItems: "center", gap: 7,
+                        background: tokens.white, color: tokens.grayText,
+                        border: `0.5px solid ${tokens.grayBorder}`, borderRadius: 10, padding: "9px 18px",
+                        fontSize: 13, fontWeight: 500, cursor: "pointer",
+                        fontFamily: "Inter, -apple-system, sans-serif",
+                        transition: "all 0.15s",
+                      }}
+                      onMouseEnter={e => (e.currentTarget.style.background = tokens.grayBg)}
+                      onMouseLeave={e => (e.currentTarget.style.background = tokens.white)}
+                    >
+                      <Download size={15} />
+                      Exportar
+                    </button>
                     <button
                       onClick={() => handleOpenModal('Egreso')}
                       style={{

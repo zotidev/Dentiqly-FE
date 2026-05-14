@@ -15,6 +15,9 @@ export { copagosApi } from "./copagos"
 export { feriadosApi } from "./feriados"
 export { recordatoriosApi } from "./recordatorios"
 export { sucursalesApi } from "./sucursales"
+export { usuariosClinicaApi } from "./usuarios-clinica"
+export type { UsuarioClinica, CrearUsuarioClinicaData, ActualizarUsuarioClinicaData } from "./usuarios-clinica"
+export { exportApi } from "./export"
 
 // Re-exportar el cliente para uso directo si es necesario
 export { apiClient } from "../lib/api-client"
