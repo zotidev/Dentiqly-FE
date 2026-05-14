@@ -26,6 +26,7 @@ interface AdminLayoutProps {
   children: React.ReactNode
   currentView: string
   onViewChange: (view: string) => void
+  onSearch?: (query: string) => void
 }
 
 interface MenuGroup {
@@ -36,7 +37,8 @@ interface MenuGroup {
 export const AdminLayout: React.FC<AdminLayoutProps> = ({
   children,
   currentView,
-  onViewChange
+  onViewChange,
+  onSearch
 }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [collapsed, setCollapsed] = useState(false)
@@ -245,7 +247,13 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Buscar..."
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && searchQuery.trim() && onSearch) {
+                    onSearch(searchQuery.trim())
+                    setSearchQuery('')
+                  }
+                }}
+                placeholder="Buscar pacientes..."
                 className="w-full pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-xl text-sm text-gray-700 placeholder:text-[#B5AFA8] focus:outline-none focus:border-[#2563FF] focus:ring-2 focus:ring-[#2563FF]/10 transition-all"
               />
             </div>

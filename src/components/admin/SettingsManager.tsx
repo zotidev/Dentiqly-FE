@@ -10,6 +10,9 @@ import {
   Loader2,
   MessageSquare,
   MapPin,
+  Clock,
+  Plus,
+  Trash2,
 } from "lucide-react"
 import { useToast } from "../../hooks/use-toast"
 
@@ -22,7 +25,7 @@ const labelStyle = sharedLabelStyle
 const inputStyle = sharedInputStyle
 
 export const SettingsManager: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<"general" | "banking">("general")
+  const [activeTab, setActiveTab] = useState<"general" | "banking" | "horarios">("general")
   const [settings, setSettings] = useState<Setting[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -45,6 +48,28 @@ export const SettingsManager: React.FC = () => {
     clinic_google_maps: ""
   })
 
+  const DAY_LABELS: Record<string, string> = {
+    lunes: "Lunes", martes: "Martes", miercoles: "Miércoles",
+    jueves: "Jueves", viernes: "Viernes", sabado: "Sábado", domingo: "Domingo"
+  }
+  const DAY_KEYS = ["lunes", "martes", "miercoles", "jueves", "viernes", "sabado", "domingo"]
+
+  type Rango = { inicio: string; fin: string }
+  type DiaHorario = { activo: boolean; rangos: Rango[] }
+  type HorariosNegocio = Record<string, DiaHorario>
+
+  const defaultHorarios: HorariosNegocio = {
+    lunes:     { activo: true,  rangos: [{ inicio: "09:00", fin: "18:00" }] },
+    martes:    { activo: true,  rangos: [{ inicio: "09:00", fin: "18:00" }] },
+    miercoles: { activo: true,  rangos: [{ inicio: "09:00", fin: "18:00" }] },
+    jueves:    { activo: true,  rangos: [{ inicio: "09:00", fin: "18:00" }] },
+    viernes:   { activo: true,  rangos: [{ inicio: "09:00", fin: "18:00" }] },
+    sabado:    { activo: false, rangos: [{ inicio: "09:00", fin: "13:00" }] },
+    domingo:   { activo: false, rangos: [] },
+  }
+
+  const [horariosData, setHorariosData] = useState<HorariosNegocio>(defaultHorarios)
+
   useEffect(() => {
     fetchSettings()
   }, [])
@@ -61,6 +86,12 @@ export const SettingsManager: React.FC = () => {
       data.forEach(s => {
         if (s.clave in bankFields) bankFields[s.clave] = s.valor
         if (s.clave in generalFields) generalFields[s.clave] = s.valor
+        if (s.clave === "business_hours" && s.valor) {
+          try {
+            const parsed = typeof s.valor === "string" ? JSON.parse(s.valor) : s.valor
+            setHorariosData(parsed)
+          } catch { /* keep defaults */ }
+        }
       })
       setBankData(bankFields)
       setGeneralData(generalFields)
@@ -115,6 +146,53 @@ export const SettingsManager: React.FC = () => {
     }
   }
 
+  const handleSaveHorarios = async () => {
+    setSaving(true)
+    try {
+      await configuracionApi.crear({
+        clave: "business_hours",
+        valor: JSON.stringify(horariosData),
+        tipo: "json",
+        categoria: "horarios"
+      })
+      toast({ title: "Éxito", description: "Horarios de atención actualizados" })
+      fetchSettings()
+    } catch {
+      toast({ title: "Error", description: "No se pudieron guardar los horarios.", variant: "destructive" })
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const updateDia = (dia: string, field: string, value: any) => {
+    setHorariosData(prev => ({
+      ...prev,
+      [dia]: { ...prev[dia], [field]: value }
+    }))
+  }
+
+  const updateRango = (dia: string, index: number, field: "inicio" | "fin", value: string) => {
+    setHorariosData(prev => {
+      const rangos = [...prev[dia].rangos]
+      rangos[index] = { ...rangos[index], [field]: value }
+      return { ...prev, [dia]: { ...prev[dia], rangos } }
+    })
+  }
+
+  const addRango = (dia: string) => {
+    setHorariosData(prev => {
+      const rangos = [...prev[dia].rangos, { inicio: "14:00", fin: "18:00" }]
+      return { ...prev, [dia]: { ...prev[dia], rangos } }
+    })
+  }
+
+  const removeRango = (dia: string, index: number) => {
+    setHorariosData(prev => {
+      const rangos = prev[dia].rangos.filter((_, i) => i !== index)
+      return { ...prev, [dia]: { ...prev[dia], rangos } }
+    })
+  }
+
   if (loading) {
     return (
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "100px 0", gap: 12 }}>
@@ -142,6 +220,7 @@ export const SettingsManager: React.FC = () => {
       <div style={{ display: "flex", gap: 6, marginBottom: 24, background: tokens.grayRow, padding: 4, borderRadius: 12, width: "fit-content" }}>
         {[
           { id: "general", label: "General", icon: Building2 },
+          { id: "horarios", label: "Horarios", icon: Clock },
           { id: "banking", label: "Pagos y Cuentas", icon: CreditCard },
         ].map(tab => (
           <button
@@ -218,6 +297,119 @@ export const SettingsManager: React.FC = () => {
               </button>
             </div>
           </form>
+        )}
+
+        {activeTab === "horarios" && (
+          <div style={{ padding: 32 }}>
+            <div style={{ marginBottom: 24 }}>
+              <h3 style={{ fontSize: 14, fontWeight: 700, color: tokens.navy, margin: "0 0 6px 0", display: "flex", alignItems: "center", gap: 8 }}>
+                <Clock size={16} color={tokens.blue} /> Horarios de Atención
+              </h3>
+              <p style={{ fontSize: 12, color: tokens.grayMuted, margin: 0 }}>
+                Configurá los días y horarios en que tu clínica atiende. Estos horarios se muestran en el sistema de reservas online.
+              </p>
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {DAY_KEYS.map(dia => {
+                const diaData = horariosData[dia]
+                return (
+                  <div
+                    key={dia}
+                    style={{
+                      display: "flex", alignItems: "flex-start", gap: 16, padding: "14px 16px",
+                      background: diaData.activo ? tokens.white : tokens.grayBg,
+                      borderRadius: 12, border: `1px solid ${diaData.activo ? tokens.grayBorder : "#E8E8E8"}`,
+                      transition: "all 0.15s"
+                    }}
+                  >
+                    {/* Day name + toggle */}
+                    <div style={{ width: 120, flexShrink: 0, paddingTop: 6 }}>
+                      <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }}>
+                        <input
+                          type="checkbox"
+                          checked={diaData.activo}
+                          onChange={e => updateDia(dia, "activo", e.target.checked)}
+                          style={{ width: 16, height: 16, accentColor: tokens.blue }}
+                        />
+                        <span style={{ fontSize: 13, fontWeight: 600, color: diaData.activo ? tokens.navy : tokens.grayMuted }}>
+                          {DAY_LABELS[dia]}
+                        </span>
+                      </label>
+                    </div>
+
+                    {/* Time ranges */}
+                    <div style={{ flex: 1 }}>
+                      {diaData.activo ? (
+                        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                          {diaData.rangos.map((rango, idx) => (
+                            <div key={idx} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                              <input
+                                type="time"
+                                value={rango.inicio}
+                                onChange={e => updateRango(dia, idx, "inicio", e.target.value)}
+                                style={{ ...inputStyle, width: 130, padding: "6px 10px", fontSize: 13 }}
+                              />
+                              <span style={{ fontSize: 12, color: tokens.grayMuted, fontWeight: 500 }}>a</span>
+                              <input
+                                type="time"
+                                value={rango.fin}
+                                onChange={e => updateRango(dia, idx, "fin", e.target.value)}
+                                style={{ ...inputStyle, width: 130, padding: "6px 10px", fontSize: 13 }}
+                              />
+                              {diaData.rangos.length > 1 && (
+                                <button
+                                  type="button"
+                                  onClick={() => removeRango(dia, idx)}
+                                  style={{ background: "none", border: "none", cursor: "pointer", padding: 4, color: tokens.red, display: "flex" }}
+                                  title="Eliminar rango"
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              )}
+                            </div>
+                          ))}
+                          {diaData.rangos.length < 3 && (
+                            <button
+                              type="button"
+                              onClick={() => addRango(dia)}
+                              style={{
+                                display: "flex", alignItems: "center", gap: 4, background: "none",
+                                border: "none", cursor: "pointer", fontSize: 11, fontWeight: 600,
+                                color: tokens.blue, padding: "2px 0"
+                              }}
+                            >
+                              <Plus size={12} /> Agregar rango horario
+                            </button>
+                          )}
+                        </div>
+                      ) : (
+                        <p style={{ fontSize: 12, color: tokens.grayMuted, fontStyle: "italic", margin: 0, paddingTop: 6 }}>
+                          Cerrado
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+
+            <div style={{ marginTop: 32, paddingTop: 24, borderTop: `0.5px solid ${tokens.grayRow}`, display: "flex", justifyContent: "flex-end" }}>
+              <button
+                type="button" onClick={handleSaveHorarios} disabled={saving}
+                style={{
+                  display: "flex", alignItems: "center", gap: 8, background: tokens.blue, color: tokens.white,
+                  border: "none", borderRadius: 10, padding: "10px 24px", fontSize: 13, fontWeight: 700,
+                  cursor: "pointer", transition: "background 0.15s", opacity: saving ? 0.7 : 1
+                }}
+                onMouseEnter={e => { if(!saving) e.currentTarget.style.background = tokens.blueHover }}
+                onMouseLeave={e => { if(!saving) e.currentTarget.style.background = tokens.blue }}
+              >
+                {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                Guardar Horarios
+              </button>
+            </div>
+          </div>
         )}
 
         {activeTab === "banking" && (

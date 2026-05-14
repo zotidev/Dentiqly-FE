@@ -86,7 +86,7 @@ const STATUS_COLORS = {
 } as const
 
 interface CalendarViewProps {
-  onNavigate?: (view: string) => void
+  onNavigate?: (view: string, params?: Record<string, any>) => void
 }
 
 export const CalendarView: React.FC<CalendarViewProps> = ({ onNavigate }) => {
@@ -1062,7 +1062,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ onNavigate }) => {
                   <button
                     onClick={() => {
                       setSelectedAppointment(null)
-                      onNavigate('patients')
+                      onNavigate('patients', { patientId: selectedAppointment.paciente_id })
                     }}
                     className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-[12px] font-bold text-[#2563FF] bg-[#EEF3FF] border border-[#2563FF]/10 rounded-xl hover:bg-[#2563FF] hover:text-white transition-all"
                   >

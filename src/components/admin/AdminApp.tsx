@@ -65,8 +65,14 @@ const SubscriptionBanner: React.FC<{ status: SubscriptionStatus }> = ({ status }
 
 export const AdminApp: React.FC = () => {
   const [currentView, setCurrentView] = useState('dashboard')
+  const [navParams, setNavParams] = useState<Record<string, any>>({})
   const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus | null>(null)
   const [loading, setLoading] = useState(true)
+
+  const handleNavigate = (view: string, params?: Record<string, any>) => {
+    setCurrentView(view)
+    setNavParams(params || {})
+  }
 
   useEffect(() => {
     const fetchSubscriptionStatus = async () => {
@@ -102,12 +108,12 @@ export const AdminApp: React.FC = () => {
       case 'dashboard':
         return <Dashboard
           slug={subscriptionStatus?.slug}
-          onNavigate={setCurrentView}
+          onNavigate={handleNavigate}
         />
       case 'calendar':
-        return <CalendarView onNavigate={setCurrentView} />
+        return <CalendarView onNavigate={handleNavigate} />
       case 'patients':
-        return <PatientsView />
+        return <PatientsView initialPatientId={navParams.patientId} initialSearchTerm={navParams.searchTerm} />
       case 'professionals':
         return <ProfessionalsManager />
       case 'services':
@@ -138,7 +144,7 @@ export const AdminApp: React.FC = () => {
   }
 
   return (
-    <AdminLayout currentView={currentView} onViewChange={setCurrentView}>
+    <AdminLayout currentView={currentView} onViewChange={setCurrentView} onSearch={(q) => handleNavigate('patients', { searchTerm: q })}>
       {subscriptionStatus && <SubscriptionBanner status={subscriptionStatus} />}
       {renderCurrentView()}
     </AdminLayout>

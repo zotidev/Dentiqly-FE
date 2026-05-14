@@ -6,7 +6,8 @@ import { Input } from "../ui/Input"
 import { Select } from "../ui/Select"
 import type { CrearPacienteData, ObraSocial } from "../../types"
 import { obrasSocialesApi } from "../../api/obras-sociales"
-import { User, Heart, Shield, Phone, Mail, MapPin } from "lucide-react"
+import { pacientesApi } from "../../api"
+import { User, Heart, Shield, Phone, Mail, MapPin, Search, CheckCircle2, UserPlus, UserCheck } from "lucide-react"
 
 interface PatientFormProps {
   onPatientData: (data: CrearPacienteData) => void
@@ -48,6 +49,11 @@ export const PatientForm: React.FC<PatientFormProps> = ({ onPatientData, loading
 
   const [errors, setErrors] = useState<Partial<Record<keyof CrearPacienteData, string>>>({})
   const [nombreCompleto, setNombreCompleto] = useState("")
+  const [patientMode, setPatientMode] = useState<"choice" | "new" | "existing">("choice")
+  const [dniSearch, setDniSearch] = useState("")
+  const [searching, setSearching] = useState(false)
+  const [searchResult, setSearchResult] = useState<"idle" | "found" | "not_found">("idle")
+  const [existingPatientLocked, setExistingPatientLocked] = useState(false)
 
   useEffect(() => {
     const fetchObrasSociales = async () => {
@@ -122,6 +128,43 @@ export const PatientForm: React.FC<PatientFormProps> = ({ onPatientData, loading
     if (errors.nombre) setErrors(prev => ({ ...prev, nombre: undefined }))
   }
 
+  const handleDniSearch = async () => {
+    if (!dniSearch.trim()) return
+    setSearching(true)
+    setSearchResult("idle")
+    try {
+      const patient = await pacientesApi.buscarPorDocumento(dniSearch.trim())
+      if (patient) {
+        setFormData({
+          apellido: patient.apellido || "",
+          nombre: patient.nombre || "",
+          tipo_documento: "DNI",
+          numero_documento: patient.numero_documento || "",
+          fecha_nacimiento: patient.fecha_nacimiento || "",
+          sexo: patient.sexo || "Masculino",
+          telefono: patient.telefono || "",
+          email: patient.email || "",
+          direccion: patient.direccion || "",
+          obra_social_id: patient.obra_social_id,
+          numero_afiliado: patient.numero_afiliado || "",
+          contacto_emergencia: patient.contacto_emergencia || "",
+          telefono_emergencia: patient.telefono_emergencia || "",
+          observaciones: "",
+          obra_social_nombre_custom: "",
+        })
+        setNombreCompleto(`${patient.nombre || ''} ${patient.apellido || ''}`.trim())
+        setSearchResult("found")
+        setExistingPatientLocked(true)
+      } else {
+        setSearchResult("not_found")
+      }
+    } catch {
+      setSearchResult("not_found")
+    } finally {
+      setSearching(false)
+    }
+  }
+
   const handleObraSocialChange = (value: string) => {
     if (value === "OTRO") {
       setFormData(prev => ({ 
@@ -146,8 +189,99 @@ export const PatientForm: React.FC<PatientFormProps> = ({ onPatientData, loading
     }
   }
 
+  if (patientMode === "choice") {
+    return (
+      <div className="space-y-4">
+        <p className="text-sm text-gray-600 text-center mb-2">¿Ya te atendiste con nosotros?</p>
+        <div className="grid grid-cols-2 gap-4">
+          <button
+            type="button"
+            onClick={() => setPatientMode("existing")}
+            className="flex flex-col items-center gap-3 p-6 bg-white border-2 border-gray-200 rounded-2xl hover:border-[#2563FF] hover:bg-blue-50/30 transition-all group"
+          >
+            <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center group-hover:bg-[#2563FF]/10 transition-colors">
+              <UserCheck className="h-6 w-6 text-[#2563FF]" />
+            </div>
+            <div className="text-center">
+              <p className="font-bold text-gray-900 text-sm">Ya soy paciente</p>
+              <p className="text-[11px] text-gray-500 mt-0.5">Buscar por DNI</p>
+            </div>
+          </button>
+          <button
+            type="button"
+            onClick={() => setPatientMode("new")}
+            className="flex flex-col items-center gap-3 p-6 bg-white border-2 border-gray-200 rounded-2xl hover:border-[#2563FF] hover:bg-blue-50/30 transition-all group"
+          >
+            <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center group-hover:bg-[#2563FF]/10 transition-colors">
+              <UserPlus className="h-6 w-6 text-[#2563FF]" />
+            </div>
+            <div className="text-center">
+              <p className="font-bold text-gray-900 text-sm">Primera vez</p>
+              <p className="text-[11px] text-gray-500 mt-0.5">Completar datos</p>
+            </div>
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Búsqueda por DNI para pacientes existentes */}
+      {patientMode === "existing" && !existingPatientLocked && (
+        <div className="bg-blue-50/50 p-5 rounded-2xl border border-blue-100 space-y-4">
+          <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2 uppercase tracking-widest">
+            <Search className="text-[#2563FF]" size={16} />
+            Buscar por DNI
+          </h3>
+          <div className="flex gap-3">
+            <input
+              type="text"
+              value={dniSearch}
+              onChange={(e) => { setDniSearch(e.target.value); setSearchResult("idle") }}
+              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleDniSearch() } }}
+              placeholder="Ingresá tu DNI"
+              className="flex-1 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#2563FF]/20 focus:border-[#2563FF] transition-all"
+            />
+            <button
+              type="button"
+              onClick={handleDniSearch}
+              disabled={searching || !dniSearch.trim()}
+              className="px-5 py-2.5 bg-[#2563FF] text-white font-bold text-sm rounded-xl hover:bg-blue-700 transition-all disabled:opacity-50"
+            >
+              {searching ? "Buscando..." : "Buscar"}
+            </button>
+          </div>
+          {searchResult === "not_found" && (
+            <div className="flex items-center gap-2 text-amber-700 bg-amber-50 px-4 py-2.5 rounded-xl text-sm">
+              <span>No se encontró un paciente con ese DNI.</span>
+              <button type="button" onClick={() => { setPatientMode("new"); setDniSearch("") }} className="underline font-semibold ml-1">
+                Completar como nuevo
+              </button>
+            </div>
+          )}
+          {searchResult === "found" && (
+            <p className="text-xs text-gray-500">Si los datos no son correctos, podés modificarlos antes de confirmar.</p>
+          )}
+        </div>
+      )}
+
+      {patientMode === "existing" && existingPatientLocked && (
+        <div className="flex items-center gap-3 bg-green-50 border border-green-200 px-4 py-3 rounded-xl">
+          <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-green-800">Paciente encontrado: {nombreCompleto}</p>
+            <p className="text-xs text-green-700">DNI {formData.numero_documento}</p>
+          </div>
+          <button type="button" onClick={() => { setExistingPatientLocked(false); setSearchResult("idle"); setDniSearch("") }} className="text-xs font-bold text-green-700 underline">
+            Cambiar
+          </button>
+        </div>
+      )}
+
+      {/* Solo mostrar el formulario completo si es nuevo o ya se encontró al existente */}
+      {(patientMode === "new" || existingPatientLocked) && (
+        <>
       {/* Sección 1: Información Personal */}
       <div className="bg-gray-50/50 p-6 rounded-2xl border border-gray-100 space-y-5">
         <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2 uppercase tracking-widest">
@@ -341,6 +475,8 @@ export const PatientForm: React.FC<PatientFormProps> = ({ onPatientData, loading
       >
         {loading ? "Cargando..." : "Confirmar Datos"}
       </button>
+        </>
+      )}
     </form>
   )
 }

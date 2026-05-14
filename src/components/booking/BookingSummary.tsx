@@ -114,19 +114,64 @@ export const BookingSummary: React.FC = () => {
           </div>
           
           <div className="space-y-3.5">
-            {[
-              { days: "Lun, Mar, Jue", time: "9:00 - 18:00" },
-              { days: "Miércoles", time: "9:00 - 16:00" },
-              { days: "Viernes", time: "10:00 - 16:30" },
-              { days: "Sáb y Dom", time: "Cerrado", closed: true }
-            ].map((item, i) => (
-              <div key={i} className="flex justify-between items-center text-xs">
-                <span className="font-bold text-gray-600">{item.days}</span>
-                <span className={`${item.closed ? 'text-red-400 font-black italic' : 'text-gray-500 font-bold'}`}>
-                  {item.time}
-                </span>
-              </div>
-            ))}
+            {(() => {
+              const businessHours = config.business_hours
+              let parsed: Record<string, { activo: boolean; rangos: { inicio: string; fin: string }[] }> | null = null
+              if (businessHours) {
+                try {
+                  parsed = typeof businessHours === "string" ? JSON.parse(businessHours) : businessHours
+                } catch { /* fallback below */ }
+              }
+
+              if (parsed) {
+                const dayLabels: Record<string, string> = {
+                  lunes: "Lunes", martes: "Martes", miercoles: "Miércoles",
+                  jueves: "Jueves", viernes: "Viernes", sabado: "Sábado", domingo: "Domingo"
+                }
+                const days = ["lunes", "martes", "miercoles", "jueves", "viernes", "sabado", "domingo"]
+
+                // Group days with same schedule
+                const groups: { days: string[]; time: string; closed: boolean }[] = []
+                days.forEach(day => {
+                  const d = parsed![day]
+                  if (!d) return
+                  const closed = !d.activo || d.rangos.length === 0
+                  const time = closed ? "Cerrado" : d.rangos.map(r => `${r.inicio} - ${r.fin}`).join(", ")
+                  const last = groups[groups.length - 1]
+                  if (last && last.time === time && last.closed === closed) {
+                    last.days.push(dayLabels[day])
+                  } else {
+                    groups.push({ days: [dayLabels[day]], time, closed })
+                  }
+                })
+
+                return groups.map((g, i) => {
+                  const label = g.days.length <= 2 ? g.days.join(" y ") :
+                    `${g.days[0]} a ${g.days[g.days.length - 1]}`
+                  return (
+                    <div key={i} className="flex justify-between items-center text-xs">
+                      <span className="font-bold text-gray-600">{label}</span>
+                      <span className={`${g.closed ? 'text-red-400 font-black italic' : 'text-gray-500 font-bold'}`}>
+                        {g.time}
+                      </span>
+                    </div>
+                  )
+                })
+              }
+
+              // Fallback: hardcoded defaults
+              return [
+                { days: "Lunes a Viernes", time: "9:00 - 18:00" },
+                { days: "Sáb y Dom", time: "Cerrado", closed: true }
+              ].map((item, i) => (
+                <div key={i} className="flex justify-between items-center text-xs">
+                  <span className="font-bold text-gray-600">{item.days}</span>
+                  <span className={`${'closed' in item && item.closed ? 'text-red-400 font-black italic' : 'text-gray-500 font-bold'}`}>
+                    {item.time}
+                  </span>
+                </div>
+              ))
+            })()}
           </div>
         </div>
       </div>

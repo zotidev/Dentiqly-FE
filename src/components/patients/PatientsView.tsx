@@ -45,7 +45,12 @@ const labelStyle = sharedLabelStyle
 const inputStyle = sharedInputStyle
 
 /* ═══════════════════════════════════════════════════════════════════════ */
-export const PatientsView: React.FC = () => {
+interface PatientsViewProps {
+  initialPatientId?: string | number
+  initialSearchTerm?: string
+}
+
+export const PatientsView: React.FC<PatientsViewProps> = ({ initialPatientId, initialSearchTerm }) => {
   const [patients, setPatients] = useState<Paciente[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
@@ -67,6 +72,28 @@ export const PatientsView: React.FC = () => {
   const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api"
 
   useEffect(() => { fetchPatients(); fetchObrasSociales() }, [currentPage, searchTerm])
+
+  useEffect(() => {
+    if (initialPatientId) {
+      const loadInitialPatient = async () => {
+        try {
+          const patient = await pacientesApi.obtener(String(initialPatientId))
+          setSelectedPatient(patient)
+          setViewMode("detail")
+        } catch (e) {
+          console.error("Error loading patient:", e)
+        }
+      }
+      loadInitialPatient()
+    }
+  }, [initialPatientId])
+
+  useEffect(() => {
+    if (initialSearchTerm) {
+      setSearchTerm(initialSearchTerm)
+      setCurrentPage(1)
+    }
+  }, [initialSearchTerm])
 
   const fetchObrasSociales = async () => {
     try {
