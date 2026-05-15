@@ -5,7 +5,10 @@ import { Navbar } from "./sections/Navbar"
 import { HeroSection } from "./sections/HeroSection"
 import { LogoCarousel } from "./sections/LogoCarousel"
 import { ProductShowcase } from "./sections/ProductShowcase"
+import { BentoGridSection } from "./sections/BentoGridSection"
+import { ScrollRevealSection } from "./sections/ScrollRevealSection"
 import { MetricsSection } from "./sections/MetricsSection"
+import { TabbedShowcase } from "./sections/TabbedShowcase"
 import { FeatureDeepDive } from "./sections/FeatureDeepDive"
 import { TestimonialSection } from "./sections/TestimonialSection"
 import { SecuritySection } from "./sections/SecuritySection"
@@ -13,6 +16,7 @@ import { FaqSection } from "./sections/FaqSection"
 import { PricingSection } from "./sections/PricingSection"
 import { CtaSection } from "./sections/CtaSection"
 import { FooterSection } from "./sections/FooterSection"
+import { PerformanceSection } from "./sections/PerformanceSection"
 
 export const LandingPage: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -26,11 +30,11 @@ export const LandingPage: React.FC = () => {
       <CustomCursor />
       <Navbar />
       <HeroSection />
-      <LogoCarousel />
       <ProductShowcase />
-      <MetricsSection />
-      <FeatureDeepDive />
-      <TestimonialSection />
+      <BentoGridSection />
+      <ScrollRevealSection />
+      <TabbedShowcase />
+      <PerformanceSection />
       <SecuritySection />
       <PricingSection />
       <FaqSection />

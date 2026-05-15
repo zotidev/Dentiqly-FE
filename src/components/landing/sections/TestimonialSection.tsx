@@ -75,7 +75,7 @@ export const TestimonialSection: React.FC = () => {
         <div className="testimonial-card relative bg-[#FAFCFF] rounded-3xl p-10 sm:p-14 border border-gray-100">
           <Quote className="w-12 h-12 text-[#2563FF]/15 mb-6" />
 
-          <blockquote className="testimonial-quote text-xl sm:text-2xl font-medium text-[#0B1023] leading-relaxed mb-8">
+          <blockquote className="testimonial-quote text-xl sm:text-2xl font-medium text-[#0A0F2D] leading-relaxed mb-8">
             &ldquo;Desde que implementamos Dentiqly, nuestra clinica ahorra horas
             de trabajo administrativo cada semana. La agenda inteligente y los
             recordatorios por WhatsApp redujeron las ausencias drasticamente. Es
@@ -83,11 +83,11 @@ export const TestimonialSection: React.FC = () => {
           </blockquote>
 
           <div className="testimonial-author flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#2563FF] to-[#02E3FF] flex items-center justify-center">
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#2563FF] to-[#0047FF] flex items-center justify-center">
               <span className="text-white text-sm font-bold">MG</span>
             </div>
             <div>
-              <p className="font-bold text-[#0B1023]">Dra. Marina Gonzalez</p>
+              <p className="font-bold text-[#0A0F2D]">Dra. Marina Gonzalez</p>
               <p className="text-sm text-[#8A93A8]">
                 Directora — Centro Odontologico Palermo
               </p>
@@ -105,9 +105,9 @@ export const TestimonialSection: React.FC = () => {
               key={i}
               className="text-center py-6 px-4 bg-[#FAFCFF] rounded-2xl border border-gray-100"
             >
-              <p className="text-2xl font-extrabold text-[#0B1023]">
+              <p className="text-2xl font-extrabold text-[#0A0F2D]">
                 {i === 0 ? stat.value : stat.value}
-                <span className="text-[#02E3FF]">{stat.suffix}</span>
+                <span className="text-[#0047FF]">{stat.suffix}</span>
               </p>
               <p className="text-xs text-[#8A93A8] mt-1 font-medium">{stat.label}</p>
             </div>

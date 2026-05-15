@@ -56,7 +56,7 @@ export const FooterSection: React.FC = () => {
           </div>
 
           <div>
-            <h4 className="font-bold text-[#0B1023] mb-6">Plataforma</h4>
+            <h4 className="font-bold text-[#0A0F2D] mb-6">Plataforma</h4>
             <ul className="space-y-4 text-sm text-gray-500">
               {sectionLinks.map((item) => (
                 <li key={item.href}>
@@ -73,7 +73,7 @@ export const FooterSection: React.FC = () => {
           </div>
 
           <div>
-            <h4 className="font-bold text-[#0B1023] mb-6">Compania</h4>
+            <h4 className="font-bold text-[#0A0F2D] mb-6">Compania</h4>
             <ul className="space-y-4 text-sm text-gray-500">
               <li>
                 <Link to="/sobre-nosotros" className="hover:text-[#2563FF] transition-colors">

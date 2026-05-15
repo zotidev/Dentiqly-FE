@@ -29,7 +29,7 @@ const features = [
       "Recordatorios 24h y 1h antes del turno",
       "Mensajes personalizables por clinica",
     ],
-    color: "#02E3FF",
+    color: "#0047FF",
     visual: "whatsapp",
   },
   {
@@ -127,7 +127,7 @@ export const FeatureDeepDive: React.FC = () => {
                 >
                   {feature.subtitle}
                 </p>
-                <h3 className="feature-text-reveal text-3xl sm:text-4xl font-extrabold text-[#0B1023] tracking-tight mb-5">
+                <h3 className="feature-text-reveal text-3xl sm:text-4xl font-semibold text-[#0A0F2D] tracking-[-2px] mb-5">
                   {feature.title}
                 </h3>
                 <p className="feature-text-reveal text-lg text-gray-600 leading-relaxed mb-8">
@@ -192,7 +192,7 @@ export const FeatureDeepDive: React.FC = () => {
                           className={`max-w-[70%] px-4 py-2.5 rounded-2xl text-sm ${
                             msg.align === "left"
                               ? "self-start bg-white shadow-sm text-gray-700"
-                              : "self-end bg-[#02E3FF] text-[#0B1023] font-medium"
+                              : "self-end bg-[#0047FF] text-[#0A0F2D] font-medium"
                           }`}
                         >
                           {msg.text}
@@ -222,8 +222,8 @@ export const FeatureDeepDive: React.FC = () => {
                                           : "#7C3AED",
                                 }}
                               />
-                              <p className="text-xs font-bold text-[#0B1023]">{sede}</p>
-                              <p className="text-[10px] text-gray-400 mt-1">
+                              <p className="text-xs font-bold text-[#0A0F2D]">{sede}</p>
+                              <p className="text-[10px] text-gray-400 mt-1 font-semibold tracking-[-2px]">
                                 {12 + s * 3} profesionales
                               </p>
                             </div>

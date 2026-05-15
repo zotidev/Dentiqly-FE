@@ -1,9 +1,6 @@
-import React, { useEffect, useRef } from "react"
+import React from "react"
 import { Shield, Lock, Cloud, Database } from "lucide-react"
-import gsap from "gsap"
-import { ScrollTrigger } from "gsap/ScrollTrigger"
-
-gsap.registerPlugin(ScrollTrigger)
+import { motion } from "framer-motion"
 
 const badges = [
   {
@@ -29,81 +26,52 @@ const badges = [
 ]
 
 export const SecuritySection: React.FC = () => {
-  const sectionRef = useRef<HTMLElement>(null)
-
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.from(".security-title", {
-        y: 40,
-        opacity: 0,
-        duration: 0.8,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top 80%",
-        },
-      })
-
-      gsap.from(".security-badge", {
-        y: 50,
-        opacity: 0,
-        duration: 0.8,
-        stagger: 0.1,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: ".security-grid",
-          start: "top 80%",
-        },
-      })
-
-      gsap.from(".security-shimmer", {
-        x: "-100%",
-        duration: 1.5,
-        delay: 1,
-        ease: "power2.inOut",
-        scrollTrigger: {
-          trigger: ".security-grid",
-          start: "top 80%",
-        },
-      })
-    }, sectionRef)
-
-    return () => ctx.revert()
-  }, [])
-
   return (
-    <section ref={sectionRef} id="seguridad" className="py-28 sm:py-36 bg-[#0B1023] relative overflow-hidden">
+    <section className="py-28 sm:py-36 bg-white relative overflow-hidden">
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-0 right-0 w-[40%] h-[40%] bg-[#2563FF]/5 rounded-full blur-[120px]" />
-        <div className="absolute bottom-0 left-0 w-[30%] h-[30%] bg-[#02E3FF]/5 rounded-full blur-[100px]" />
+        <div className="absolute bottom-0 left-0 w-[30%] h-[30%] bg-[#0047FF]/5 rounded-full blur-[100px]" />
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center mb-16">
-          <h2 className="security-title text-sm font-extrabold text-[#02E3FF] tracking-widest uppercase mb-4">
+          <motion.h2 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-sm font-extrabold text-[#0047FF] tracking-widest uppercase mb-4"
+          >
             Seguridad de nivel empresarial
-          </h2>
-          <h3 className="security-title text-3xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight">
+          </motion.h2>
+          <motion.h3 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+            className="text-3xl sm:text-4xl md:text-5xl font-semibold text-[#0A0F2D] tracking-[-3px]"
+          >
             Tus datos, siempre protegidos.
-          </h3>
+          </motion.h3>
         </div>
 
-        <div className="security-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 relative">
-          <div className="security-shimmer absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent pointer-events-none rounded-3xl" />
-
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 relative">
           {badges.map((badge, i) => {
             const Icon = badge.icon
             return (
-              <div
+              <motion.div
                 key={i}
-                className="security-badge group relative bg-white/[0.04] backdrop-blur-sm border border-white/[0.06] rounded-2xl p-6 hover:bg-white/[0.08] hover:border-white/[0.1] transition-all duration-500"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="group relative bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-[#0047FF]/30 transition-all duration-500"
               >
-                <div className="w-12 h-12 rounded-xl bg-[#2563FF]/10 flex items-center justify-center mb-5 group-hover:bg-[#2563FF]/20 transition-colors">
-                  <Icon className="w-6 h-6 text-[#02E3FF]" />
+                <div className="w-12 h-12 rounded-xl bg-[#0047FF]/10 flex items-center justify-center mb-5 group-hover:bg-[#0047FF]/20 transition-colors">
+                  <Icon className="w-6 h-6 text-[#0047FF]" />
                 </div>
-                <h4 className="text-lg font-bold text-white mb-2">{badge.title}</h4>
-                <p className="text-sm text-white/40 leading-relaxed">{badge.desc}</p>
-              </div>
+                <h4 className="text-lg font-bold text-[#0A0F2D] mb-2">{badge.title}</h4>
+                <p className="text-sm text-gray-500 leading-relaxed">{badge.desc}</p>
+              </motion.div>
             )
           })}
         </div>

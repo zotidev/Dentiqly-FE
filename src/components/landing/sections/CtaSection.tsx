@@ -30,12 +30,12 @@ export const CtaSection: React.FC = () => {
   return (
     <section ref={sectionRef} className="py-24 bg-white">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="relative rounded-[2.5rem] bg-gradient-to-br from-[#2563FF] to-[#02E3FF] p-12 md:p-20 text-center overflow-hidden shadow-[0_20px_60px_rgba(37,99,255,0.2)]">
+        <div className="relative rounded-[2.5rem] bg-gradient-to-br from-[#2563FF] to-[#0047FF] p-12 md:p-20 text-center overflow-hidden shadow-[0_20px_60px_rgba(37,99,255,0.2)]">
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
           <div className="absolute bottom-0 left-0 w-64 h-64 bg-black/10 rounded-full blur-3xl" />
 
           <div className="cta-content relative z-10">
-            <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-6 tracking-tight">
+            <h2 className="text-4xl md:text-5xl font-semibold text-white mb-6 tracking-[-3px]">
               El futuro de tu clinica
               <br />
               comienza hoy.
