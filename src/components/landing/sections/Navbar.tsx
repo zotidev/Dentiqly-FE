@@ -5,6 +5,7 @@ import gsap from "gsap"
 
 export const Navbar: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [isDark, setIsDark] = useState(false)
   const navRef = useRef<HTMLElement>(null)
   const mobileMenuRef = useRef<HTMLDivElement>(null)
 
@@ -19,6 +20,32 @@ export const Navbar: React.FC = () => {
       })
     })
     return () => ctx.revert()
+  }, [])
+
+  useEffect(() => {
+    const darkSections = document.querySelectorAll<HTMLElement>('[data-navbar-theme="dark"]')
+    if (darkSections.length === 0) return
+
+    const visibleDarkSections = new Set<HTMLElement>()
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            visibleDarkSections.add(entry.target as HTMLElement)
+          } else {
+            visibleDarkSections.delete(entry.target as HTMLElement)
+          }
+        })
+        setIsDark(visibleDarkSections.size > 0)
+      },
+      {
+        rootMargin: "-1px 0px -95% 0px",
+      }
+    )
+
+    darkSections.forEach((el) => observer.observe(el))
+    return () => observer.disconnect()
   }, [])
 
   useEffect(() => {
@@ -51,66 +78,64 @@ export const Navbar: React.FC = () => {
         ref={navRef}
         className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 lg:px-8 pt-3"
       >
-        {/* ── Navbar layout: two separate containers aligned to hero width ── */}
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
+        <div className="w-full flex items-center justify-between h-[54px]">
 
-          {/* ═══ Container 1: Logo + Nav Links ═══ */}
-          <div
-            className="w-full max-w-[700px] flex items-center justify-between px-6"
-            style={{
-              background: "#0047FF",
-              height: "54px",
-            }}
+          {/* ═══ Left: Logo ═══ */}
+          <Link
+            to="/"
+            className="flex items-center shrink-0 hover:opacity-80 transition-opacity"
           >
-            {/* Logo */}
-            <Link
-              to="/"
-              className="flex items-center shrink-0 hover:opacity-80 transition-opacity"
-            >
-              <img
-                src="/assets/dentiqly-logo.png"
-                alt="Dentiqly"
-                className="h-[18px] w-auto brightness-0 invert"
-              />
-            </Link>
+            <img
+              src="/assets/dentiqly-logo.png"
+              alt="Dentiqly"
+              className={`h-[28px] w-auto transition-all duration-300 ${isDark ? "brightness-0 invert" : ""}`}
+            />
+          </Link>
 
-            {/* Nav links — aligned to end */}
-            <div className="hidden md:flex items-center gap-2 lg:gap-4">
-              {navLinks.map((item) => (
-                <a
-                  key={item.label}
-                  href={item.href}
-                  className="px-2 py-1.5 text-[13px] font-medium text-white hover:opacity-80 transition-all tracking-normal"
-                >
-                  {item.label}
-                </a>
-              ))}
-            </div>
-
-            {/* Mobile hamburger inside container 1 */}
-            <button
-              className="md:hidden p-1.5 text-white/60"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            >
-              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </button>
+          {/* ═══ Center: Nav Links pill ═══ */}
+          <div className="hidden md:flex items-center gap-1 lg:gap-1.5 bg-[#0047FF] rounded-full px-2 py-1.5 absolute left-1/2 -translate-x-1/2">
+            {navLinks.map((item) => (
+              <a
+                key={item.label}
+                href={item.href}
+                className="px-3 py-1.5 text-[13px] font-medium text-white hover:bg-white/15 rounded-full transition-all tracking-normal"
+              >
+                {item.label}
+              </a>
+            ))}
           </div>
 
-          {/* ═══ Container 2: Auth Buttons (visually separated, no bg) ═══ */}
+          {/* Mobile hamburger */}
+          <button
+            className={`md:hidden p-1.5 transition-colors duration-300 ${isDark ? "text-white" : "text-[#0047FF]"}`}
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
+
+          {/* ═══ Right: Auth Buttons ═══ */}
           <div className="hidden md:flex items-center gap-[10px]">
             <Link
               to="/login"
-              className="btn-wayflyer-secondary px-5 py-2.5 text-[13px]"
+              className={`px-5 py-2.5 text-[13px] transition-all duration-300 ${
+                isDark
+                  ? "border border-white/30 text-white hover:bg-white/10 inline-flex items-center justify-center font-medium"
+                  : "btn-wayflyer-secondary"
+              }`}
             >
               <User size={14} className="mr-1.5" />
               Ingresar
             </Link>
             <Link
               to="/register"
-              className="btn-wayflyer-primary px-5 py-2.5 text-[13px]"
+              className={`px-5 py-2.5 text-[13px] transition-all duration-300 ${
+                isDark
+                  ? "bg-white text-[#0A0F2D] hover:bg-white/90 inline-flex items-center justify-center font-semibold gap-3"
+                  : "btn-wayflyer-primary"
+              }`}
             >
               Registrarse
-              <div className="btn-icon-circle">
+              <div className={`btn-icon-circle ${isDark ? "!bg-[#0047FF] !text-white" : ""}`}>
                 <ArrowRight size={12} />
               </div>
             </Link>

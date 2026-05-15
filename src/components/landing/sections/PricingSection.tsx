@@ -64,6 +64,7 @@ export const PricingSection: React.FC = () => {
     <section
       ref={sectionRef}
       id="precios"
+      data-navbar-theme="dark"
       className="py-28 sm:py-36 bg-[#0A0F2D] relative overflow-hidden"
     >
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[#2563FF] rounded-[100%] blur-[150px] opacity-15 pointer-events-none" />

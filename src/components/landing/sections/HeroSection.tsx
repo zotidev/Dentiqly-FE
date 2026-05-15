@@ -3,7 +3,6 @@ import { Link } from "react-router-dom"
 import { motion } from "framer-motion"
 import { ArrowRight } from "lucide-react"
 
-// ASCII Molar Tooth Pattern mimicking the reference's background tech style
 const AsciiTooth = ({ className }: { className?: string }) => (
   <pre className={`text-[8px] sm:text-[10px] md:text-[12px] leading-[8px] sm:leading-[10px] md:leading-[12px] font-mono whitespace-pre select-none pointer-events-none ${className}`}>
     {`       +++++++++++++++
@@ -21,6 +20,38 @@ const AsciiTooth = ({ className }: { className?: string }) => (
   </pre>
 );
 
+const AsciiAgenda = ({ className }: { className?: string }) => (
+  <pre className={`text-[7px] sm:text-[9px] md:text-[10px] leading-[9px] sm:leading-[11px] md:leading-[12px] font-mono whitespace-pre select-none pointer-events-none ${className}`}>
+    {`+========================+
+|  <<<   AGENDA   >>>    |
++========================+
+|  LU  MA  MI  JU  VI   |
+|------------------------+
+|  08  --  --  09  --    |
+|  09  10  --  --  11    |
+|  --  --  14  15  --    |
+|  16  --  17  --  18    |
+|  --  20  --  21  --    |
++------------------------+
+|  >> TURNO 09:30  <<    |
+|  >> TURNO 14:00  <<    |
++========================+`}
+  </pre>
+);
+
+const AsciiCalendar = ({ className }: { className?: string }) => (
+  <pre className={`text-[7px] sm:text-[9px] md:text-[10px] leading-[9px] sm:leading-[11px] md:leading-[12px] font-mono whitespace-pre select-none pointer-events-none ${className}`}>
+    {`+--+--+--+--+--+
+|LU|MA|MI|JU|VI|
++--+--+--+--+--+
+|  |##|  |##|  |
+|##|  |  |  |##|
+|  |  |##|  |  |
+|  |##|  |##|  |
++--+--+--+--+--+`}
+  </pre>
+);
+
 export const HeroSection: React.FC = () => {
   return (
     <section className="relative min-h-[95vh] flex flex-col items-center justify-center overflow-hidden bg-white pt-32 pb-20">
@@ -31,6 +62,11 @@ export const HeroSection: React.FC = () => {
         <AsciiTooth className="absolute right-[8%] bottom-[20%] text-[#0A0F2D]/25 rotate-12 scale-125" />
         <AsciiTooth className="absolute left-[15%] bottom-[10%] text-[#0A0F2D]/20 -rotate-6 scale-75" />
         <AsciiTooth className="absolute right-[15%] top-[18%] text-[#0A0F2D]/20 rotate-6 scale-90" />
+
+        <AsciiAgenda className="absolute left-[2%] top-[50%] text-[#0A0F2D]/[0.7] rotate-6" />
+        <AsciiAgenda className="absolute right-[3%] top-[38%] text-[#0A0F2D]/[0.9] -rotate-3 scale-110" />
+        <AsciiCalendar className="absolute left-[22%] top-[12%] text-[#0A0F2D]/[0.8] rotate-3" />
+        <AsciiCalendar className="absolute right-[20%] bottom-[8%] text-[#0A0F2D]/[0.8] -rotate-6 scale-110" />
       </div>
 
       <div className="relative z-10 w-full max-w-[1000px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center">

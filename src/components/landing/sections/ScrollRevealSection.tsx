@@ -44,7 +44,7 @@ export const ScrollRevealSection: React.FC = () => {
 
   return (
     // Added mb-32 to give breathing room before the next section
-    <section ref={sectionRef} className="bg-[#0A0F2D] w-full border-b border-transparent relative">
+    <section ref={sectionRef} data-navbar-theme="dark" className="bg-[#0A0F2D] w-full border-b border-transparent relative">
       <div ref={containerRef} className="h-screen w-full flex flex-col items-center justify-center overflow-hidden">
         
         {/* Text Area */}
