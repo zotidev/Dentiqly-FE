@@ -4,13 +4,12 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import { Card } from "../ui/Card"
 import { Button } from "../ui/Button"
-import { Plus, Save, X, Calendar, Trash2, Eye, ArrowUp, ArrowDown } from "lucide-react"
+import { Plus, Save, X, Calendar, Trash2, Eye, Edit3, ArrowUp, ArrowDown, Eraser, ChevronDown } from "lucide-react"
 import { odontogramasApi } from "../../api/odontogramas"
 import type { DientesData, DatosDiente } from "../../api/odontogramas"
 import type { Odontograma, CrearOdontogramaData } from "../../types"
-import {
-  getDienteImageSrc,
-} from "../../utils/dienteImages"
+import { getDienteImageSrc } from "../../utils/dienteImages"
+import { ToothAnatomicalSVG } from "./ToothAnatomicalSVG"
 
 interface OdontogramSectionProps {
   pacienteId: string | number
@@ -34,7 +33,6 @@ const DIENTES_TEMPORARIOS_INFERIORES = [
   "8.5", "8.4", "8.3", "8.2", "8.1", "7.1", "7.2", "7.3", "7.4", "7.5"
 ]
 
-// Tratamientos disponibles
 const TRATAMIENTOS = [
   { value: "corona", label: "Corona" },
   { value: "implante", label: "Implante" },
@@ -71,8 +69,14 @@ const TRATAMIENTOS = [
 type EstadoTipo = "buen_estado" | "mal_estado"
 
 const ESTADO_COLORS: Record<EstadoTipo, string> = {
-  buen_estado: "#2563EB",  // Blue
-  mal_estado: "#DC2626",   // Red
+  buen_estado: "#2563EB",
+  mal_estado: "#EF4444",
+}
+
+const TIPO_BADGE_STYLES: Record<string, string> = {
+  Inicial: "bg-blue-50 text-blue-700 border-blue-200",
+  Control: "bg-amber-50 text-amber-700 border-amber-200",
+  Tratamiento: "bg-emerald-50 text-emerald-700 border-emerald-200",
 }
 
 export const OdontogramSection: React.FC<OdontogramSectionProps> = ({ pacienteId }) => {
@@ -87,7 +91,6 @@ export const OdontogramSection: React.FC<OdontogramSectionProps> = ({ pacienteId
   const [profesionalActual] = useState(1)
   const [mostrarTemporarios, setMostrarTemporarios] = useState(false)
 
-  // New: treatment-based workflow
   const [selectedTratamiento, setSelectedTratamiento] = useState<string>("")
   const [selectedEstado, setSelectedEstado] = useState<EstadoTipo>("mal_estado")
   const [isBorrarMode, setIsBorrarMode] = useState(false)
@@ -115,10 +118,8 @@ export const OdontogramSection: React.FC<OdontogramSectionProps> = ({ pacienteId
     } catch (error) {
       console.error("Error inicializando dientes:", error)
       const todosLosDientes = [
-        ...DIENTES_SUPERIORES,
-        ...DIENTES_TEMPORARIOS_SUPERIORES,
-        ...DIENTES_TEMPORARIOS_INFERIORES,
-        ...DIENTES_INFERIORES,
+        ...DIENTES_SUPERIORES, ...DIENTES_TEMPORARIOS_SUPERIORES,
+        ...DIENTES_TEMPORARIOS_INFERIORES, ...DIENTES_INFERIORES,
       ]
       const dientesVacios: DientesData = {}
       todosLosDientes.forEach((diente) => {
@@ -175,12 +176,10 @@ export const OdontogramSection: React.FC<OdontogramSectionProps> = ({ pacienteId
     }
   }
 
-  // Click on a surface square of a tooth
   const handleSuperficieClick = (numeroDiente: string, superficie: string) => {
     if (modalMode === "view") return
 
     if (isBorrarMode) {
-      // Borrar: reset this surface to sano
       setDientesData((prev) => {
         const currentData = prev[numeroDiente] || {
           estado: "sano",
@@ -250,7 +249,6 @@ export const OdontogramSection: React.FC<OdontogramSectionProps> = ({ pacienteId
 
     if (!selectedTratamiento) return
 
-    // Solo aplicar si el tratamiento es uno de los generales o si se desea aplicar a todo el diente
     const tratamientosGenerales = ["ausente", "corona", "implante", "extraccion", "caries", "restauracion", "erupcion_up", "erupcion_down", "extrusion", "intrusion", "tratamiento_endodontico"]
     if (!tratamientosGenerales.includes(selectedTratamiento)) return
 
@@ -297,13 +295,17 @@ export const OdontogramSection: React.FC<OdontogramSectionProps> = ({ pacienteId
   }
 
   if (loading) {
-    return <div className="text-center py-8 text-gray-500">Cargando odontogramas...</div>
+    return (
+      <div className="flex items-center justify-center py-16">
+        <div className="w-8 h-8 border-2 border-[#2563FF] border-t-transparent rounded-full animate-spin" />
+      </div>
+    )
   }
 
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold text-gray-900">Odontogramas</h3>
+        <h3 className="text-lg font-semibold text-[#0A0F2D]">Odontogramas</h3>
         <Button onClick={handleCreate} size="sm">
           <Plus className="h-4 w-4 mr-2" />
           Nuevo Odontograma
@@ -311,195 +313,225 @@ export const OdontogramSection: React.FC<OdontogramSectionProps> = ({ pacienteId
       </div>
 
       {odontogramas.length === 0 ? (
-        <Card className="p-8 text-center text-gray-500">
-          <p>No hay odontogramas registrados</p>
-          <Button onClick={handleCreate} variant="outline" className="mt-4">
+        <Card className="p-10 text-center">
+          <div className="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center mx-auto mb-4">
+            <Plus className="h-6 w-6 text-[#2563FF]" />
+          </div>
+          <p className="text-gray-500 mb-4">No hay odontogramas registrados</p>
+          <Button onClick={handleCreate} variant="outline" size="sm">
             Crear primer odontograma
           </Button>
         </Card>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-2">
           {odontogramas.map((odontograma) => (
-            <Card key={odontograma.id} className="p-4 hover:shadow-md transition-shadow">
-              <div className="flex justify-between items-start">
-                <div className="flex-1 cursor-pointer" onClick={() => handleView(odontograma)}>
-                  <div className="flex items-center gap-2 mb-2">
-                    <Calendar className="h-4 w-4 text-gray-400" />
-                    <span className="text-sm font-medium text-gray-900">
-                      {new Date(odontograma.fecha).toLocaleDateString("es-ES")}
-                    </span>
-                    <span className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded">
-                      {odontograma.tipo}
-                    </span>
+            <div
+              key={odontograma.id}
+              className="bg-white rounded-xl border border-gray-100 p-4 hover:border-[#2563FF]/20 hover:shadow-sm transition-all cursor-pointer group"
+              onClick={() => handleView(odontograma)}
+            >
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center group-hover:bg-blue-100 transition-colors">
+                    <Calendar className="h-4 w-4 text-[#2563FF]" />
                   </div>
-                  {odontograma.observaciones && (
-                    <p className="text-sm text-gray-600 line-clamp-2">{odontograma.observaciones}</p>
-                  )}
+                  <div>
+                    <span className="text-sm font-semibold text-[#0A0F2D]">
+                      {new Date(odontograma.fecha).toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" })}
+                    </span>
+                    {odontograma.observaciones && (
+                      <p className="text-xs text-gray-400 line-clamp-1 mt-0.5">{odontograma.observaciones}</p>
+                    )}
+                  </div>
+                  <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border ${TIPO_BADGE_STYLES[odontograma.tipo] || TIPO_BADGE_STYLES.Inicial}`}>
+                    {odontograma.tipo}
+                  </span>
                 </div>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={() => handleView(odontograma)}>
+                <div className="flex gap-1.5" onClick={(e) => e.stopPropagation()}>
+                  <button onClick={() => handleView(odontograma)} className="p-2 rounded-lg hover:bg-gray-50 text-gray-400 hover:text-[#2563FF] transition-colors">
                     <Eye className="h-4 w-4" />
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={() => handleEdit(odontograma)}>
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={() => handleDelete(odontograma.id)}>
+                  </button>
+                  <button onClick={() => handleEdit(odontograma)} className="p-2 rounded-lg hover:bg-gray-50 text-gray-400 hover:text-[#2563FF] transition-colors">
+                    <Edit3 className="h-4 w-4" />
+                  </button>
+                  <button onClick={() => handleDelete(odontograma.id)} className="p-2 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors">
                     <Trash2 className="h-4 w-4" />
-                  </Button>
+                  </button>
                 </div>
               </div>
-            </Card>
+            </div>
           ))}
         </div>
       )}
 
+      {/* ══════════════════════════════════════ MODAL ══════════════════════════════════════ */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-[1400px] w-full max-h-[95vh] overflow-hidden flex flex-col">
-            {/* Header */}
-            <div className="sticky top-0 bg-white px-6 py-4 border-b flex justify-between items-center z-10">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-[1400px] w-full max-h-[95vh] overflow-hidden flex flex-col border border-gray-100">
+
+            {/* ── Header ── */}
+            <div className="bg-gradient-to-r from-[#0A0F2D] to-[#1a2456] px-6 py-5 flex justify-between items-center">
               <div className="flex items-center gap-4">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">
+                  <h3 className="text-lg font-semibold text-white">
                     {modalMode === "view" ? "Ver Odontograma" : modalMode === "create" ? "Nuevo Odontograma" : "Editar Odontograma"}
                   </h3>
                   {selectedOdontograma && (
-                    <p className="text-sm text-gray-500">
-                      {new Date(selectedOdontograma.fecha).toLocaleDateString("es-ES")}
+                    <p className="text-sm text-blue-200/60">
+                      {new Date(selectedOdontograma.fecha).toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" })}
                     </p>
                   )}
                 </div>
                 {modalMode !== "view" && (
-                  <select
-                    value={tipo}
-                    onChange={(e) => setTipo(e.target.value as any)}
-                    className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm"
-                  >
-                    <option value="Inicial">Inicial</option>
-                    <option value="Control">Control</option>
-                    <option value="Tratamiento">Tratamiento</option>
-                  </select>
+                  <div className="relative">
+                    <select
+                      value={tipo}
+                      onChange={(e) => setTipo(e.target.value as any)}
+                      className="appearance-none px-4 py-2 pr-8 bg-white/10 border border-white/20 rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#2563FF] cursor-pointer"
+                    >
+                      <option value="Inicial" className="text-gray-900">Inicial</option>
+                      <option value="Control" className="text-gray-900">Control</option>
+                      <option value="Tratamiento" className="text-gray-900">Tratamiento</option>
+                    </select>
+                    <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-white/60 pointer-events-none" />
+                  </div>
                 )}
               </div>
-              <div className="flex gap-2">
+              <div className="flex items-center gap-3">
                 {modalMode !== "view" && (
-                  <Button onClick={handleSubmit} size="sm">
-                    <Save className="h-4 w-4 mr-2" />
+                  <button
+                    onClick={handleSubmit}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#2563FF] hover:bg-[#1D4ED8] text-white text-sm font-semibold rounded-lg transition-colors"
+                  >
+                    <Save className="h-4 w-4" />
                     Guardar
-                  </Button>
+                  </button>
                 )}
-                <button onClick={() => setShowModal(false)} className="p-2 hover:bg-gray-100 rounded-lg">
-                  <X className="h-5 w-5" />
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                >
+                  <X className="h-5 w-5 text-white/70" />
                 </button>
               </div>
             </div>
 
-            {/* Toolbar - treatment selector like old system */}
+            {/* ── Toolbar ── */}
             {modalMode !== "view" && (
-              <div className="sticky top-[73px] bg-gray-50 px-6 py-3 border-b flex items-center gap-3 flex-wrap z-10">
-                {/* Mostrar temporarios checkbox */}
-                <label className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium border-2 border-gray-300 bg-white hover:border-gray-400 cursor-pointer">
+              <div className="bg-white px-6 py-3.5 border-b border-gray-100 flex items-center gap-3 flex-wrap">
+                {/* Temporarios toggle */}
+                <label className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium bg-gray-50 hover:bg-gray-100 cursor-pointer transition-colors border border-gray-200">
                   <input
                     type="checkbox"
                     checked={mostrarTemporarios}
                     onChange={(e) => setMostrarTemporarios(e.target.checked)}
-                    className="w-4 h-4 text-pink-500 border-gray-300 rounded focus:ring-pink-500"
+                    className="w-4 h-4 text-[#2563FF] border-gray-300 rounded focus:ring-[#2563FF]"
                   />
-                  <span>Mostrar temporarios</span>
+                  <span className="text-gray-700">Temporarios</span>
                 </label>
 
-                {/* BORRAR toggle */}
+                <div className="w-px h-8 bg-gray-200" />
+
+                {/* Borrar */}
                 <button
-                  onClick={() => setIsBorrarMode(!isBorrarMode)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium border-2 transition-all ${
+                  onClick={() => { setIsBorrarMode(!isBorrarMode); if (!isBorrarMode) setSelectedTratamiento("") }}
+                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium border transition-all ${
                     isBorrarMode
-                      ? "bg-gray-800 text-white border-gray-800"
-                      : "bg-white text-gray-700 border-gray-300 hover:border-gray-400"
+                      ? "bg-gray-900 text-white border-gray-900 shadow-sm"
+                      : "bg-white text-gray-600 border-gray-200 hover:border-gray-300 hover:bg-gray-50"
                   }`}
                 >
-                  <div className={`w-3 h-3 rounded-sm ${isBorrarMode ? "bg-white" : "bg-gray-800"}`} />
-                  BORRAR
+                  <Eraser className="w-4 h-4" />
+                  Borrar
                 </button>
 
+                <div className="w-px h-8 bg-gray-200" />
+
                 {/* Treatment selector */}
-                <select
-                  value={selectedTratamiento}
-                  onChange={(e) => {
-                    setSelectedTratamiento(e.target.value)
-                    if (e.target.value) setIsBorrarMode(false)
-                  }}
-                  className="flex-1 max-w-xs px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
-                >
-                  <option value="">-- Seleccionar tratamiento --</option>
-                  {TRATAMIENTOS.map((t) => (
-                    <option key={t.value} value={t.value}>{t.label}</option>
-                  ))}
-                </select>
+                <div className="relative flex-1 max-w-xs">
+                  <select
+                    value={selectedTratamiento}
+                    onChange={(e) => {
+                      setSelectedTratamiento(e.target.value)
+                      if (e.target.value) setIsBorrarMode(false)
+                    }}
+                    className="w-full appearance-none px-4 py-2 pr-9 border border-gray-200 rounded-lg text-sm bg-white hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#2563FF]/20 focus:border-[#2563FF] transition-all cursor-pointer"
+                  >
+                    <option value="">Seleccionar tratamiento...</option>
+                    {TRATAMIENTOS.map((t) => (
+                      <option key={t.value} value={t.value}>{t.label}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                </div>
 
                 {selectedTratamiento && (
-                  <button
-                    onClick={() => setSelectedTratamiento("")}
-                    className="p-1 hover:bg-gray-200 rounded"
-                  >
-                    <X className="h-4 w-4 text-gray-500" />
+                  <button onClick={() => setSelectedTratamiento("")} className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors">
+                    <X className="h-4 w-4 text-gray-400" />
                   </button>
                 )}
 
-                {/* Estado toggle */}
-                <div className="flex items-center gap-2">
+                <div className="w-px h-8 bg-gray-200" />
+
+                {/* Estado toggles */}
+                <div className="inline-flex rounded-lg border border-gray-200 overflow-hidden">
                   <button
                     onClick={() => setSelectedEstado("buen_estado")}
-                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium border-2 transition-all ${
+                    className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-medium transition-all ${
                       selectedEstado === "buen_estado"
-                        ? "bg-blue-600 text-white border-blue-600"
-                        : "bg-white text-gray-700 border-gray-300 hover:border-blue-400"
+                        ? "bg-[#2563FF] text-white"
+                        : "bg-white text-gray-600 hover:bg-gray-50"
                     }`}
                   >
-                    <div className={`w-3 h-3 rounded-sm ${selectedEstado === "buen_estado" ? "bg-white" : "bg-blue-600"}`} />
+                    <div className={`w-2.5 h-2.5 rounded-full ${selectedEstado === "buen_estado" ? "bg-white" : "bg-[#2563FF]"}`} />
                     Buen estado
                   </button>
                   <button
                     onClick={() => setSelectedEstado("mal_estado")}
-                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium border-2 transition-all ${
+                    className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-medium border-l transition-all ${
                       selectedEstado === "mal_estado"
-                        ? "bg-red-600 text-white border-red-600"
-                        : "bg-white text-gray-700 border-gray-300 hover:border-red-400"
+                        ? "bg-[#EF4444] text-white border-[#EF4444]"
+                        : "bg-white text-gray-600 hover:bg-gray-50 border-gray-200"
                     }`}
                   >
-                    <div className={`w-3 h-3 rounded-sm ${selectedEstado === "mal_estado" ? "bg-white" : "bg-red-600"}`} />
+                    <div className={`w-2.5 h-2.5 rounded-full ${selectedEstado === "mal_estado" ? "bg-white" : "bg-[#EF4444]"}`} />
                     Mal estado
                   </button>
                 </div>
 
-                {/* Active treatment indicator */}
                 {selectedTratamiento && (
-                  <span className="text-xs text-gray-500 italic">
-                    Click en los cuadrados del diente para aplicar
+                  <span className="text-xs text-gray-400 ml-2">
+                    Hacé click en las superficies para aplicar
                   </span>
                 )}
               </div>
             )}
 
             {modalMode === "view" && (
-              <div className="bg-gray-50 px-6 py-3 border-b flex items-center justify-end z-10">
-                <label className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium border-2 border-gray-300 bg-white hover:border-gray-400 cursor-pointer">
+              <div className="bg-white px-6 py-3.5 border-b border-gray-100 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className={`text-xs font-semibold px-3 py-1.5 rounded-full border ${TIPO_BADGE_STYLES[tipo]}`}>
+                    {tipo}
+                  </span>
+                </div>
+                <label className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium bg-gray-50 hover:bg-gray-100 cursor-pointer transition-colors border border-gray-200">
                   <input
                     type="checkbox"
                     checked={mostrarTemporarios}
                     onChange={(e) => setMostrarTemporarios(e.target.checked)}
-                    className="w-4 h-4 text-pink-500 border-gray-300 rounded focus:ring-pink-500"
+                    className="w-4 h-4 text-[#2563FF] border-gray-300 rounded focus:ring-[#2563FF]"
                   />
-                  <span>Mostrar temporarios</span>
+                  <span className="text-gray-700">Temporarios</span>
                 </label>
               </div>
             )}
 
-            {/* Dental chart */}
-            <div className="flex-1 overflow-y-auto p-6">
-              <div className="bg-gray-50 rounded-lg p-6 border-2 border-gray-200">
+            {/* ── Dental Chart ── */}
+            <div className="flex-1 overflow-y-auto p-6 bg-[#FAFCFF]">
+              <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm">
                 {/* Upper teeth */}
-                <div className="mb-4">
-                  <div className="flex justify-center gap-1">
+                <div className="mb-2">
+                  <div className="flex justify-center gap-0.5 xl:gap-1">
                     {DIENTES_SUPERIORES.map((num) => (
                       <DienteVisual
                         key={num}
@@ -516,10 +548,10 @@ export const OdontogramSection: React.FC<OdontogramSectionProps> = ({ pacienteId
                   </div>
                 </div>
 
-                {/* Temporary Upper teeth */}
+                {/* Temporary upper */}
                 {mostrarTemporarios && (
-                  <div className="mb-4 pt-4 border-t border-dashed border-gray-300">
-                    <div className="flex justify-center gap-1">
+                  <div className="mb-2 pt-3 border-t border-dashed border-gray-200">
+                    <div className="flex justify-center gap-0.5 xl:gap-1">
                       {DIENTES_TEMPORARIOS_SUPERIORES.map((num) => (
                         <DienteVisual
                           key={num}
@@ -538,14 +570,23 @@ export const OdontogramSection: React.FC<OdontogramSectionProps> = ({ pacienteId
                 )}
 
                 {/* Divider */}
-                <div className="relative h-8 mb-4">
-                  <div className="absolute top-1/2 left-0 right-0 border-t-2 border-gray-400" />
+                <div className="relative my-4">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-gray-200" />
+                  </div>
+                  <div className="relative flex justify-center">
+                    <div className="flex items-center gap-6 bg-white px-6">
+                      <span className="text-[10px] font-semibold text-gray-300 uppercase tracking-widest">Derecha</span>
+                      <div className="w-1.5 h-1.5 rounded-full bg-gray-200" />
+                      <span className="text-[10px] font-semibold text-gray-300 uppercase tracking-widest">Izquierda</span>
+                    </div>
+                  </div>
                 </div>
 
-                {/* Temporary Lower teeth */}
+                {/* Temporary lower */}
                 {mostrarTemporarios && (
-                  <div className="mb-4 pb-4 border-b border-dashed border-gray-300">
-                    <div className="flex justify-center gap-1">
+                  <div className="mb-2 pb-3 border-b border-dashed border-gray-200">
+                    <div className="flex justify-center gap-0.5 xl:gap-1">
                       {DIENTES_TEMPORARIOS_INFERIORES.map((num) => (
                         <DienteVisual
                           key={num}
@@ -565,7 +606,7 @@ export const OdontogramSection: React.FC<OdontogramSectionProps> = ({ pacienteId
 
                 {/* Lower teeth */}
                 <div>
-                  <div className="flex justify-center gap-1">
+                  <div className="flex justify-center gap-0.5 xl:gap-1">
                     {DIENTES_INFERIORES.map((num) => (
                       <DienteVisual
                         key={num}
@@ -583,34 +624,38 @@ export const OdontogramSection: React.FC<OdontogramSectionProps> = ({ pacienteId
                 </div>
               </div>
 
-              {/* Observaciones */}
-              <div className="mt-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Observaciones Generales</label>
-                <textarea
-                  value={observaciones}
-                  onChange={(e) => setObservaciones(e.target.value)}
-                  disabled={modalMode === "view"}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg disabled:bg-gray-100"
-                  rows={3}
-                  placeholder="Observaciones generales del odontograma..."
-                />
-              </div>
-
-              {/* Legend */}
-              <div className="mt-4 p-4 bg-gray-100 rounded-lg border border-gray-300">
-                <h4 className="text-sm font-semibold mb-2 text-gray-700">Leyenda</h4>
-                <div className="flex gap-6 text-sm">
-                  <div className="flex items-center gap-2">
-                    <div className="w-5 h-5 rounded border-2" style={{ backgroundColor: ESTADO_COLORS.buen_estado }} />
-                    <span>Buen estado</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-5 h-5 rounded border-2" style={{ backgroundColor: ESTADO_COLORS.mal_estado }} />
-                    <span>Mal estado</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-5 h-5 rounded border-2 bg-white border-gray-300" />
-                    <span>Sin tratamiento</span>
+              {/* Observaciones + Legend row */}
+              <div className="mt-5 flex flex-col lg:flex-row gap-4">
+                <div className="flex-1">
+                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                    Observaciones
+                  </label>
+                  <textarea
+                    value={observaciones}
+                    onChange={(e) => setObservaciones(e.target.value)}
+                    disabled={modalMode === "view"}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm disabled:bg-gray-50 disabled:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#2563FF]/20 focus:border-[#2563FF] transition-all resize-none"
+                    rows={3}
+                    placeholder="Observaciones generales del odontograma..."
+                  />
+                </div>
+                <div className="lg:w-64 shrink-0">
+                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                    Leyenda
+                  </label>
+                  <div className="bg-white rounded-xl border border-gray-100 p-4 space-y-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-4 h-4 rounded-full bg-[#2563FF]" />
+                      <span className="text-sm text-gray-600">Buen estado</span>
+                    </div>
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-4 h-4 rounded-full bg-[#EF4444]" />
+                      <span className="text-sm text-gray-600">Mal estado</span>
+                    </div>
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-4 h-4 rounded-full bg-white border-2 border-gray-200" />
+                      <span className="text-sm text-gray-600">Sano</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -647,81 +692,16 @@ const DienteVisual: React.FC<DienteVisualProps> = ({
   const [imgError, setImgError] = useState(false)
   const imageSrc = getDienteImageSrc(numero)
 
-  const getSuperficieColor = (superficie: string): string => {
-    const estado = datos?.superficies?.[superficie as keyof typeof datos.superficies]
-    if (!estado || estado === "sano") return "#F3F4F6"
-    if (estado === "buen_estado") return ESTADO_COLORS.buen_estado
-    if (estado === "mal_estado") return ESTADO_COLORS.mal_estado
-    // Legacy color mapping for old data
-    const legacyColors: Record<string, string> = {
-      caries: "#DC2626", obturado: "#2563EB", extraido: "#1F2937",
-      ausente: "#9CA3AF", protesis: "#A855F7", corona: "#EAB308",
-      endodoncia: "#EC4899", fractura: "#F97316",
-    }
-    return legacyColors[estado] || "#9CA3AF"
-  }
-
-  const getSuperficieBorder = (superficie: string): string => {
-    const estado = datos?.superficies?.[superficie as keyof typeof datos.superficies]
-    if (!estado || estado === "sano") return "#D1D5DB"
-    if (estado === "buen_estado") return "#1D4ED8"
-    if (estado === "mal_estado") return "#B91C1C"
-    return "#6B7280"
-  }
-
   const canClick = !isReadOnly && hasActiveTratamiento
-  const cursorClass = canClick ? "cursor-pointer" : isReadOnly ? "cursor-default" : "cursor-default"
-
-  const renderSuperficieSquare = (superficie: string, position: string) => {
-    const bgColor = getSuperficieColor(superficie)
-    const borderColor = getSuperficieBorder(superficie)
-    const tratamientoInfo = (datos as any)?.tratamientos?.[superficie]
-
-    return (
-      <div
-        onClick={(e) => {
-          e.stopPropagation()
-          if (canClick) onSuperficieClick(superficie)
-        }}
-        style={{ backgroundColor: bgColor, borderColor }}
-        className={`border transition-all ${position} ${
-          canClick ? "hover:opacity-75 hover:scale-110 cursor-pointer" : ""
-        }`}
-        title={
-          tratamientoInfo
-            ? `${TRATAMIENTOS.find(t => t.value === tratamientoInfo.tratamiento)?.label || tratamientoInfo.tratamiento} - ${
-                tratamientoInfo.estado === "buen_estado" ? "Buen estado" : "Mal estado"
-              }`
-            : superficie
-        }
-      />
-    )
-  }
-
-  // The 5 surface squares layout: top, left, center, right, bottom
-  const renderSurfaceGrid = () => (
-    <div className="grid grid-cols-3 grid-rows-3 gap-px w-[52px] h-[52px]">
-      <div className="bg-transparent" />
-      {renderSuperficieSquare("vestibular", "")}
-      <div className="bg-transparent" />
-
-      {renderSuperficieSquare("mesial", "")}
-      {renderSuperficieSquare("oclusal", "border-2")}
-      {renderSuperficieSquare("distal", "")}
-
-      <div className="bg-transparent" />
-      {renderSuperficieSquare("lingual", "")}
-      <div className="bg-transparent" />
-    </div>
-  )
+  const cursorClass = canClick ? "cursor-pointer" : "cursor-default"
 
   const renderToothImage = () => {
     const tratamientoGral = (datos as any)?.tratamiento_general?.tratamiento || (datos?.estado !== "sano" ? datos?.estado : null)
     const color = (datos as any)?.tratamiento_general?.estado === "buen_estado" ? ESTADO_COLORS.buen_estado : ESTADO_COLORS.mal_estado
 
     return (
-      <div 
-        className={`w-12 h-16 relative flex items-center justify-center ${canClick ? "hover:scale-105 transition-transform" : ""}`}
+      <div
+        className={`w-10 h-14 relative flex items-center justify-center ${canClick ? "hover:scale-105 transition-transform" : ""}`}
         onClick={(e) => {
           e.stopPropagation()
           if (canClick) onDienteClick()
@@ -733,96 +713,98 @@ const DienteVisual: React.FC<DienteVisualProps> = ({
             alt={`Diente ${numero}`}
             className="w-full h-full object-contain"
             onError={() => setImgError(true)}
-            style={{ 
-              filter: tratamientoGral === "ausente" || tratamientoGral === "extraccion" ? "opacity(0.2) grayscale(1)" : "none" 
+            style={{
+              filter: tratamientoGral === "ausente" || tratamientoGral === "extraccion" ? "opacity(0.15) grayscale(1)" : "none"
             }}
           />
         ) : (
-          <svg viewBox="0 0 48 64" className="w-full h-full" style={{ opacity: tratamientoGral ? 0.3 : 1 }}>
+          <svg viewBox="0 0 48 64" className="w-full h-full" style={{ opacity: tratamientoGral ? 0.2 : 1 }}>
             {esSuperior ? (
               <>
-                <path d="M 16 28 L 24 8 L 32 28 Z" fill="#E5E7EB" stroke="#9CA3AF" strokeWidth="1.5" />
-                <rect x="12" y="28" width="24" height="28" rx="4" fill="#E5E7EB" stroke="#9CA3AF" strokeWidth="1.5" />
+                <path d="M 16 28 L 24 8 L 32 28 Z" fill="#E5E7EB" stroke="#D1D5DB" strokeWidth="1.5" />
+                <rect x="12" y="28" width="24" height="28" rx="4" fill="#E5E7EB" stroke="#D1D5DB" strokeWidth="1.5" />
               </>
             ) : (
               <>
-                <rect x="12" y="8" width="24" height="28" rx="4" fill="#E5E7EB" stroke="#9CA3AF" strokeWidth="1.5" />
-                <path d="M 16 36 L 24 56 L 32 36 Z" fill="#E5E7EB" stroke="#9CA3AF" strokeWidth="1.5" />
+                <rect x="12" y="8" width="24" height="28" rx="4" fill="#E5E7EB" stroke="#D1D5DB" strokeWidth="1.5" />
+                <path d="M 16 36 L 24 56 L 32 36 Z" fill="#E5E7EB" stroke="#D1D5DB" strokeWidth="1.5" />
               </>
             )}
           </svg>
         )}
 
-        {/* Overlay Symbols */}
+        {/* Overlay symbols */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           {tratamientoGral === "ausente" && (
             <div className="w-full h-full relative">
-              <div 
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-1 rotate-45" 
-                style={{ backgroundColor: color }}
-              />
-              <div 
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-1 -rotate-45" 
-                style={{ backgroundColor: color }}
-              />
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-0.5 rotate-45" style={{ backgroundColor: color }} />
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-0.5 -rotate-45" style={{ backgroundColor: color }} />
             </div>
           )}
           {tratamientoGral === "extraccion" && (
-            <div className="flex flex-col gap-1 items-center justify-center">
-              <div className="w-8 h-1.5" style={{ backgroundColor: color }} />
-              <div className="w-8 h-1.5" style={{ backgroundColor: color }} />
+            <div className="flex flex-col gap-1 items-center">
+              <div className="w-7 h-1" style={{ backgroundColor: color }} />
+              <div className="w-7 h-1" style={{ backgroundColor: color }} />
             </div>
           )}
           {tratamientoGral === "corona" && (
-            <div className="w-10 h-10 rounded-full border-4" style={{ borderColor: color }} />
+            <div className="w-9 h-9 rounded-full border-[3px]" style={{ borderColor: color }} />
           )}
           {tratamientoGral === "caries" && (
-            <div className="w-6 h-6 rounded-full" style={{ backgroundColor: "black", opacity: 0.8 }} />
+            <div className="w-5 h-5 rounded-full bg-gray-800/80" />
           )}
           {tratamientoGral === "restauracion" && (
-            <div className="w-6 h-6 rounded-full" style={{ backgroundColor: color, opacity: 0.8 }} />
+            <div className="w-5 h-5 rounded-full" style={{ backgroundColor: color, opacity: 0.8 }} />
           )}
           {tratamientoGral === "implante" && (
             <div className="flex flex-col items-center">
-              <div className="w-6 h-2 bg-gray-700 rounded-t-full" />
-              <div className="w-4 h-8 bg-gray-700 relative overflow-hidden">
-                <div className="absolute inset-0 flex flex-col gap-1 pt-1">
-                  {[...Array(5)].map((_, i) => (
-                    <div key={i} className="w-full h-px bg-gray-400 rotate-12" />
-                  ))}
-                </div>
-              </div>
-              <div className="w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[12px] border-t-gray-700" />
+              <div className="w-5 h-1.5 bg-gray-700 rounded-t-full" />
+              <div className="w-3 h-6 bg-gray-700" />
+              <div className="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[10px] border-t-gray-700" />
             </div>
           )}
           {tratamientoGral === "tratamiento_endodontico" && (
-            <div className="w-1 h-12 rounded-full" style={{ backgroundColor: color }} />
+            <div className="w-0.5 h-10 rounded-full" style={{ backgroundColor: color }} />
           )}
         </div>
       </div>
     )
   }
 
+  const renderSurfaceSVG = () => (
+    <div className="w-[56px] h-[56px]">
+      <ToothAnatomicalSVG
+        numero={numero}
+        esSuperior={esSuperior}
+        datos={datos}
+        isReadOnly={isReadOnly || !hasActiveTratamiento}
+        onSuperficieClick={onSuperficieClick}
+        onDienteClick={onDienteClick}
+        estadoColors={ESTADO_COLORS}
+      />
+    </div>
+  )
+
   return (
-    <div className={`relative flex flex-col items-center ${cursorClass}`}>
-      {/* Erupción / Extrusión Arrows */}
+    <div className={`relative flex flex-col items-center group ${cursorClass}`}>
+      {/* Erupción / Extrusión arrows */}
       {((datos as any)?.tratamiento_general?.tratamiento === "erupcion_up" || (datos as any)?.tratamiento_general?.tratamiento === "extrusion") && (
-        <ArrowUp className="w-5 h-5 absolute -top-5" style={{ color: (datos as any)?.tratamiento_general?.estado === "buen_estado" ? ESTADO_COLORS.buen_estado : ESTADO_COLORS.mal_estado }} />
+        <ArrowUp className="w-4 h-4 absolute -top-4" style={{ color: (datos as any)?.tratamiento_general?.estado === "buen_estado" ? ESTADO_COLORS.buen_estado : ESTADO_COLORS.mal_estado }} />
       )}
       {((datos as any)?.tratamiento_general?.tratamiento === "erupcion_down" || (datos as any)?.tratamiento_general?.tratamiento === "intrusion") && (
-        <ArrowDown className="w-5 h-5 absolute -top-5" style={{ color: (datos as any)?.tratamiento_general?.estado === "buen_estado" ? ESTADO_COLORS.buen_estado : ESTADO_COLORS.mal_estado }} />
+        <ArrowDown className="w-4 h-4 absolute -top-4" style={{ color: (datos as any)?.tratamiento_general?.estado === "buen_estado" ? ESTADO_COLORS.buen_estado : ESTADO_COLORS.mal_estado }} />
       )}
 
       {esSuperior ? (
         <>
           {renderToothImage()}
-          <div className="text-center text-[10px] font-semibold text-gray-700 my-0.5">{numero}</div>
-          {renderSurfaceGrid()}
+          <div className="text-center text-[9px] font-bold text-gray-400 my-0.5 group-hover:text-[#2563FF] transition-colors">{numero}</div>
+          {renderSurfaceSVG()}
         </>
       ) : (
         <>
-          {renderSurfaceGrid()}
-          <div className="text-center text-[10px] font-semibold text-gray-700 my-0.5">{numero}</div>
+          {renderSurfaceSVG()}
+          <div className="text-center text-[9px] font-bold text-gray-400 my-0.5 group-hover:text-[#2563FF] transition-colors">{numero}</div>
           {renderToothImage()}
         </>
       )}
