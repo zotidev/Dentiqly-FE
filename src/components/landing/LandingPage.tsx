@@ -5,7 +5,6 @@ import { CustomCursor } from "./components/CustomCursor"
 import { Navbar } from "./sections/Navbar"
 import { HeroSection } from "./sections/HeroSection"
 import { ProductShowcase } from "./sections/ProductShowcase"
-import { BentoGridSection } from "./sections/BentoGridSection"
 import { ScrollRevealSection } from "./sections/ScrollRevealSection"
 import { TabbedShowcase } from "./sections/TabbedShowcase"
 import { FeatureDeepDive } from "./sections/FeatureDeepDive"
@@ -32,7 +31,6 @@ export const LandingPage: React.FC = () => {
       <main>
         <HeroSection />
         <ProductShowcase />
-        <BentoGridSection />
         <ScrollRevealSection />
         <TabbedShowcase />
         <PerformanceSection />

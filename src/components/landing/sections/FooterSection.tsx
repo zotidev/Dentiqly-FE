@@ -34,7 +34,7 @@ export const FooterSection: React.FC = () => {
             <p className="text-gray-400 text-sm mb-6 leading-relaxed">
               Dentiqly es el software dental todo en uno para clínicas odontológicas en Argentina.
               Gestión de turnos online, historias clínicas digitales, odontogramas interactivos
-              y facturación con obras sociales.
+              y recordatorios automáticos por email.
             </p>
             <div className="flex items-center gap-2 text-sm text-gray-500">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
@@ -65,7 +65,7 @@ export const FooterSection: React.FC = () => {
               </li>
               <li>
                 <a href="#funcionalidades-tabs" onClick={(e) => handleAnchorClick(e, "#funcionalidades-tabs")} className="hover:text-white transition-colors">
-                  Recordatorios por WhatsApp
+                  Recordatorios por email
                 </a>
               </li>
               <li>
@@ -102,27 +102,22 @@ export const FooterSection: React.FC = () => {
               </li>
               <li>
                 <a href="#producto" onClick={(e) => handleAnchorClick(e, "#producto")} className="hover:text-white transition-colors">
-                  Facturación odontológica
-                </a>
-              </li>
-              <li>
-                <a href="#producto" onClick={(e) => handleAnchorClick(e, "#producto")} className="hover:text-white transition-colors">
-                  Control de obras sociales
-                </a>
-              </li>
-              <li>
-                <a href="#producto" onClick={(e) => handleAnchorClick(e, "#producto")} className="hover:text-white transition-colors">
                   Gestión multi-sucursal
                 </a>
               </li>
               <li>
                 <a href="#producto" onClick={(e) => handleAnchorClick(e, "#producto")} className="hover:text-white transition-colors">
-                  Liquidación de profesionales
+                  Portal de pacientes
                 </a>
               </li>
               <li>
                 <a href="#producto" onClick={(e) => handleAnchorClick(e, "#producto")} className="hover:text-white transition-colors">
-                  Portal de pacientes
+                  Dashboard y métricas
+                </a>
+              </li>
+              <li>
+                <a href="#producto" onClick={(e) => handleAnchorClick(e, "#producto")} className="hover:text-white transition-colors">
+                  Recordatorios automáticos
                 </a>
               </li>
             </ul>
@@ -203,7 +198,7 @@ export const FooterSection: React.FC = () => {
           </p>
           <p className="text-gray-600 text-xs max-w-md text-center md:text-right">
             Software para dentistas y clínicas odontológicas. Turnos online, historias clínicas digitales,
-            odontograma interactivo, facturación dental y recordatorios automáticos por WhatsApp.
+            odontograma interactivo y recordatorios automáticos por email.
           </p>
         </div>
       </div>

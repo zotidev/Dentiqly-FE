@@ -78,7 +78,7 @@ export const TestimonialSection: React.FC = () => {
           <blockquote className="testimonial-quote text-xl sm:text-2xl font-medium text-[#0A0F2D] leading-relaxed mb-8">
             &ldquo;Desde que implementamos Dentiqly, nuestra clinica ahorra horas
             de trabajo administrativo cada semana. La agenda inteligente y los
-            recordatorios por WhatsApp redujeron las ausencias drasticamente. Es
+            recordatorios por email redujeron las ausencias drasticamente. Es
             como tener un asistente digital que nunca descansa.&rdquo;
           </blockquote>
 
