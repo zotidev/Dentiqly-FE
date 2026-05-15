@@ -22,9 +22,9 @@ const faqs = [
       "Absolutamente. Usamos encriptacion AES-256, conexiones SSL/TLS y backups automaticos cada hora. Cada clinica tiene sus datos completamente aislados en un modelo multi-tenant seguro.",
   },
   {
-    question: "Como funcionan los recordatorios por WhatsApp?",
+    question: "Como funcionan los recordatorios por email?",
     answer:
-      "Dentiqly envia recordatorios automaticos a tus pacientes antes de cada turno. Podes personalizar el mensaje y los tiempos de envio. Esto reduce las inasistencias hasta un 40%.",
+      "Dentiqly envia recordatorios automaticos por email a tus pacientes antes de cada turno. Podes personalizar el mensaje y los tiempos de envio. Esto reduce las inasistencias hasta un 40%.",
   },
   {
     question: "Puedo migrar datos desde otro sistema?",

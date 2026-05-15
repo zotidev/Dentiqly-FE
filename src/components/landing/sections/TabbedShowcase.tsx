@@ -16,12 +16,12 @@ const tabs = [
   },
   {
     number: "02",
-    label: "TURNOS Y WHATSAPP",
+    label: "TURNOS Y EMAIL",
     title:
       "Reduce ausencias hasta un 80% sin mover un dedo.",
     description:
-      "Tus pacientes reciben recordatorios automáticos por WhatsApp antes de cada turno. Confirmación, cancelación y mensajes personalizables.",
-    image: "/assets/features/turnos-whatsapp.png",
+      "Tus pacientes reciben recordatorios automáticos por email antes de cada turno. Confirmación, cancelación y mensajes personalizables.",
+    image: "/assets/features/turnos-email.png",
   },
   {
     number: "03",

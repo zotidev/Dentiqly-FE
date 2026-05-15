@@ -154,14 +154,14 @@ const tabsData: TabData[] = [
     key: "integraciones",
     label: "Integraciones",
     headline:
-      "Tu clínica no opera en un vacío. WhatsApp, obras sociales, sistemas contables: todo necesita conectarse.",
+      "Tu clínica no opera en un vacío. Email, obras sociales, sistemas contables: todo necesita conectarse.",
     headlineFaded:
       "Dentiqly se integra nativamente con los servicios que ya usás, eliminando la doble carga de datos y errores manuales.",
     cta: "Explorá las integraciones",
     metrics: [
       {
         multiplier: "80%",
-        label: "Menos ausencias con WhatsApp",
+        label: "Menos ausencias con email",
         competitionLabel: "COMPETENCIA",
         competitionValue: "Manual",
         competitionWidth: "100%",

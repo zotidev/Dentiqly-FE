@@ -21,16 +21,16 @@ const features = [
   },
   {
     icon: MessageCircle,
-    title: "Turnos y WhatsApp",
+    title: "Turnos y Email",
     subtitle: "Recordatorios automaticos",
-    desc: "Tus pacientes reciben recordatorios automaticos por WhatsApp antes de cada turno. Reduce las ausencias hasta un 80% sin mover un dedo.",
+    desc: "Tus pacientes reciben recordatorios automaticos por email antes de cada turno. Reduce las ausencias hasta un 80% sin mover un dedo.",
     bullets: [
-      "Confirmacion y cancelacion desde WhatsApp",
+      "Confirmacion y cancelacion desde email",
       "Recordatorios 24h y 1h antes del turno",
       "Mensajes personalizables por clinica",
     ],
     color: "#0047FF",
-    visual: "whatsapp",
+    visual: "email",
   },
   {
     icon: Building2,
@@ -180,7 +180,7 @@ export const FeatureDeepDive: React.FC = () => {
                       </div>
                     </div>
                   )}
-                  {feature.visual === "whatsapp" && (
+                  {feature.visual === "email" && (
                     <div className="w-full h-full p-8 flex flex-col items-center justify-center gap-3">
                       {[
                         { align: "left", text: "Hola! Recordatorio de tu turno manana a las 10:00" },

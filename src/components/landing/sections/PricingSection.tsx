@@ -27,7 +27,7 @@ const allFeatures = [
   { icon: FileText, text: "Historias clínicas digitales completas" },
   { icon: Stethoscope, text: "Odontograma interactivo" },
   { icon: CreditCard, text: "Facturación y control de caja" },
-  { icon: MessageCircle, text: "Recordatorios automáticos por WhatsApp" },
+  { icon: MessageCircle, text: "Recordatorios automáticos por email" },
   { icon: Building2, text: "Gestión multi-sucursal" },
   { icon: BarChart3, text: "Dashboard con métricas en tiempo real" },
   { icon: Globe, text: "Portal de pacientes y reservas online" },
