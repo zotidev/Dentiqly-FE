@@ -58,7 +58,7 @@ export const Navbar: React.FC = () => {
           <div
             className="w-full max-w-[700px] flex items-center justify-between px-6"
             style={{
-              background: "#0B1023",
+              background: "#0047FF",
               height: "54px",
             }}
           >
@@ -75,12 +75,12 @@ export const Navbar: React.FC = () => {
             </Link>
 
             {/* Nav links — aligned to end */}
-            <div className="hidden md:flex items-center gap-1">
+            <div className="hidden md:flex items-center gap-2 lg:gap-4">
               {navLinks.map((item) => (
                 <a
                   key={item.label}
                   href={item.href}
-                  className="px-4 py-1.5 text-[13px] font-medium text-white hover:text-[#02E3FF] transition-colors"
+                  className="px-2 py-1.5 text-[13px] font-medium text-white hover:opacity-80 transition-all tracking-normal"
                 >
                   {item.label}
                 </a>
@@ -100,17 +100,19 @@ export const Navbar: React.FC = () => {
           <div className="hidden md:flex items-center gap-[10px]">
             <Link
               to="/login"
-              className="px-5 py-[12px] text-[12px] font-semibold text-white bg-[#0B1023] hover:bg-[#161d3a] transition-all whitespace-nowrap btn-hexagon flex items-center gap-1.5"
+              className="btn-wayflyer-secondary px-5 py-2.5 text-[13px]"
             >
-              <User size={14} />
+              <User size={14} className="mr-1.5" />
               Ingresar
             </Link>
             <Link
               to="/register"
-              className="px-5 py-[12px] text-[12px] font-semibold text-[#0B1023] bg-[#02E3FF] hover:bg-[#02E3FF]/90 transition-all whitespace-nowrap btn-hexagon flex items-center gap-1.5"
+              className="btn-wayflyer-primary px-5 py-2.5 text-[13px]"
             >
               Registrarse
-              <ArrowRight size={14} />
+              <div className="btn-icon-circle">
+                <ArrowRight size={12} />
+              </div>
             </Link>
           </div>
         </div>
@@ -120,7 +122,7 @@ export const Navbar: React.FC = () => {
       {mobileMenuOpen && (
         <div
           ref={mobileMenuRef}
-          className="fixed inset-0 z-40 bg-[#0B1023]/95 backdrop-blur-xl pt-20 px-8 md:hidden"
+          className="fixed inset-0 z-40 bg-[#0A0F2D]/95 backdrop-blur-xl pt-20 px-8 md:hidden"
         >
           <div className="flex flex-col gap-2">
             {navLinks.map((item) => (
@@ -137,14 +139,14 @@ export const Navbar: React.FC = () => {
               <Link
                 to="/login"
                 onClick={() => setMobileMenuOpen(false)}
-                className="mobile-nav-link text-center py-3.5 text-white/80 font-bold text-base border border-white/15 rounded-lg"
+                className="mobile-nav-link text-center py-3.5 btn-wayflyer-secondary w-full"
               >
                 Ingresar
               </Link>
               <Link
                 to="/register"
                 onClick={() => setMobileMenuOpen(false)}
-                className="mobile-nav-link text-center py-3.5 bg-white text-[#0B1023] font-bold text-base rounded-lg"
+                className="mobile-nav-link text-center py-3.5 btn-wayflyer-primary w-full"
               >
                 Registrarse
               </Link>

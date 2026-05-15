@@ -11,7 +11,7 @@ const screenshots = [
     title: "Dashboard Inteligente",
     desc: "Métricas, agenda y turnos del día en una vista clara y accionable.",
     icon: LayoutDashboard,
-    accent: "#2563FF",
+    accent: "#ffffff",
   },
 ]
 
@@ -106,7 +106,7 @@ export const ProductShowcase: React.FC = () => {
   const rest = screenshots.slice(1)
 
   return (
-    <section ref={sectionRef} id="producto" className="py-32 bg-white relative overflow-hidden">
+    <section ref={sectionRef} id="producto" className="py-32 bg-[#ffffff] relative overflow-hidden">
       {/* Subtle bg decor */}
       <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
         <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full"
@@ -117,10 +117,10 @@ export const ProductShowcase: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* ── Header ── */}
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="product-title-reveal text-sm font-extrabold text-[#2563FF] tracking-widest uppercase mb-4">
+          <h2 className="product-title-reveal text-sm font-extrabold text-[#0047FF] tracking-widest uppercase mb-4">
             Poder sin límites
           </h2>
-          <h3 className="product-subtitle-reveal text-4xl md:text-5xl font-extrabold text-[#0B1023] tracking-tight leading-tight">
+          <h3 className="product-subtitle-reveal text-4xl md:text-5xl font-semibold text-[#0A0F2D] tracking-[-3px] leading-tight">
             Todo lo que necesitas,
             <br />
             en una interfaz asombrosa.
@@ -146,7 +146,7 @@ export const ProductShowcase: React.FC = () => {
                   <hero.icon className="w-5 h-5" style={{ color: hero.accent }} />
                 </div>
                 <div>
-                  <h4 className="text-lg font-bold text-[#0B1023]">{hero.title}</h4>
+                  <h4 className="text-lg font-bold text-[#0A0F2D]">{hero.title}</h4>
                   <p className="text-sm text-gray-400">{hero.desc}</p>
                 </div>
                 {/* Dot indicators */}

@@ -97,7 +97,7 @@ export const TabbedShowcase: React.FC = () => {
                     style={{
                       padding: "10px 20px",
                       borderRadius: "999px",
-                      background: isActive ? "#0B1023" : "transparent",
+                      background: isActive ? "#0A0F2D" : "transparent",
                       color: isActive ? "#FFFFFF" : "#64748B",
                     }}
                   >
@@ -152,9 +152,9 @@ export const TabbedShowcase: React.FC = () => {
             {/* ── Left: Title + Description ── */}
             <div className="order-2 lg:order-1">
               <h3
-                className="tab-content-animate text-4xl sm:text-5xl lg:text-[3.25rem] font-extrabold tracking-tight leading-[1.1] mb-6"
+                className="tab-content-animate text-4xl sm:text-5xl lg:text-[3.25rem] font-semibold tracking-[-3px] leading-[1.1] mb-6"
                 style={{
-                  color: "#0B1023",
+                  color: "#0A0F2D",
                   fontFamily: "'Inter', sans-serif",
                 }}
               >

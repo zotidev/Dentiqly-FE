@@ -21,7 +21,7 @@ export const ScrollRevealSection: React.FC = () => {
         scrollTrigger: {
           trigger: sectionRef.current,
           start: "top top",
-          end: "+=150%", // Scroll 1.5x the height of the section to complete the animation
+          end: "+=100%", // Reduced from 150% to make it faster
           pin: true,
           scrub: 1,
         }
@@ -31,7 +31,7 @@ export const ScrollRevealSection: React.FC = () => {
       const wordSpans = textRef.current?.querySelectorAll('.reveal-word');
       if (wordSpans) {
         tl.to(wordSpans, {
-          color: "#0A0F2D",
+          color: "#FFFFFF",
           stagger: 0.1,
           ease: "none",
         });
@@ -44,20 +44,20 @@ export const ScrollRevealSection: React.FC = () => {
 
   return (
     // Added mb-32 to give breathing room before the next section
-    <section ref={sectionRef} className="bg-[#FAFCFF] w-full mb-32 border-b border-transparent">
+    <section ref={sectionRef} className="bg-[#0A0F2D] w-full border-b border-transparent relative">
       <div ref={containerRef} className="h-screen w-full flex flex-col items-center justify-center overflow-hidden">
         
         {/* Text Area */}
         <div className="max-w-[1100px] w-full px-6 mx-auto">
           <p 
             ref={textRef}
-            className="text-3xl md:text-5xl lg:text-[56px] font-medium tracking-tight leading-[1.15] text-center flex flex-wrap justify-center gap-x-[0.3em] gap-y-[0.1em]"
+            className="text-3xl md:text-5xl lg:text-[56px] font-semibold tracking-[-3px] leading-[1.15] text-center flex flex-wrap justify-center gap-x-[0.3em] gap-y-[0.1em]"
           >
             {words.map((word, i) => (
               <span 
                 key={i} 
                 className="reveal-word inline-block transition-none"
-                style={{ color: "#E5E7EB" }}
+                style={{ color: "rgba(255,255,255,0.15)" }}
               >
                 {word}
               </span>

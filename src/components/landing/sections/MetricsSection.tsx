@@ -11,18 +11,18 @@ const IconOrden = () => (
     {/* Document body */}
     <path
       d="M16 8C16 5.79 17.79 4 20 4H44L56 16V60C56 62.21 54.21 64 52 64H20C17.79 64 16 62.21 16 60V8Z"
-      stroke="#0B1023"
+      stroke="#0A0F2D"
       strokeWidth="3"
       fill="none"
     />
     {/* Folded corner */}
-    <path d="M44 4V16H56" stroke="#0B1023" strokeWidth="3" fill="none" />
+    <path d="M44 4V16H56" stroke="#0A0F2D" strokeWidth="3" fill="none" />
     {/* Lines */}
-    <line x1="24" y1="26" x2="48" y2="26" stroke="#0B1023" strokeWidth="2.5" />
-    <line x1="24" y1="34" x2="48" y2="34" stroke="#0B1023" strokeWidth="2.5" />
-    <line x1="24" y1="42" x2="48" y2="42" stroke="#0B1023" strokeWidth="2.5" />
-    <line x1="24" y1="50" x2="48" y2="50" stroke="#0B1023" strokeWidth="2.5" />
-    <line x1="24" y1="58" x2="40" y2="58" stroke="#0B1023" strokeWidth="2.5" />
+    <line x1="24" y1="26" x2="48" y2="26" stroke="#0A0F2D" strokeWidth="2.5" />
+    <line x1="24" y1="34" x2="48" y2="34" stroke="#0A0F2D" strokeWidth="2.5" />
+    <line x1="24" y1="42" x2="48" y2="42" stroke="#0A0F2D" strokeWidth="2.5" />
+    <line x1="24" y1="50" x2="48" y2="50" stroke="#0A0F2D" strokeWidth="2.5" />
+    <line x1="24" y1="58" x2="40" y2="58" stroke="#0A0F2D" strokeWidth="2.5" />
     {/* Blue dots */}
     <circle cx="21" cy="26" r="2" fill="#2563FF" />
     <circle cx="21" cy="34" r="2" fill="#2563FF" />
@@ -46,7 +46,7 @@ const IconVelocidad = () => (
     {/* Lightning bolt */}
     <path
       d="M38 10L24 38H34L30 62L50 30H38L42 10Z"
-      stroke="#0B1023"
+      stroke="#0A0F2D"
       strokeWidth="3"
       strokeLinejoin="round"
       fill="none"
@@ -63,19 +63,19 @@ const IconVelocidad = () => (
 const IconTareas = () => (
   <svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
     {/* Globe outer circle */}
-    <circle cx="32" cy="36" r="24" stroke="#0B1023" strokeWidth="2.5" fill="none" />
+    <circle cx="32" cy="36" r="24" stroke="#0A0F2D" strokeWidth="2.5" fill="none" />
     {/* Longitude lines */}
-    <ellipse cx="32" cy="36" rx="12" ry="24" stroke="#0B1023" strokeWidth="1.5" fill="none" />
+    <ellipse cx="32" cy="36" rx="12" ry="24" stroke="#0A0F2D" strokeWidth="1.5" fill="none" />
     {/* Latitude lines */}
-    <ellipse cx="32" cy="36" rx="24" ry="8" stroke="#0B1023" strokeWidth="1.5" fill="none" />
-    <line x1="8" y1="36" x2="56" y2="36" stroke="#0B1023" strokeWidth="1.5" />
-    <line x1="32" y1="12" x2="32" y2="60" stroke="#0B1023" strokeWidth="1.5" />
+    <ellipse cx="32" cy="36" rx="24" ry="8" stroke="#0A0F2D" strokeWidth="1.5" fill="none" />
+    <line x1="8" y1="36" x2="56" y2="36" stroke="#0A0F2D" strokeWidth="1.5" />
+    <line x1="32" y1="12" x2="32" y2="60" stroke="#0A0F2D" strokeWidth="1.5" />
     {/* Arc lines for globe feel */}
-    <path d="M12 24C16 24 20 22 32 22C44 22 48 24 52 24" stroke="#0B1023" strokeWidth="1" fill="none" />
-    <path d="M12 48C16 48 20 50 32 50C44 50 48 48 52 48" stroke="#0B1023" strokeWidth="1" fill="none" />
+    <path d="M12 24C16 24 20 22 32 22C44 22 48 24 52 24" stroke="#0A0F2D" strokeWidth="1" fill="none" />
+    <path d="M12 48C16 48 20 50 32 50C44 50 48 48 52 48" stroke="#0A0F2D" strokeWidth="1" fill="none" />
     {/* Magnifying glass */}
-    <circle cx="48" cy="48" r="10" stroke="#0B1023" strokeWidth="2.5" fill="white" />
-    <line x1="55" y1="55" x2="64" y2="64" stroke="#0B1023" strokeWidth="3" strokeLinecap="round" />
+    <circle cx="48" cy="48" r="10" stroke="#0A0F2D" strokeWidth="2.5" fill="white" />
+    <line x1="55" y1="55" x2="64" y2="64" stroke="#0A0F2D" strokeWidth="3" strokeLinecap="round" />
     {/* Blue dots */}
     <circle cx="20" cy="30" r="2.5" fill="#2563FF" />
     <circle cx="40" cy="28" r="2.5" fill="#2563FF" />
@@ -87,17 +87,17 @@ const IconTareas = () => (
 const IconControl = () => (
   <svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
     {/* Top left block */}
-    <rect x="8" y="8" width="22" height="18" rx="2" stroke="#0B1023" strokeWidth="3" fill="none" />
+    <rect x="8" y="8" width="22" height="18" rx="2" stroke="#0A0F2D" strokeWidth="3" fill="none" />
     {/* Top right block */}
-    <rect x="42" y="8" width="22" height="18" rx="2" stroke="#0B1023" strokeWidth="3" fill="none" />
+    <rect x="42" y="8" width="22" height="18" rx="2" stroke="#0A0F2D" strokeWidth="3" fill="none" />
     {/* Bottom left block */}
-    <rect x="8" y="46" width="22" height="18" rx="2" stroke="#0B1023" strokeWidth="3" fill="none" />
+    <rect x="8" y="46" width="22" height="18" rx="2" stroke="#0A0F2D" strokeWidth="3" fill="none" />
     {/* Bottom right block */}
-    <rect x="42" y="46" width="22" height="18" rx="2" stroke="#0B1023" strokeWidth="3" fill="none" />
+    <rect x="42" y="46" width="22" height="18" rx="2" stroke="#0A0F2D" strokeWidth="3" fill="none" />
     {/* Connection lines */}
-    <line x1="30" y1="17" x2="42" y2="17" stroke="#0B1023" strokeWidth="3" />
-    <line x1="36" y1="17" x2="36" y2="55" stroke="#0B1023" strokeWidth="3" />
-    <line x1="30" y1="55" x2="42" y2="55" stroke="#0B1023" strokeWidth="3" />
+    <line x1="30" y1="17" x2="42" y2="17" stroke="#0A0F2D" strokeWidth="3" />
+    <line x1="36" y1="17" x2="36" y2="55" stroke="#0A0F2D" strokeWidth="3" />
+    <line x1="30" y1="55" x2="42" y2="55" stroke="#0A0F2D" strokeWidth="3" />
     {/* Blue dots */}
     <circle cx="22" cy="19" r="3" fill="#2563FF" />
     <circle cx="56" cy="14" r="3" fill="#2563FF" />
@@ -218,7 +218,7 @@ export const MetricsSection: React.FC = () => {
                 <h3
                   className="text-sm font-extrabold tracking-[0.15em] mb-4 leading-snug"
                   style={{
-                    color: "#0B1023",
+                    color: "#0A0F2D",
                     fontFamily: "'Inter', sans-serif",
                     textTransform: "uppercase",
                   }}

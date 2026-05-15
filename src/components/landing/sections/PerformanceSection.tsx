@@ -52,25 +52,25 @@ export const PerformanceSection: React.FC = () => {
   const isInView = useInView(ref, { once: true, margin: "-10%" })
 
   return (
-    <section className="bg-[#0B1023] text-white py-24 sm:py-32 overflow-hidden border-t border-white/5">
+    <section className="bg-[#0A0F2D] text-white py-24 sm:py-32 overflow-hidden border-t border-white/5">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col lg:flex-row gap-12 lg:gap-24">
           
           {/* ── Left Sidebar (hidden on mobile) ── */}
           <div className="hidden lg:flex flex-col gap-6 w-48 shrink-0 pt-2 border-l border-white/10 pl-6">
-            <button className="text-[11px] font-bold tracking-widest text-white text-left uppercase transition-colors">
+            <button className="text-[11px] font-semibold tracking-[-2px] text-white text-left uppercase transition-colors">
               Eficiencia
             </button>
-            <button className="text-[11px] font-bold tracking-widest text-white/40 hover:text-white text-left uppercase transition-colors">
+            <button className="text-[11px] font-semibold tracking-[-2px] text-white/40 hover:text-white text-left uppercase transition-colors">
               Pacientes
             </button>
-            <button className="text-[11px] font-bold tracking-widest text-white/40 hover:text-white text-left uppercase transition-colors">
+            <button className="text-[11px] font-semibold tracking-[-2px] text-white/40 hover:text-white text-left uppercase transition-colors">
               Finanzas
             </button>
-            <button className="text-[11px] font-bold tracking-widest text-white/40 hover:text-white text-left uppercase transition-colors">
+            <button className="text-[11px] font-semibold tracking-[-2px] text-white/40 hover:text-white text-left uppercase transition-colors">
               Integraciones
             </button>
-            <button className="text-[11px] font-bold tracking-widest text-white/40 hover:text-white text-left uppercase transition-colors">
+            <button className="text-[11px] font-semibold tracking-[-2px] text-white/40 hover:text-white text-left uppercase transition-colors">
               Escalabilidad
             </button>
           </div>
@@ -83,7 +83,7 @@ export const PerformanceSection: React.FC = () => {
               transition={{ duration: 0.6 }}
               className="max-w-3xl"
             >
-              <h2 className="text-2xl sm:text-3xl font-medium leading-relaxed tracking-tight text-white mb-6">
+              <h2 className="text-2xl sm:text-3xl font-semibold leading-relaxed tracking-[-2px] text-white mb-6">
                 La gestión clínica moderna requiere precisión y velocidad. 
                 El software tradicional o planillas sueltas limitan tu crecimiento. 
                 <span className="text-white/60"> Dentiqly está diseñado para optimizar flujos de trabajo, 
@@ -92,10 +92,12 @@ export const PerformanceSection: React.FC = () => {
               
               <Link
                 to="/register"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-all text-sm font-medium text-[#02E3FF]"
+                className="btn-wayflyer-primary"
               >
                 Conoce el impacto de Dentiqly
-                <ArrowRight size={14} />
+                <div className="btn-icon-circle">
+                  <ArrowRight size={14} />
+                </div>
               </Link>
             </motion.div>
 
@@ -110,7 +112,7 @@ export const PerformanceSection: React.FC = () => {
                       initial={{ opacity: 0, x: -20 }}
                       animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
                       transition={{ duration: 0.6, delay: 0.2 + idx * 0.15 }}
-                      className="text-5xl sm:text-6xl font-medium tracking-tighter text-white mb-2"
+                      className="text-5xl sm:text-6xl font-semibold tracking-[-3px] text-white mb-2"
                     >
                       {metric.multiplier}
                     </motion.div>
@@ -118,7 +120,7 @@ export const PerformanceSection: React.FC = () => {
                       initial={{ opacity: 0 }}
                       animate={isInView ? { opacity: 1 } : { opacity: 0 }}
                       transition={{ duration: 0.6, delay: 0.3 + idx * 0.15 }}
-                      className="text-[#02E3FF] text-sm font-medium tracking-wide"
+                      className="text-[#0047FF] text-sm font-semibold tracking-wide"
                     >
                       {metric.label}
                     </motion.div>
@@ -129,7 +131,7 @@ export const PerformanceSection: React.FC = () => {
                     
                     {/* Competition Bar */}
                     <div className="flex flex-col gap-2">
-                      <div className="flex items-center justify-between text-[10px] font-mono tracking-widest text-white/40 uppercase">
+                      <div className="flex items-center justify-between text-[10px] font-mono tracking-[-2px] text-white/40 uppercase font-semibold">
                         <span>{metric.competitionLabel}</span>
                         <span>{metric.competitionValue}</span>
                       </div>
@@ -148,7 +150,7 @@ export const PerformanceSection: React.FC = () => {
 
                     {/* Dentiqly Bar */}
                     <div className="flex flex-col gap-2">
-                      <div className="flex items-center justify-between text-[10px] font-bold font-mono tracking-widest text-[#02E3FF] uppercase">
+                      <div className="flex items-center justify-between text-[10px] font-semibold font-mono tracking-[-2px] text-[#0047FF] uppercase">
                         <span>{metric.dentiqlyLabel}</span>
                         <span>{metric.dentiqlyValue}</span>
                       </div>
@@ -157,7 +159,7 @@ export const PerformanceSection: React.FC = () => {
                           initial={{ width: 0 }}
                           animate={isInView ? { width: metric.dentiqlyWidth } : { width: 0 }}
                           transition={{ duration: 0.8, delay: 0.6 + idx * 0.15, ease: "easeOut" }}
-                          className="h-full bg-[#02E3FF] rounded-sm shadow-[0_0_10px_rgba(2,227,255,0.5)]"
+                          className="h-full bg-[#0047FF] rounded-sm shadow-[0_0_15px_rgba(0,71,255,0.4)]"
                         />
                       </div>
                     </div>

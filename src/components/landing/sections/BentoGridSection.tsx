@@ -7,28 +7,28 @@ export const BentoGridSection: React.FC = () => {
     <section className="py-24 relative overflow-hidden bg-[#FAFCFF]">
       <div className="max-w-[1200px] mx-auto px-6 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          
+
           {/* Top Left Card - col-span-2 */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="md:col-span-2 bg-white rounded-[2rem] p-10 md:p-12 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 relative overflow-hidden flex flex-col justify-end min-h-[400px]"
+            className="md:col-span-2 bg-[#0047ff] rounded-[2rem] p-10 md:p-12 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 relative overflow-hidden flex flex-col justify-end min-h-[400px]"
           >
             {/* Placeholder for 3D Icon */}
             <div className="absolute top-8 right-8 w-32 h-32 md:w-48 md:h-48">
-              <div className="w-full h-full bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-2xl border-2 border-dashed border-blue-200 flex items-center justify-center relative transform rotate-12 transition-transform hover:rotate-0 duration-500">
-                 <span className="text-blue-300 text-sm font-medium absolute -bottom-6 text-center w-full">Espacio 3D</span>
-                 <Award className="w-16 h-16 text-blue-500/50" />
+              <div className="w-full h-full bg-gradient-to-br from-[#ffffff] to-blue-100/50 rounded-2xl border-2 border-dashed border-blue-200 flex items-center justify-center relative transform rotate-12 transition-transform hover:rotate-0 duration-500">
+                <span className="text-[#ffffff] text-sm font-medium absolute -bottom-6 text-center w-full">Espacio 3D</span>
+                <Award className="w-16 h-16 text-[#ffffff]/50" />
               </div>
             </div>
 
             <div className="max-w-md relative z-10">
-              <h3 className="text-3xl md:text-4xl font-semibold text-[#0A0F2D] mb-4 tracking-tight leading-tight">
+              <h3 className="text-3xl md:text-4xl font-semibold text-[#ffffff] mb-4 tracking-[-2px] leading-tight">
                 Diseñado por expertos en odontología
               </h3>
-              <p className="text-lg text-gray-500 leading-relaxed">
+              <p className="text-lg text-[#ffffff] leading-relaxed">
                 Nuestro equipo combina años de experiencia clínica con tecnología de punta. Esa experiencia se traduce en una plataforma construida para la velocidad, claridad y excelencia operativa.
               </p>
             </div>
@@ -60,21 +60,21 @@ export const BentoGridSection: React.FC = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="md:col-span-1 bg-[#Fdf6e3] rounded-[2rem] p-10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative flex flex-col justify-end min-h-[400px]"
+            className="md:col-span-1 bg-[#0A0F2D] rounded-[2rem] p-10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative flex flex-col justify-end min-h-[400px]"
           >
             {/* Placeholder for 3D Icon */}
             <div className="absolute top-10 left-10 w-24 h-24 md:w-32 md:h-32">
-               <div className="w-full h-full bg-amber-100/50 rounded-2xl border-2 border-dashed border-amber-200 flex items-center justify-center relative transform -rotate-6 transition-transform hover:rotate-0 duration-500">
-                 <span className="text-amber-600/60 text-xs font-medium absolute -bottom-6 text-center w-full">Espacio 3D</span>
-                 <ShieldCheck className="w-12 h-12 text-amber-500/50" />
+              <div className="w-full h-full bg-[#ffffff] rounded-2xl border-2 border-dashed border-amber-200 flex items-center justify-center relative transform -rotate-6 transition-transform hover:rotate-0 duration-500">
+                <span className="text-[#ffffff] text-xs font-medium absolute -bottom-6 text-center w-full">Espacio 3D</span>
+                <ShieldCheck className="w-12 h-12 text-[#ffffff]" />
               </div>
             </div>
 
             <div className="relative z-10 mt-auto">
-              <h3 className="text-2xl md:text-3xl font-semibold text-[#0A0F2D] mb-3 tracking-tight leading-tight">
+              <h3 className="text-2xl md:text-3xl font-semibold text-[#ffffff] mb-3 tracking-[-2px] leading-tight">
                 Seguridad empresarial
               </h3>
-              <p className="text-base text-gray-700/80 leading-relaxed">
+              <p className="text-base text-[#ffffff] leading-relaxed">
                 Diseñado para grandes clínicas, Dentiqly cumple con los más altos estándares de seguridad y protección de datos médicos.
               </p>
             </div>
@@ -89,7 +89,7 @@ export const BentoGridSection: React.FC = () => {
             className="md:col-span-2 bg-white rounded-[2rem] p-10 md:p-12 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 relative overflow-hidden flex flex-col min-h-[400px]"
           >
             <div className="max-w-md relative z-10 mb-auto">
-              <h3 className="text-3xl md:text-4xl font-semibold text-[#0A0F2D] mb-4 tracking-tight leading-tight">
+              <h3 className="text-3xl md:text-4xl font-semibold text-[#0A0F2D] mb-4 tracking-[-2px] leading-tight">
                 Diseñado para tu ecosistema
               </h3>
               <p className="text-lg text-gray-500 leading-relaxed mb-8">
@@ -99,9 +99,9 @@ export const BentoGridSection: React.FC = () => {
 
             {/* Integrations Pills area */}
             <div className="flex flex-wrap gap-3 mt-8 relative z-10">
-              <IntegrationPill icon={<Calendar className="w-4 h-4" />} text="Google Calendar" color="text-blue-600" bg="bg-blue-50" />
+              <IntegrationPill icon={<Calendar className="w-4 h-4" />} text="Google Calendar" color="text-[#0A0F2D]" bg="bg-[#0047FF]/10" />
               <IntegrationPill icon={<MessageSquare className="w-4 h-4" />} text="WhatsApp" color="text-green-600" bg="bg-green-50" />
-              <IntegrationPill icon={<CreditCard className="w-4 h-4" />} text="Mercado Pago" color="text-sky-600" bg="bg-sky-50" />
+              <IntegrationPill icon={<CreditCard className="w-4 h-4" />} text="Mercado Pago" color="text-[#0047FF]" bg="bg-[#0047FF]/10" />
               <IntegrationPill icon={<CreditCard className="w-4 h-4" />} text="Stripe" color="text-indigo-600" bg="bg-indigo-50" />
               <div className="px-4 py-2 rounded-full border border-gray-200 bg-gray-50 text-gray-500 text-sm font-medium flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-gray-300"></span>

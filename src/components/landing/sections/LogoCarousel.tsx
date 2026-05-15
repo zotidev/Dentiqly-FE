@@ -42,7 +42,7 @@ export const LogoCarousel: React.FC = () => {
         {logo.src ? (
           <img src={logo.src} alt={logo.name} className="h-8 w-auto object-contain grayscale" />
         ) : (
-          <span className="text-lg font-bold text-[#0B1023]/60 tracking-tight whitespace-nowrap">
+          <span className="text-lg font-bold text-[#0A0F2D]/60 tracking-tight whitespace-nowrap">
             {logo.text}
           </span>
         )}

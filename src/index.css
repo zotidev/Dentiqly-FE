@@ -1,4 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -6,6 +7,7 @@
 @layer base {
   body {
     font-family: 'Inter', system-ui, sans-serif;
+    letter-spacing: -0.01em;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -381,4 +383,63 @@ html.lenis, html.lenis body {
 /* ─── Button Shape Helpers ─────────────────────────────────────────── */
 .btn-hexagon {
   clip-path: polygon(12px 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 12px 100%, 0 50%);
+}
+
+/* ─── Premium Buttons (Wayflyer Style) ────────────────────────────── */
+.btn-wayflyer-primary {
+  font-family: 'Inter', sans-serif;
+  background-color: #0047FF;
+  color: #FFFFFF;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0;
+  padding: 12px 24px;
+  gap: 12px;
+}
+.btn-wayflyer-primary:hover {
+  background-color: #0036CC;
+  transform: translateY(-1px);
+}
+
+.btn-wayflyer-secondary {
+  font-family: 'Inter', sans-serif;
+  background-color: transparent;
+  border: 1px solid #0047FF;
+  color: #0047FF;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0;
+  padding: 12px 24px;
+  box-shadow: none;
+}
+.btn-wayflyer-secondary:hover {
+  background-color: #F9FAFB;
+  border-color: #D1D5DB;
+}
+
+.btn-icon-circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background-color: #FFFFFF;
+  border-radius: 50%;
+  color: #0047FF;
+}
+
+/* Dark mode version of secondary for dark sections */
+.dark .btn-premium-secondary, .bg-navy .btn-premium-secondary, section[class*="bg-[#0B1023]"] .btn-premium-secondary {
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #FFFFFF;
+}
+.dark .btn-premium-secondary:hover, .bg-navy .btn-premium-secondary:hover, section[class*="bg-[#0B1023]"] .btn-premium-secondary:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.5);
 }
