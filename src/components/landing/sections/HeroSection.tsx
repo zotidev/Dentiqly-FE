@@ -125,7 +125,7 @@ export const HeroSection: React.FC = () => {
       <div className="relative z-10 w-full max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row items-center justify-between gap-6 lg:gap-4 xl:gap-6">
 
         {/* Left Card */}
-        <div className="hidden lg:flex lg:w-[32%] xl:w-[34%] justify-center items-center">
+        <div className="hidden lg:flex lg:w-[28%] xl:w-[30%] justify-center items-center">
           <FloatingCard
             src="/assets/hero/tarjeta-izquierda.png"
             alt="Dentiqly - Agenda dental con turnos y citas de pacientes"
@@ -136,14 +136,14 @@ export const HeroSection: React.FC = () => {
         </div>
 
         {/* Center Text */}
-        <div className="flex-shrink-0 w-full lg:w-auto lg:max-w-[460px] xl:max-w-[480px] flex flex-col items-center text-center px-2 py-4">
+        <div className="flex-shrink-0 w-full lg:w-auto lg:max-w-[580px] xl:max-w-[650px] flex flex-col items-center text-center px-2 py-4">
           <motion.h1
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-            className="text-[2.6rem] sm:text-[3.2rem] md:text-[3.8rem] lg:text-[3.6rem] xl:text-[4.2rem] font-semibold tracking-[-3px] leading-[1.05] text-[#0A0F2D] mb-6"
+            className="text-[2.6rem] sm:text-[3.2rem] md:text-[3.8rem] lg:text-[3.4rem] xl:text-[4rem] font-semibold tracking-[-3px] leading-[1.05] text-[#0A0F2D] mb-6"
           >
-            Software dental
+            <span className="inline-block whitespace-nowrap">Software dental</span>
             <br />
             todo <span className="text-[#2563FF]">en uno</span>
           </motion.h1>
@@ -152,7 +152,7 @@ export const HeroSection: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
-            className="text-[15px] sm:text-[17px] md:text-[18px] text-gray-500 leading-relaxed max-w-[440px] mb-10"
+            className="text-[15px] sm:text-[17px] md:text-[18px] text-gray-500 leading-relaxed max-w-[500px] mb-10"
           >
             Desarrolla experiencias excepcionales para tus pacientes.
             Gestiona historias clínicas, turnos y facturación con una fluidez que parece magia. Sin complicaciones.
@@ -177,7 +177,7 @@ export const HeroSection: React.FC = () => {
         </div>
 
         {/* Right Card */}
-        <div className="hidden lg:flex lg:w-[32%] xl:w-[34%] justify-center items-center">
+        <div className="hidden lg:flex lg:w-[28%] xl:w-[30%] justify-center items-center">
           <FloatingCard
             src="/assets/hero/tarjeta-derecha.png"
             alt="Dentiqly - Ficha de paciente con historial clínico y facturación"
