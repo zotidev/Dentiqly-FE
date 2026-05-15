@@ -27,7 +27,7 @@ const badges = [
 
 export const SecuritySection: React.FC = () => {
   return (
-    <section className="py-28 sm:py-36 bg-white relative overflow-hidden">
+    <section id="seguridad" className="py-28 sm:py-36 bg-white relative overflow-hidden">
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-0 right-0 w-[40%] h-[40%] bg-[#2563FF]/5 rounded-full blur-[120px]" />
         <div className="absolute bottom-0 left-0 w-[30%] h-[30%] bg-[#0047FF]/5 rounded-full blur-[100px]" />
@@ -35,23 +35,23 @@ export const SecuritySection: React.FC = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center mb-16">
-          <motion.h2 
+          <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             className="text-sm font-extrabold text-[#0047FF] tracking-widest uppercase mb-4"
           >
             Seguridad de nivel empresarial
-          </motion.h2>
-          <motion.h3 
+          </motion.p>
+          <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
             className="text-3xl sm:text-4xl md:text-5xl font-semibold text-[#0A0F2D] tracking-[-3px]"
           >
-            Tus datos, siempre protegidos.
-          </motion.h3>
+            Tus datos dentales, siempre protegidos.
+          </motion.h2>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 relative">

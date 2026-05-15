@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Heart, Shield, Zap, Users, Globe, Award, Sparkles, MessageCircle, Building2 } from 'lucide-react';
+import { SEO, PAGE_SEO } from '../seo/SEO';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Navbar } from '../landing/sections/Navbar';
@@ -145,6 +146,7 @@ export const AboutPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#FAFCFF] font-sans text-[#0A0F2D] selection:bg-[#2563FF] selection:text-white overflow-hidden">
+      <SEO {...PAGE_SEO.about} />
       <Navbar />
 
       {/* Hero — Light, with 3D */}

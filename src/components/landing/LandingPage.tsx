@@ -1,13 +1,12 @@
 import React, { useRef } from "react"
 import { useLenis } from "./animations/useLenis"
+import { SEO, PAGE_SEO } from "../seo/SEO"
 import { CustomCursor } from "./components/CustomCursor"
 import { Navbar } from "./sections/Navbar"
 import { HeroSection } from "./sections/HeroSection"
-import { LogoCarousel } from "./sections/LogoCarousel"
 import { ProductShowcase } from "./sections/ProductShowcase"
 import { BentoGridSection } from "./sections/BentoGridSection"
 import { ScrollRevealSection } from "./sections/ScrollRevealSection"
-import { MetricsSection } from "./sections/MetricsSection"
 import { TabbedShowcase } from "./sections/TabbedShowcase"
 import { FeatureDeepDive } from "./sections/FeatureDeepDive"
 import { TestimonialSection } from "./sections/TestimonialSection"
@@ -27,18 +26,21 @@ export const LandingPage: React.FC = () => {
       ref={containerRef}
       className="min-h-screen bg-[#FAFCFF] font-sans text-[#0A0F2D] selection:bg-[#2563FF] selection:text-white overflow-hidden cursor-none md:cursor-none"
     >
+      <SEO {...PAGE_SEO.home} />
       <CustomCursor />
       <Navbar />
-      <HeroSection />
-      <ProductShowcase />
-      <BentoGridSection />
-      <ScrollRevealSection />
-      <TabbedShowcase />
-      <PerformanceSection />
-      <SecuritySection />
-      <PricingSection />
-      <FaqSection />
-      <CtaSection />
+      <main>
+        <HeroSection />
+        <ProductShowcase />
+        <BentoGridSection />
+        <ScrollRevealSection />
+        <TabbedShowcase />
+        <PerformanceSection />
+        <SecuritySection />
+        <PricingSection />
+        <FaqSection />
+        <CtaSection />
+      </main>
       <FooterSection />
     </div>
   )

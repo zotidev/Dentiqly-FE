@@ -1,6 +1,5 @@
 import React, { useCallback } from "react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
-import { Twitter, Linkedin, Instagram, Facebook } from "lucide-react"
 
 export const FooterSection: React.FC = () => {
   const location = useLocation()
@@ -20,99 +19,192 @@ export const FooterSection: React.FC = () => {
     [isLanding, navigate]
   )
 
-  const sectionLinks = [
-    { label: "Producto", href: "#producto" },
-    { label: "Funcionalidades", href: "#funcionalidades" },
-    { label: "Seguridad", href: "#seguridad" },
-    { label: "Precios", href: "#precios" },
-    { label: "Preguntas Frecuentes", href: "#faq" },
-  ]
-
   return (
-    <footer className="bg-[#FAFCFF] border-t border-gray-100 pt-20 pb-10">
+    <footer className="bg-[#0A0F2D] text-white pt-20 pb-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-16">
-          <div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+
+          {/* Brand & Description */}
+          <div className="lg:col-span-1">
             <img
               src="/assets/dentiqly-logo.png"
-              alt="Dentiqly"
-              className="h-8 w-auto mb-6"
+              alt="Dentiqly - Software de gestión dental para clínicas odontológicas"
+              className="h-8 w-auto mb-6 brightness-0 invert"
             />
-            <p className="text-gray-500 text-sm mb-8 pr-4">
-              Software de gestion dental de proxima generacion para clinicas que
-              exigen lo mejor.
+            <p className="text-gray-400 text-sm mb-6 leading-relaxed">
+              Dentiqly es el software dental todo en uno para clínicas odontológicas en Argentina.
+              Gestión de turnos online, historias clínicas digitales, odontogramas interactivos
+              y facturación con obras sociales.
             </p>
-            <div className="flex gap-3">
-              {[Twitter, Linkedin, Instagram, Facebook].map((Icon, i) => (
-                <a
-                  key={i}
-                  href="#"
-                  className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:text-[#2563FF] hover:border-[#2563FF]/30 hover:bg-blue-50 transition-all"
-                >
-                  <Icon className="w-4 h-4" />
-                </a>
-              ))}
+            <div className="flex items-center gap-2 text-sm text-gray-500">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+              <a href="mailto:hola@dentiqly.com" className="hover:text-[#2563FF] transition-colors">
+                hola@dentiqly.com
+              </a>
             </div>
           </div>
 
-          <div>
-            <h4 className="font-bold text-[#0A0F2D] mb-6">Plataforma</h4>
-            <ul className="space-y-4 text-sm text-gray-500">
-              {sectionLinks.map((item) => (
-                <li key={item.href}>
-                  <a
-                    href={item.href}
-                    onClick={(e) => handleAnchorClick(e, item.href)}
-                    className="hover:text-[#2563FF] transition-colors"
-                  >
-                    {item.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="font-bold text-[#0A0F2D] mb-6">Compania</h4>
-            <ul className="space-y-4 text-sm text-gray-500">
+          {/* Platform Links */}
+          <nav aria-label="Plataforma">
+            <h3 className="font-bold text-white mb-6 text-sm uppercase tracking-wider">Plataforma</h3>
+            <ul className="space-y-3 text-sm text-gray-400">
               <li>
-                <Link to="/sobre-nosotros" className="hover:text-[#2563FF] transition-colors">
+                <a href="#producto" onClick={(e) => handleAnchorClick(e, "#producto")} className="hover:text-white transition-colors">
+                  Software dental
+                </a>
+              </li>
+              <li>
+                <a href="#funcionalidades-tabs" onClick={(e) => handleAnchorClick(e, "#funcionalidades-tabs")} className="hover:text-white transition-colors">
+                  Odontograma digital
+                </a>
+              </li>
+              <li>
+                <a href="#funcionalidades-tabs" onClick={(e) => handleAnchorClick(e, "#funcionalidades-tabs")} className="hover:text-white transition-colors">
+                  Gestión de turnos online
+                </a>
+              </li>
+              <li>
+                <a href="#funcionalidades-tabs" onClick={(e) => handleAnchorClick(e, "#funcionalidades-tabs")} className="hover:text-white transition-colors">
+                  Recordatorios por WhatsApp
+                </a>
+              </li>
+              <li>
+                <a href="#seguridad" onClick={(e) => handleAnchorClick(e, "#seguridad")} className="hover:text-white transition-colors">
+                  Seguridad de datos
+                </a>
+              </li>
+              <li>
+                <a href="#precios" onClick={(e) => handleAnchorClick(e, "#precios")} className="hover:text-white transition-colors">
+                  Precios
+                </a>
+              </li>
+              <li>
+                <a href="#faq" onClick={(e) => handleAnchorClick(e, "#faq")} className="hover:text-white transition-colors">
+                  Preguntas frecuentes
+                </a>
+              </li>
+            </ul>
+          </nav>
+
+          {/* Features Keywords */}
+          <nav aria-label="Funcionalidades">
+            <h3 className="font-bold text-white mb-6 text-sm uppercase tracking-wider">Funcionalidades</h3>
+            <ul className="space-y-3 text-sm text-gray-400">
+              <li>
+                <a href="#producto" onClick={(e) => handleAnchorClick(e, "#producto")} className="hover:text-white transition-colors">
+                  Historia clínica dental digital
+                </a>
+              </li>
+              <li>
+                <a href="#producto" onClick={(e) => handleAnchorClick(e, "#producto")} className="hover:text-white transition-colors">
+                  Agenda dental online
+                </a>
+              </li>
+              <li>
+                <a href="#producto" onClick={(e) => handleAnchorClick(e, "#producto")} className="hover:text-white transition-colors">
+                  Facturación odontológica
+                </a>
+              </li>
+              <li>
+                <a href="#producto" onClick={(e) => handleAnchorClick(e, "#producto")} className="hover:text-white transition-colors">
+                  Control de obras sociales
+                </a>
+              </li>
+              <li>
+                <a href="#producto" onClick={(e) => handleAnchorClick(e, "#producto")} className="hover:text-white transition-colors">
+                  Gestión multi-sucursal
+                </a>
+              </li>
+              <li>
+                <a href="#producto" onClick={(e) => handleAnchorClick(e, "#producto")} className="hover:text-white transition-colors">
+                  Liquidación de profesionales
+                </a>
+              </li>
+              <li>
+                <a href="#producto" onClick={(e) => handleAnchorClick(e, "#producto")} className="hover:text-white transition-colors">
+                  Portal de pacientes
+                </a>
+              </li>
+            </ul>
+          </nav>
+
+          {/* Company */}
+          <nav aria-label="Compañía">
+            <h3 className="font-bold text-white mb-6 text-sm uppercase tracking-wider">Compañía</h3>
+            <ul className="space-y-3 text-sm text-gray-400">
+              <li>
+                <Link to="/sobre-nosotros" className="hover:text-white transition-colors">
                   Sobre nosotros
                 </Link>
               </li>
               <li>
-                <a href="mailto:hola@dentiqly.com" className="hover:text-[#2563FF] transition-colors">
+                <Link to="/register" className="hover:text-white transition-colors">
+                  Registrarse gratis
+                </Link>
+              </li>
+              <li>
+                <Link to="/login" className="hover:text-white transition-colors">
+                  Iniciar sesión
+                </Link>
+              </li>
+              <li>
+                <a href="mailto:hola@dentiqly.com" className="hover:text-white transition-colors">
                   Contacto
                 </a>
               </li>
+            </ul>
+
+            <h3 className="font-bold text-white mt-8 mb-4 text-sm uppercase tracking-wider">Legal</h3>
+            <ul className="space-y-3 text-sm text-gray-400">
               <li>
-                <a
-                  href="mailto:hola@dentiqly.com"
-                  className="hover:text-[#2563FF] transition-colors"
-                >
-                  hola@dentiqly.com
-                </a>
+                <Link to="/privacidad" className="hover:text-white transition-colors">
+                  Política de privacidad
+                </Link>
+              </li>
+              <li>
+                <Link to="/terminos" className="hover:text-white transition-colors">
+                  Términos de servicio
+                </Link>
+              </li>
+              <li>
+                <Link to="/cookies" className="hover:text-white transition-colors">
+                  Política de cookies
+                </Link>
               </li>
             </ul>
+          </nav>
+
+        </div>
+
+        {/* CTA Bar */}
+        <div className="border-t border-white/10 pt-10 mb-10">
+          <div className="bg-gradient-to-r from-[#2563FF]/20 to-[#0047FF]/10 rounded-2xl p-8 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div>
+              <p className="text-white font-semibold text-lg mb-1">
+                Probá Dentiqly gratis por 14 días
+              </p>
+              <p className="text-gray-400 text-sm">
+                Sin tarjeta de crédito. Gestión de turnos, historias clínicas y odontogramas desde el primer día.
+              </p>
+            </div>
+            <Link
+              to="/register"
+              className="shrink-0 bg-[#2563FF] hover:bg-[#1d4ed8] text-white px-8 py-3 rounded-xl font-semibold transition-colors text-sm"
+            >
+              Comenzar prueba gratuita
+            </Link>
           </div>
         </div>
 
-        <div className="border-t border-gray-200 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-gray-400 text-sm">
-            &copy; {new Date().getFullYear()} Dentiqly. Todos los derechos
-            reservados.
+        {/* Bottom Bar */}
+        <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-gray-500 text-sm">
+            &copy; {new Date().getFullYear()} Dentiqly. Software de gestión dental. Todos los derechos reservados. Argentina.
           </p>
-          <div className="flex gap-6 text-sm text-gray-400">
-            <Link to="/privacidad" className="hover:text-[#2563FF] transition-colors">
-              Privacidad
-            </Link>
-            <Link to="/terminos" className="hover:text-[#2563FF] transition-colors">
-              Terminos
-            </Link>
-            <Link to="/cookies" className="hover:text-[#2563FF] transition-colors">
-              Cookies
-            </Link>
-          </div>
+          <p className="text-gray-600 text-xs max-w-md text-center md:text-right">
+            Software para dentistas y clínicas odontológicas. Turnos online, historias clínicas digitales,
+            odontograma interactivo, facturación dental y recordatorios automáticos por WhatsApp.
+          </p>
         </div>
       </div>
     </footer>

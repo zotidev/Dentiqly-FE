@@ -1,14 +1,261 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" dir="ltr">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Sistema de reservas online para Centro Odontológico. Agenda tu cita de forma rápida y sencilla." />
-    <title>Centro Odontológico - Reserva tu Cita</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+
+    <!-- Primary SEO Meta Tags -->
+    <title>Dentiqly - Software de Gestión Dental | Turnos, Historias Clínicas y Facturación</title>
+    <meta name="description" content="Dentiqly es el software dental todo en uno para clínicas odontológicas. Gestión de turnos online, historias clínicas digitales, odontogramas, facturación, recordatorios por WhatsApp y más. Prueba gratuita 14 días." />
+    <meta name="keywords" content="software dental, gestión odontológica, turnos odontología, historia clínica dental, odontograma digital, software para dentistas, gestión de clínica dental, agenda dental online, facturación odontológica, software odontológico, turnos online dentista, sistema para consultorio dental, software para clínica odontológica, gestión de pacientes dental, recordatorios WhatsApp dentista" />
+    <meta name="author" content="Dentiqly" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="googlebot" content="index, follow" />
+    <meta name="bingbot" content="index, follow" />
+    <link rel="canonical" href="https://dentiqly.com/" />
+
+    <!-- Geographic & Language -->
+    <meta name="geo.region" content="AR" />
+    <meta name="geo.country" content="Argentina" />
+    <meta name="language" content="es-AR" />
+    <meta name="content-language" content="es-AR" />
+    <meta name="distribution" content="global" />
+    <meta name="rating" content="general" />
+    <meta name="revisit-after" content="3 days" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://dentiqly.com/" />
+    <meta property="og:title" content="Dentiqly - Software de Gestión Dental #1 en Argentina" />
+    <meta property="og:description" content="El software dental todo en uno para clínicas odontológicas. Turnos online, historias clínicas, odontogramas, facturación y recordatorios por WhatsApp. 14 días gratis." />
+    <meta property="og:image" content="https://dentiqly.com/assets/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Dentiqly - Software de gestión dental con dashboard, agenda y gestión de pacientes" />
+    <meta property="og:locale" content="es_AR" />
+    <meta property="og:site_name" content="Dentiqly" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://dentiqly.com/" />
+    <meta name="twitter:title" content="Dentiqly - Software de Gestión Dental #1 en Argentina" />
+    <meta name="twitter:description" content="Software dental todo en uno: turnos online, historias clínicas, odontogramas, facturación. Prueba gratis 14 días." />
+    <meta name="twitter:image" content="https://dentiqly.com/assets/og-image.png" />
+    <meta name="twitter:image:alt" content="Dentiqly - Software de gestión dental" />
+
+    <!-- Favicon & App Icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" href="/assets/dentiqly-logo.png" />
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- Theme & Mobile App Meta -->
+    <meta name="theme-color" content="#2563FF" />
+    <meta name="msapplication-TileColor" content="#2563FF" />
+    <meta name="msapplication-TileImage" content="/assets/dentiqly-logo.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Dentiqly" />
+    <meta name="application-name" content="Dentiqly" />
+    <meta name="mobile-web-app-capable" content="yes" />
+
+    <!-- Preconnect for Performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet" />
+
+    <!-- JSON-LD Structured Data: Organization -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Dentiqly",
+      "url": "https://dentiqly.com",
+      "logo": "https://dentiqly.com/assets/dentiqly-logo.png",
+      "description": "Software de gestión dental todo en uno para clínicas odontológicas en Argentina y Latinoamérica.",
+      "foundingDate": "2024",
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "email": "hola@dentiqly.com",
+        "contactType": "customer service",
+        "availableLanguage": "Spanish"
+      },
+      "sameAs": [],
+      "areaServed": {
+        "@type": "Country",
+        "name": "Argentina"
+      }
+    }
+    </script>
+
+    <!-- JSON-LD Structured Data: SoftwareApplication -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Dentiqly",
+      "applicationCategory": "BusinessApplication",
+      "applicationSubCategory": "Dental Practice Management Software",
+      "operatingSystem": "Web Browser",
+      "url": "https://dentiqly.com",
+      "description": "Software dental todo en uno para gestión de clínicas odontológicas. Incluye agenda de turnos online, historias clínicas digitales, odontogramas interactivos, facturación, control de obras sociales y recordatorios automáticos por WhatsApp.",
+      "screenshot": "https://dentiqly.com/assets/screenshots/dashboard.png",
+      "softwareVersion": "1.0",
+      "offers": {
+        "@type": "Offer",
+        "price": "80000",
+        "priceCurrency": "ARS",
+        "priceValidUntil": "2027-12-31",
+        "availability": "https://schema.org/InStock",
+        "url": "https://dentiqly.com/register"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.9",
+        "ratingCount": "150",
+        "bestRating": "5",
+        "worstRating": "1"
+      },
+      "featureList": [
+        "Gestión de turnos y agenda online",
+        "Historias clínicas digitales",
+        "Odontograma interactivo",
+        "Facturación y control de obras sociales",
+        "Recordatorios automáticos por WhatsApp",
+        "Portal de pacientes online",
+        "Gestión multi-sucursal",
+        "Dashboard con métricas en tiempo real",
+        "Liquidación de profesionales",
+        "Reservas online para pacientes"
+      ]
+    }
+    </script>
+
+    <!-- JSON-LD Structured Data: WebSite with SearchAction -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Dentiqly",
+      "url": "https://dentiqly.com",
+      "description": "Software de gestión dental para clínicas odontológicas",
+      "publisher": {
+        "@type": "Organization",
+        "name": "Dentiqly"
+      },
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://dentiqly.com/?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+
+    <!-- JSON-LD Structured Data: FAQ -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "¿Cuánto tiempo lleva configurar Dentiqly?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Menos de 10 minutos. Te registrás, creás tu clínica y ya podés empezar a cargar pacientes, configurar servicios y agendar turnos. No necesitás instalar nada ni contratar soporte técnico."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Puedo gestionar varias sucursales desde una sola cuenta?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Sí. Dentiqly está diseñado como multi-sucursal nativo. Desde un único panel podés ver métricas, agendar turnos y gestionar profesionales de todas tus clínicas en tiempo real."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Mis datos están seguros en Dentiqly?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Absolutamente. Usamos encriptación AES-256, conexiones SSL/TLS y backups automáticos cada hora. Cada clínica tiene sus datos completamente aislados en un modelo multi-tenant seguro."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Cómo funcionan los recordatorios por WhatsApp?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Dentiqly envía recordatorios automáticos a tus pacientes antes de cada turno. Podés personalizar el mensaje y los tiempos de envío. Esto reduce las inasistencias hasta un 40%."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Puedo migrar datos desde otro sistema?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Sí. Ofrecemos asistencia para migrar pacientes, historiales y turnos desde planillas de Excel u otros sistemas. Nuestro equipo te guía durante todo el proceso sin costo adicional."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Hay período de prueba gratuito?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Sí. Tenés 14 días de prueba gratuita con acceso completo a todas las funcionalidades. No se requiere tarjeta de crédito para comenzar."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Qué incluye el software dental Dentiqly?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Dentiqly incluye gestión de turnos y agenda online, historias clínicas digitales, odontograma interactivo, facturación y control de obras sociales, recordatorios automáticos por WhatsApp, portal de pacientes, gestión multi-sucursal, dashboard con métricas en tiempo real y liquidación de profesionales."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Cuánto cuesta el software dental Dentiqly?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "El Plan Pro de Dentiqly tiene un precio de $80.000 ARS por mes, o $864.000 ARS por año con un 10% de descuento. Incluye usuarios y profesionales ilimitados, todas las funcionalidades y soporte prioritario 24/7."
+          }
+        }
+      ]
+    }
+    </script>
+
+    <!-- JSON-LD: BreadcrumbList -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Inicio",
+          "item": "https://dentiqly.com/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Precios",
+          "item": "https://dentiqly.com/#precios"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "Registrarse",
+          "item": "https://dentiqly.com/register"
+        }
+      ]
+    }
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -36,9 +36,9 @@ export const CtaSection: React.FC = () => {
 
           <div className="cta-content relative z-10">
             <h2 className="text-4xl md:text-5xl font-semibold text-white mb-6 tracking-[-3px]">
-              El futuro de tu clinica
+              Digitalizá tu clínica dental
               <br />
-              comienza hoy.
+              hoy mismo.
             </h2>
             <p className="text-blue-100/80 text-lg md:text-xl mb-10 max-w-2xl mx-auto">
               Unite a las cientos de clinicas que ya estan ahorrando tiempo y

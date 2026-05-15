@@ -1,14 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import { Shield, CheckCircle2, ArrowRight, Building2, User, Mail, Lock, Loader2, Phone, Globe } from 'lucide-react';
+import { apiClient } from '../../lib/api-client';
+import { Shield, CheckCircle2, ArrowRight, Building2, User, Mail, Lock, Loader2, Phone, Globe, Sparkles, CreditCard, Clock, ArrowLeft, Check } from 'lucide-react';
 import { useToast } from '../../hooks/use-toast';
+import { SEO, PAGE_SEO } from '../seo/SEO';
+
+type Step = 'form' | 'plan';
 
 export const RegisterPage: React.FC = () => {
   const { register } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [step, setStep] = useState<Step>('form');
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
 
   const [formData, setFormData] = useState({
     nombre_clinica: '',
@@ -19,25 +25,58 @@ export const RegisterPage: React.FC = () => {
     web_url: '',
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-
-    try {
-      const response = await register(formData);
+    if (!formData.nombre_clinica || !formData.nombre_admin || !formData.email_admin || !formData.password) {
       toast({
-        title: "Bienvenido a Dentiqly!",
-        description: "Tu clinica ha sido registrada exitosamente. Ya puedes empezar a trabajar.",
+        title: "Campos requeridos",
+        description: "Por favor completá todos los campos obligatorios.",
+        variant: "destructive",
       });
-      if (response.tenant?.slug) {
-        navigate(`/${response.tenant.slug}/admin`);
+      return;
+    }
+    if (formData.password.length < 6) {
+      toast({
+        title: "Contraseña muy corta",
+        description: "La contraseña debe tener al menos 6 caracteres.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setStep('plan');
+  };
+
+  const handlePlanSelect = async (planChoice: 'trial' | 'monthly' | 'annual') => {
+    setLoading(true);
+    try {
+      const response = await register({
+        ...formData,
+        plan_choice: planChoice,
+      } as any);
+
+      if (planChoice === 'trial') {
+        toast({
+          title: "¡Bienvenido a Dentiqly!",
+          description: "Tu prueba gratuita de 14 días ha comenzado. ¡A trabajar!",
+        });
+        if (response.tenant?.slug) {
+          navigate(`/${response.tenant.slug}/admin`);
+        } else {
+          navigate('/admin');
+        }
       } else {
-        navigate('/admin');
+        toast({
+          title: "Clínica registrada",
+          description: "Redirigiendo al pago...",
+        });
+        if (response.tenant?.slug) {
+          navigate(`/${response.tenant.slug}/admin?activate=true&plan=${planChoice}`);
+        }
       }
     } catch (error: any) {
       toast({
         title: "Error al registrarse",
-        description: error.message || "Ocurrio un problema durante el registro. Revisa los datos.",
+        description: error.message || "Ocurrió un problema durante el registro.",
         variant: "destructive",
       });
     } finally {
@@ -49,7 +88,13 @@ export const RegisterPage: React.FC = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const monthlyPrice = 80000;
+  const annualPrice = 864000;
+  const annualMonthly = Math.round(annualPrice / 12);
+
   return (
+    <>
+    <SEO {...PAGE_SEO.register} />
     <div className="min-h-screen flex items-stretch">
       {/* Left — Dark branding panel */}
       <div className="hidden lg:flex lg:w-[45%] bg-[#0B1023] relative overflow-hidden flex-col justify-between p-16">
@@ -66,19 +111,30 @@ export const RegisterPage: React.FC = () => {
 
         <div className="relative z-10 max-w-md">
           <h2 className="text-4xl font-extrabold text-white mb-4 tracking-tight leading-tight">
-            Comienza tu transformacion digital con Dentiqly
+            {step === 'form'
+              ? 'Comienza tu transformación digital con Dentiqly'
+              : 'Elegí cómo querés empezar'
+            }
           </h2>
           <p className="text-white/40 text-lg leading-relaxed mb-10">
-            Configura tu clinica en minutos y comienza a gestionar pacientes, turnos y facturacion desde el dia uno.
+            {step === 'form'
+              ? 'Configurá tu clínica en minutos y empezá a gestionar pacientes, turnos y facturación.'
+              : '14 días de prueba gratuita sin compromiso, o activá directamente tu suscripción.'
+            }
           </p>
 
           <div className="space-y-4">
-            {[
-              'Activacion en minutos tras suscripcion',
-              'Setup automatico de servicios y configuracion',
-              'Migracion simple de datos',
+            {(step === 'form' ? [
+              'Prueba gratuita de 14 días',
+              'Sin tarjeta de crédito requerida',
+              'Setup automático de servicios',
               'Soporte prioritario durante el onboarding',
-            ].map((text, i) => (
+            ] : [
+              'Acceso completo a todas las funciones',
+              'Usuarios y profesionales ilimitados',
+              'Historias clínicas y odontogramas',
+              'Recordatorios por WhatsApp',
+            ]).map((text, i) => (
               <div key={i} className="flex items-center gap-3">
                 <div className="w-6 h-6 rounded-full bg-[#02E3FF]/15 flex items-center justify-center shrink-0">
                   <CheckCircle2 className="h-3.5 w-3.5 text-[#02E3FF]" />
@@ -96,13 +152,13 @@ export const RegisterPage: React.FC = () => {
               <span className="text-white/80 text-sm font-bold">Seguridad empresarial</span>
             </div>
             <p className="text-white/40 text-sm">
-              Tus datos protegidos con encriptacion AES-256. Copias de seguridad automaticas cada hora.
+              Tus datos protegidos con encriptación AES-256. Copias de seguridad automáticas cada hora.
             </p>
           </div>
         </div>
       </div>
 
-      {/* Right — Registration form */}
+      {/* Right — Form / Plan selection */}
       <div className="w-full lg:w-[55%] flex items-center justify-center p-8 sm:p-12 bg-[#FAFCFF]">
         <div className="w-full max-w-lg">
           <div className="lg:hidden mb-8">
@@ -111,161 +167,307 @@ export const RegisterPage: React.FC = () => {
             </Link>
           </div>
 
-          <div className="mb-6">
-            <h1 className="text-2xl font-extrabold text-[#0B1023] mb-1">Crear nueva clinica</h1>
-            <p className="text-[#8A93A8] font-medium text-sm">Configura tu espacio de trabajo en segundos.</p>
-          </div>
-
-          <div className="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100/80 p-8">
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-[#0B1023] mb-1.5 uppercase tracking-wider">Clinica</label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Building2 className="h-4 w-4 text-[#8A93A8]" />
-                    </div>
-                    <input
-                      type="text"
-                      name="nombre_clinica"
-                      required
-                      value={formData.nombre_clinica}
-                      onChange={handleChange}
-                      className="block w-full pl-9 pr-3 py-3 text-sm bg-[#F7F8FA] border border-transparent rounded-xl focus:ring-2 focus:ring-[#2563FF]/20 focus:border-[#2563FF] focus:bg-white transition-all text-[#0B1023]"
-                      placeholder="Ej: Clinica Dental"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-[#0B1023] mb-1.5 uppercase tracking-wider">Administrador</label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <User className="h-4 w-4 text-[#8A93A8]" />
-                    </div>
-                    <input
-                      type="text"
-                      name="nombre_admin"
-                      required
-                      value={formData.nombre_admin}
-                      onChange={handleChange}
-                      className="block w-full pl-9 pr-3 py-3 text-sm bg-[#F7F8FA] border border-transparent rounded-xl focus:ring-2 focus:ring-[#2563FF]/20 focus:border-[#2563FF] focus:bg-white transition-all text-[#0B1023]"
-                      placeholder="Tu nombre"
-                    />
-                  </div>
-                </div>
+          {step === 'form' ? (
+            <>
+              <div className="mb-6">
+                <h1 className="text-2xl font-extrabold text-[#0B1023] mb-1">Crear nueva clínica</h1>
+                <p className="text-[#8A93A8] font-medium text-sm">Configurá tu espacio de trabajo en segundos.</p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-[#0B1023] mb-1.5 uppercase tracking-wider">Telefono</label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Phone className="h-4 w-4 text-[#8A93A8]" />
+              <div className="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100/80 p-8">
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-[#0B1023] mb-1.5 uppercase tracking-wider">Clínica</label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <Building2 className="h-4 w-4 text-[#8A93A8]" />
+                        </div>
+                        <input
+                          type="text"
+                          name="nombre_clinica"
+                          required
+                          value={formData.nombre_clinica}
+                          onChange={handleChange}
+                          className="block w-full pl-9 pr-3 py-3 text-sm bg-[#F7F8FA] border border-transparent rounded-xl focus:ring-2 focus:ring-[#2563FF]/20 focus:border-[#2563FF] focus:bg-white transition-all text-[#0B1023]"
+                          placeholder="Ej: Clínica Dental"
+                        />
+                      </div>
                     </div>
-                    <input
-                      type="tel"
-                      name="telefono"
-                      value={formData.telefono}
-                      onChange={handleChange}
-                      className="block w-full pl-9 pr-3 py-3 text-sm bg-[#F7F8FA] border border-transparent rounded-xl focus:ring-2 focus:ring-[#2563FF]/20 focus:border-[#2563FF] focus:bg-white transition-all text-[#0B1023]"
-                      placeholder="+54 11 ..."
-                    />
-                  </div>
-                </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-[#0B1023] mb-1.5 uppercase tracking-wider">URL / Web</label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Globe className="h-4 w-4 text-[#8A93A8]" />
+                    <div>
+                      <label className="block text-xs font-bold text-[#0B1023] mb-1.5 uppercase tracking-wider">Administrador</label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <User className="h-4 w-4 text-[#8A93A8]" />
+                        </div>
+                        <input
+                          type="text"
+                          name="nombre_admin"
+                          required
+                          value={formData.nombre_admin}
+                          onChange={handleChange}
+                          className="block w-full pl-9 pr-3 py-3 text-sm bg-[#F7F8FA] border border-transparent rounded-xl focus:ring-2 focus:ring-[#2563FF]/20 focus:border-[#2563FF] focus:bg-white transition-all text-[#0B1023]"
+                          placeholder="Tu nombre"
+                        />
+                      </div>
                     </div>
-                    <input
-                      type="url"
-                      name="web_url"
-                      value={formData.web_url}
-                      onChange={handleChange}
-                      className="block w-full pl-9 pr-3 py-3 text-sm bg-[#F7F8FA] border border-transparent rounded-xl focus:ring-2 focus:ring-[#2563FF]/20 focus:border-[#2563FF] focus:bg-white transition-all text-[#0B1023]"
-                      placeholder="https://..."
-                    />
                   </div>
-                </div>
-              </div>
 
-              <div>
-                <label className="block text-xs font-bold text-[#0B1023] mb-1.5 uppercase tracking-wider">Email profesional</label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Mail className="h-4 w-4 text-[#8A93A8]" />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-[#0B1023] mb-1.5 uppercase tracking-wider">Teléfono</label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <Phone className="h-4 w-4 text-[#8A93A8]" />
+                        </div>
+                        <input
+                          type="tel"
+                          name="telefono"
+                          value={formData.telefono}
+                          onChange={handleChange}
+                          className="block w-full pl-9 pr-3 py-3 text-sm bg-[#F7F8FA] border border-transparent rounded-xl focus:ring-2 focus:ring-[#2563FF]/20 focus:border-[#2563FF] focus:bg-white transition-all text-[#0B1023]"
+                          placeholder="+54 11 ..."
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-[#0B1023] mb-1.5 uppercase tracking-wider">URL / Web</label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <Globe className="h-4 w-4 text-[#8A93A8]" />
+                        </div>
+                        <input
+                          type="url"
+                          name="web_url"
+                          value={formData.web_url}
+                          onChange={handleChange}
+                          className="block w-full pl-9 pr-3 py-3 text-sm bg-[#F7F8FA] border border-transparent rounded-xl focus:ring-2 focus:ring-[#2563FF]/20 focus:border-[#2563FF] focus:bg-white transition-all text-[#0B1023]"
+                          placeholder="https://..."
+                        />
+                      </div>
+                    </div>
                   </div>
-                  <input
-                    type="email"
-                    name="email_admin"
-                    required
-                    value={formData.email_admin}
-                    onChange={handleChange}
-                    className="block w-full pl-9 pr-3 py-3 text-sm bg-[#F7F8FA] border border-transparent rounded-xl focus:ring-2 focus:ring-[#2563FF]/20 focus:border-[#2563FF] focus:bg-white transition-all text-[#0B1023]"
-                    placeholder="ejemplo@clinica.com"
-                  />
-                </div>
-              </div>
 
-              <div>
-                <label className="block text-xs font-bold text-[#0B1023] mb-1.5 uppercase tracking-wider">Contrasena</label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Lock className="h-4 w-4 text-[#8A93A8]" />
+                  <div>
+                    <label className="block text-xs font-bold text-[#0B1023] mb-1.5 uppercase tracking-wider">Email profesional</label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <Mail className="h-4 w-4 text-[#8A93A8]" />
+                      </div>
+                      <input
+                        type="email"
+                        name="email_admin"
+                        required
+                        value={formData.email_admin}
+                        onChange={handleChange}
+                        className="block w-full pl-9 pr-3 py-3 text-sm bg-[#F7F8FA] border border-transparent rounded-xl focus:ring-2 focus:ring-[#2563FF]/20 focus:border-[#2563FF] focus:bg-white transition-all text-[#0B1023]"
+                        placeholder="ejemplo@clinica.com"
+                      />
+                    </div>
                   </div>
-                  <input
-                    type="password"
-                    name="password"
-                    required
-                    value={formData.password}
-                    onChange={handleChange}
-                    className="block w-full pl-9 pr-3 py-3 text-sm bg-[#F7F8FA] border border-transparent rounded-xl focus:ring-2 focus:ring-[#2563FF]/20 focus:border-[#2563FF] focus:bg-white transition-all text-[#0B1023]"
-                    placeholder="Minimo 6 caracteres"
-                  />
-                </div>
-              </div>
 
-              <div className="pt-2">
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full bg-[#2563FF] text-white py-3.5 px-6 rounded-xl font-bold text-sm hover:bg-[#1D4ED8] transition-all shadow-[0_8px_20px_rgba(37,99,255,0.25)] hover:shadow-[0_12px_30px_rgba(37,99,255,0.35)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2.5"
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="h-4.5 w-4.5 animate-spin" />
-                      Creando tu clinica...
-                    </>
-                  ) : (
-                    <>
-                      Crear mi clínica
+                  <div>
+                    <label className="block text-xs font-bold text-[#0B1023] mb-1.5 uppercase tracking-wider">Contraseña</label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <Lock className="h-4 w-4 text-[#8A93A8]" />
+                      </div>
+                      <input
+                        type="password"
+                        name="password"
+                        required
+                        value={formData.password}
+                        onChange={handleChange}
+                        className="block w-full pl-9 pr-3 py-3 text-sm bg-[#F7F8FA] border border-transparent rounded-xl focus:ring-2 focus:ring-[#2563FF]/20 focus:border-[#2563FF] focus:bg-white transition-all text-[#0B1023]"
+                        placeholder="Mínimo 6 caracteres"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="pt-2">
+                    <button
+                      type="submit"
+                      className="w-full bg-[#2563FF] text-white py-3.5 px-6 rounded-xl font-bold text-sm hover:bg-[#1D4ED8] transition-all shadow-[0_8px_20px_rgba(37,99,255,0.25)] hover:shadow-[0_12px_30px_rgba(37,99,255,0.35)] flex items-center justify-center gap-2.5"
+                    >
+                      Continuar
                       <ArrowRight className="h-4.5 w-4.5" />
-                    </>
-                  )}
+                    </button>
+                  </div>
+
+                  <p className="text-center text-xs text-[#8A93A8] mt-4">
+                    Al registrarte, aceptás nuestros{' '}
+                    <Link to="/terminos" className="text-[#2563FF] hover:text-[#1D4ED8] font-semibold transition-colors">Términos de Servicio</Link> y{' '}
+                    <Link to="/privacidad" className="text-[#2563FF] hover:text-[#1D4ED8] font-semibold transition-colors">Política de Privacidad</Link>.
+                  </p>
+                </form>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="mb-6">
+                <button
+                  onClick={() => setStep('form')}
+                  className="flex items-center gap-1.5 text-sm text-[#8A93A8] hover:text-[#0B1023] transition-colors mb-4"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  Volver
+                </button>
+                <h1 className="text-2xl font-extrabold text-[#0B1023] mb-1">Elegí tu plan</h1>
+                <p className="text-[#8A93A8] font-medium text-sm">
+                  Registrando: <span className="text-[#0B1023] font-bold">{formData.nombre_clinica}</span>
+                </p>
+              </div>
+
+              {/* Trial Option */}
+              <button
+                onClick={() => handlePlanSelect('trial')}
+                disabled={loading}
+                className="w-full mb-4 bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border-2 border-[#02E3FF]/30 p-6 text-left hover:border-[#02E3FF] hover:shadow-[0_8px_30px_rgba(2,227,255,0.12)] transition-all group disabled:opacity-50"
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#02E3FF]/20 to-[#02E3FF]/5 flex items-center justify-center">
+                      <Sparkles className="h-6 w-6 text-[#02E3FF]" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-[#0B1023] text-lg">Prueba Gratuita</h3>
+                      <p className="text-sm text-[#8A93A8]">14 días sin compromiso</p>
+                    </div>
+                  </div>
+                  <span className="px-3 py-1 rounded-full bg-[#02E3FF]/10 text-[#0891B2] text-xs font-bold uppercase">
+                    Gratis
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-[#8A93A8]">
+                  <Clock className="h-4 w-4" />
+                  <span>Acceso completo sin tarjeta de crédito</span>
+                </div>
+                <div className="mt-3 flex items-center gap-2 text-sm font-semibold text-[#02E3FF] group-hover:text-[#0891B2] transition-colors">
+                  Comenzar prueba gratuita
+                  <ArrowRight className="h-4 w-4" />
+                </div>
+              </button>
+
+              <div className="relative my-6">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-200"></div>
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-[#FAFCFF] px-4 text-[#8A93A8] font-bold tracking-wider">o avanzá con el plan</span>
+                </div>
+              </div>
+
+              {/* Billing cycle toggle */}
+              <div className="flex items-center justify-center gap-2 mb-4">
+                <button
+                  onClick={() => setBillingCycle('monthly')}
+                  className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${
+                    billingCycle === 'monthly'
+                      ? 'bg-[#2563FF] text-white shadow-md'
+                      : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                  }`}
+                >
+                  Mensual
+                </button>
+                <button
+                  onClick={() => setBillingCycle('annual')}
+                  className={`px-4 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-1.5 ${
+                    billingCycle === 'annual'
+                      ? 'bg-[#2563FF] text-white shadow-md'
+                      : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                  }`}
+                >
+                  Anual
+                  <span className={`text-xs px-1.5 py-0.5 rounded-md ${
+                    billingCycle === 'annual' ? 'bg-white/20 text-white' : 'bg-green-100 text-green-700'
+                  }`}>
+                    -10%
+                  </span>
                 </button>
               </div>
 
-              <p className="text-center text-xs text-[#8A93A8] mt-4">
-                Al registrarte, aceptas nuestros{' '}
-                <Link to="/terminos" className="text-[#2563FF] hover:text-[#1D4ED8] font-semibold transition-colors">Terminos de Servicio</Link> y{' '}
-                <Link to="/privacidad" className="text-[#2563FF] hover:text-[#1D4ED8] font-semibold transition-colors">Politica de Privacidad</Link>.
-              </p>
-            </form>
-          </div>
+              {/* Paid Plan Card */}
+              <button
+                onClick={() => handlePlanSelect(billingCycle)}
+                disabled={loading}
+                className="w-full bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border-2 border-[#2563FF]/20 p-6 text-left hover:border-[#2563FF] hover:shadow-[0_8px_30px_rgba(37,99,255,0.12)] transition-all group disabled:opacity-50"
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#2563FF]/20 to-[#2563FF]/5 flex items-center justify-center">
+                      <CreditCard className="h-6 w-6 text-[#2563FF]" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-[#0B1023] text-lg">Plan Pro</h3>
+                      <p className="text-sm text-[#8A93A8]">
+                        {billingCycle === 'monthly' ? 'Suscripción mensual' : 'Suscripción anual'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-2xl font-extrabold text-[#0B1023]">
+                      ${billingCycle === 'monthly'
+                        ? monthlyPrice.toLocaleString('es-AR')
+                        : annualMonthly.toLocaleString('es-AR')
+                      }
+                    </p>
+                    <p className="text-xs text-[#8A93A8]">
+                      ARS / mes
+                      {billingCycle === 'annual' && (
+                        <span className="block text-green-600 font-bold">
+                          ${annualPrice.toLocaleString('es-AR')} /año
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-2 mb-4">
+                  {[
+                    'Usuarios y profesionales ilimitados',
+                    'Gestión de turnos y agenda online',
+                    'Historias clínicas y odontogramas',
+                    'Facturación y control de caja',
+                    'Recordatorios por WhatsApp',
+                    'Soporte prioritario 24/7',
+                  ].map((feat, i) => (
+                    <div key={i} className="flex items-center gap-2 text-sm text-[#6B7280]">
+                      <Check className="h-3.5 w-3.5 text-[#2563FF] shrink-0" />
+                      <span>{feat}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex items-center gap-2 text-sm font-semibold text-[#2563FF] group-hover:text-[#1D4ED8] transition-colors">
+                  {loading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Procesando...
+                    </>
+                  ) : (
+                    <>
+                      Avanzar con el plan de pago
+                      <ArrowRight className="h-4 w-4" />
+                    </>
+                  )}
+                </div>
+              </button>
+            </>
+          )}
 
           <div className="mt-6 text-center">
             <p className="text-sm text-[#8A93A8]">
-              Ya tienes una cuenta?{' '}
+              ¿Ya tenés una cuenta?{' '}
               <Link to="/login" className="text-[#2563FF] font-bold hover:text-[#1D4ED8] transition-colors">
-                Inicia sesion aqui
+                Iniciá sesión acá
               </Link>
             </p>
           </div>
         </div>
       </div>
     </div>
+    </>
   );
 };

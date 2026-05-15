@@ -72,7 +72,7 @@ export const PricingSection: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h2 className="pricing-title text-4xl md:text-5xl font-semibold text-white mb-6 tracking-[-3px]">
-            Simple, Transparente, Ilimitado.
+            Precios del software dental: simple, transparente, ilimitado.
           </h2>
           <p className="pricing-title text-xl text-blue-200/50">
             Un unico plan que escala con tu clinica. Sin letras chicas.
@@ -90,12 +90,15 @@ export const PricingSection: React.FC = () => {
                 </span>
               </div>
 
-              <div className="mb-8">
+              <div className="mb-3">
                 <span className="text-6xl font-semibold text-white tracking-[-3px]">
                   $80.000
                 </span>
                 <span className="text-blue-200/40 text-lg ml-2">ARS / mes</span>
               </div>
+              <p className="text-blue-200/30 text-sm mb-6">
+                o $864.000 /año <span className="text-[#22C55E] font-bold">(ahorrá 10%)</span>
+              </p>
 
               <div className="space-y-5 mb-10">
                 {features.map((feat, i) => (

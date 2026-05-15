@@ -7,6 +7,8 @@ export const PrivacyPage: React.FC = () => {
       title="Politica de Privacidad"
       subtitle="Tu privacidad es nuestra prioridad. Conoce como protegemos tus datos."
       lastUpdated="13 de mayo de 2026"
+      seoDescription="Política de privacidad de Dentiqly. Conocé cómo protegemos tus datos personales y los de tus pacientes con encriptación AES-256 y protocolos de seguridad empresarial."
+      seoCanonical="/privacidad"
     >
       <h2>1. Informacion que recopilamos</h2>
       <p>

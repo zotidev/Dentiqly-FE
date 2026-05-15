@@ -76,10 +76,12 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ clinicaNombr
     }
   }
 
+  const [billingPlan, setBillingPlan] = useState<'monthly' | 'annual'>('monthly')
+
   const handlePayment = async () => {
     setPaying(true)
     try {
-      const response = await apiClient.post<{ init_point: string }>('/billing/create-preference')
+      const response = await apiClient.post<{ init_point: string }>('/billing/create-preference', { billing_plan: billingPlan })
       if (response.init_point) {
         window.location.href = response.init_point
       }
@@ -393,6 +395,35 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ clinicaNombr
                 </div>
               </div>
 
+              {/* Billing cycle toggle */}
+              <div className="flex items-center justify-center gap-2 mb-4">
+                <button
+                  onClick={() => setBillingPlan('monthly')}
+                  className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${
+                    billingPlan === 'monthly'
+                      ? 'bg-[#2563FF] text-white shadow-md'
+                      : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                  }`}
+                >
+                  Mensual
+                </button>
+                <button
+                  onClick={() => setBillingPlan('annual')}
+                  className={`px-4 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-1.5 ${
+                    billingPlan === 'annual'
+                      ? 'bg-[#2563FF] text-white shadow-md'
+                      : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                  }`}
+                >
+                  Anual
+                  <span className={`text-xs px-1.5 py-0.5 rounded-md ${
+                    billingPlan === 'annual' ? 'bg-white/20 text-white' : 'bg-green-100 text-green-700'
+                  }`}>
+                    -10%
+                  </span>
+                </button>
+              </div>
+
               {/* Plan card */}
               <div className="bg-gradient-to-br from-[#0B1023] to-[#1a2040] rounded-2xl p-6 sm:p-8 text-white relative overflow-hidden mb-6">
                 <div className="absolute inset-0 pointer-events-none">
@@ -405,13 +436,22 @@ export const OnboardingWizard: React.FC<OnboardingWizardProps> = ({ clinicaNombr
                     <div>
                       <div className="flex items-center gap-2 mb-1">
                         <ShieldCheck className="h-4 w-4 text-[#02E3FF]" />
-                        <span className="text-xs font-bold text-[#02E3FF] uppercase tracking-wider">Plan Profesional</span>
+                        <span className="text-xs font-bold text-[#02E3FF] uppercase tracking-wider">
+                          Plan Pro {billingPlan === 'annual' ? 'Anual' : 'Mensual'}
+                        </span>
                       </div>
                       <h3 className="text-2xl font-extrabold">Dentiqly</h3>
                     </div>
                     <div className="text-right">
-                      <p className="text-3xl font-extrabold">$79.999</p>
-                      <p className="text-xs text-white/40">ARS / mes</p>
+                      <p className="text-3xl font-extrabold">
+                        ${billingPlan === 'monthly' ? '80.000' : '72.000'}
+                      </p>
+                      <p className="text-xs text-white/40">
+                        ARS / mes
+                        {billingPlan === 'annual' && (
+                          <span className="block text-[#22C55E]">$864.000 /año</span>
+                        )}
+                      </p>
                     </div>
                   </div>
 

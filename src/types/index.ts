@@ -32,7 +32,10 @@ export interface AuthResponse {
     nombre: string
     slug: string
     subscription_status: string
+    trial_ends_at?: string
   }
+  clinica?: any
+  requires_payment?: boolean
 }
 
 export interface LoginData {
@@ -51,6 +54,9 @@ export interface SaasRegisterData {
   nombre_admin: string
   email_admin: string
   password: string
+  telefono?: string
+  web_url?: string
+  plan_choice?: 'trial' | 'monthly' | 'annual'
 }
 
 // Paciente types

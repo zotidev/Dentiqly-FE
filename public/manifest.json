@@ -1,0 +1,38 @@
+{
+  "name": "Dentiqly - Software de Gestión Dental",
+  "short_name": "Dentiqly",
+  "description": "Software dental todo en uno para clínicas odontológicas. Gestión de turnos, historias clínicas, odontogramas, facturación y recordatorios por WhatsApp.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FAFCFF",
+  "theme_color": "#2563FF",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "es-AR",
+  "dir": "ltr",
+  "categories": ["medical", "business", "productivity"],
+  "icons": [
+    {
+      "src": "/assets/dentiqly-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/favicon-16x16.png",
+      "sizes": "16x16",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

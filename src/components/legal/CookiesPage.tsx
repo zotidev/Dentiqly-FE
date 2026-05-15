@@ -8,6 +8,8 @@ export const CookiesPage: React.FC = () => {
       title="Politica de Cookies"
       subtitle="Como utilizamos cookies y tecnologias similares en nuestra plataforma."
       lastUpdated="13 de mayo de 2026"
+      seoDescription="Política de cookies de Dentiqly. Información sobre el uso de cookies en nuestro software de gestión dental."
+      seoCanonical="/cookies"
     >
       <h2>1. Que son las cookies?</h2>
       <p>

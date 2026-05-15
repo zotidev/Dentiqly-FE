@@ -7,6 +7,8 @@ export const TermsPage: React.FC = () => {
       title="Terminos de Servicio"
       subtitle="Condiciones que rigen el uso de la plataforma Dentiqly."
       lastUpdated="13 de mayo de 2026"
+      seoDescription="Términos y condiciones de uso de Dentiqly, el software de gestión dental para clínicas odontológicas en Argentina."
+      seoCanonical="/terminos"
     >
       <h2>1. Aceptacion de los terminos</h2>
       <p>

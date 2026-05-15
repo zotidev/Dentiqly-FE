@@ -1,17 +1,21 @@
 import React from 'react';
 import { Navbar } from '../landing/sections/Navbar';
 import { FooterSection } from '../landing/sections/FooterSection';
+import { SEO } from '../seo/SEO';
 
 interface LegalLayoutProps {
   title: string;
   subtitle: string;
   lastUpdated: string;
   children: React.ReactNode;
+  seoDescription?: string;
+  seoCanonical?: string;
 }
 
-export const LegalLayout: React.FC<LegalLayoutProps> = ({ title, subtitle, lastUpdated, children }) => {
+export const LegalLayout: React.FC<LegalLayoutProps> = ({ title, subtitle, lastUpdated, children, seoDescription, seoCanonical }) => {
   return (
     <div className="min-h-screen bg-[#FAFCFF]">
+      <SEO title={title} description={seoDescription || subtitle} canonical={seoCanonical} />
       <Navbar />
 
       {/* Hero header */}

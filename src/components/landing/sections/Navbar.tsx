@@ -115,7 +115,7 @@ export const Navbar: React.FC = () => {
           >
             <img
               src="/assets/dentiqly-logo.png"
-              alt="Dentiqly"
+              alt="Dentiqly - Software de gestión dental"
               className={`h-[28px] w-auto transition-all duration-300 ${isDark ? "brightness-0 invert" : ""}`}
             />
           </Link>

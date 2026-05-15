@@ -203,7 +203,7 @@ export const TabbedShowcase: React.FC = () => {
             >
               {/* Left: Title + Description */}
               <div className="order-2 lg:order-1">
-                <h3
+                <h2
                   className="tab-content-animate text-4xl sm:text-5xl lg:text-[3.25rem] font-semibold tracking-[-3px] leading-[1.1] mb-6"
                   style={{
                     color: "#0A0F2D",
@@ -211,7 +211,7 @@ export const TabbedShowcase: React.FC = () => {
                   }}
                 >
                   {current.title}
-                </h3>
+                </h2>
                 <p
                   className="tab-content-animate text-lg leading-relaxed max-w-lg"
                   style={{ color: "#64748B" }}
@@ -253,7 +253,8 @@ export const TabbedShowcase: React.FC = () => {
                     <img
                       key={current.image}
                       src={current.image}
-                      alt={current.label}
+                      alt={`Dentiqly - ${current.label}: ${current.title}`}
+                      loading="lazy"
                       className="max-w-full max-h-[400px] object-contain drop-shadow-lg transition-opacity duration-300"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement

@@ -139,12 +139,12 @@ export const FaqSection: React.FC = () => {
     <section ref={sectionRef} id="faq" className="py-28 sm:py-36 bg-[#FAFCFF]">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="faq-heading text-center mb-16">
-          <h2 className="text-sm font-extrabold text-[#2563FF] tracking-widest uppercase mb-4">
+          <p className="text-sm font-extrabold text-[#2563FF] tracking-widest uppercase mb-4">
             Preguntas Frecuentes
+          </p>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-[#0B1023] tracking-tight">
+            Todo lo que necesitas saber sobre Dentiqly
           </h2>
-          <h3 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-[#0B1023] tracking-tight">
-            Todo lo que necesitas saber
-          </h3>
         </div>
 
         <div className="faq-list bg-white rounded-3xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">

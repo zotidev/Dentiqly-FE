@@ -117,14 +117,14 @@ export const ProductShowcase: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* ── Header ── */}
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="product-title-reveal text-sm font-extrabold text-[#0047FF] tracking-widest uppercase mb-4">
+          <p className="product-title-reveal text-sm font-extrabold text-[#0047FF] tracking-widest uppercase mb-4">
             Poder sin límites
-          </h2>
-          <h3 className="product-subtitle-reveal text-4xl md:text-5xl font-semibold text-[#0A0F2D] tracking-[-3px] leading-tight">
+          </p>
+          <h2 className="product-subtitle-reveal text-4xl md:text-5xl font-semibold text-[#0A0F2D] tracking-[-3px] leading-tight">
             Todo lo que necesitas,
             <br />
             en una interfaz asombrosa.
-          </h3>
+          </h2>
         </div>
 
         {/* ── Hero Screenshot (Dashboard — large) ── */}
@@ -160,8 +160,8 @@ export const ProductShowcase: React.FC = () => {
               <div className="overflow-hidden">
                 <img
                   src={hero.src}
-                  alt={hero.title}
-                  loading="lazy"
+                  alt={`Dentiqly software dental - ${hero.title}`}
+                  loading="eager"
                   className="showcase-hero-img w-full h-auto block transition-transform duration-700 group-hover:scale-[1.015]"
                 />
               </div>
@@ -204,7 +204,7 @@ export const ProductShowcase: React.FC = () => {
                   <div className="overflow-hidden">
                     <img
                       src={shot.src}
-                      alt={shot.title}
+                      alt={`Dentiqly - ${shot.title} para clínicas dentales`}
                       loading="lazy"
                       className="showcase-card-img w-full h-auto block transition-transform duration-700 group-hover:scale-[1.02]"
                     />

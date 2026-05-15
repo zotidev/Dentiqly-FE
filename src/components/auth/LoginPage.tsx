@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { Shield, ArrowRight, User, Lock, Loader2, CheckCircle2 } from 'lucide-react';
 import { useToast } from '../../hooks/use-toast';
+import { SEO, PAGE_SEO } from '../seo/SEO';
 
 export const LoginPage: React.FC = () => {
   const { login } = useAuth();
@@ -46,6 +47,8 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
+    <>
+    <SEO {...PAGE_SEO.login} />
     <div className="min-h-screen flex items-stretch">
       {/* Left — Dark branding panel */}
       <div className="hidden lg:flex lg:w-1/2 bg-[#0B1023] relative overflow-hidden flex-col justify-between p-16">
@@ -199,5 +202,6 @@ export const LoginPage: React.FC = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };

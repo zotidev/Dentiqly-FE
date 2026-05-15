@@ -25,9 +25,9 @@ export const BentoGridSection: React.FC = () => {
             </div>
 
             <div className="max-w-md relative z-10">
-              <h3 className="text-3xl md:text-4xl font-semibold text-[#ffffff] mb-4 tracking-[-2px] leading-tight">
+              <h2 className="text-3xl md:text-4xl font-semibold text-[#ffffff] mb-4 tracking-[-2px] leading-tight">
                 Diseñado por expertos en odontología
-              </h3>
+              </h2>
               <p className="text-lg text-[#ffffff] leading-relaxed">
                 Nuestro equipo combina años de experiencia clínica con tecnología de punta. Esa experiencia se traduce en una plataforma construida para la velocidad, claridad y excelencia operativa.
               </p>
@@ -72,7 +72,7 @@ export const BentoGridSection: React.FC = () => {
 
             <div className="relative z-10 mt-auto">
               <h3 className="text-2xl md:text-3xl font-semibold text-[#ffffff] mb-3 tracking-[-2px] leading-tight">
-                Seguridad empresarial
+                Seguridad de datos dental empresarial
               </h3>
               <p className="text-base text-[#ffffff] leading-relaxed">
                 Diseñado para grandes clínicas, Dentiqly cumple con los más altos estándares de seguridad y protección de datos médicos.
@@ -90,7 +90,7 @@ export const BentoGridSection: React.FC = () => {
           >
             <div className="max-w-md relative z-10 mb-auto">
               <h3 className="text-3xl md:text-4xl font-semibold text-[#0A0F2D] mb-4 tracking-[-2px] leading-tight">
-                Diseñado para tu ecosistema
+                Integraciones para tu clínica dental
               </h3>
               <p className="text-lg text-gray-500 leading-relaxed mb-8">
                 Dentiqly se integra perfectamente con las herramientas que ya usas, conectando todos los puntos de tu clínica para una gestión unificada.

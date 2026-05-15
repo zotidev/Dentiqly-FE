@@ -13,6 +13,21 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['lucide-react'],
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-three': ['three', '@react-three/fiber', '@react-three/drei'],
+          'vendor-animation': ['framer-motion', 'gsap', 'lenis'],
+        },
+      },
+    },
+    cssCodeSplit: true,
+    minify: 'esbuild',
+    reportCompressedSize: true,
+    chunkSizeWarningLimit: 600,
+  },
   test: {
     globals: true,
     environment: 'jsdom',
