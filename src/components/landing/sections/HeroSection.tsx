@@ -1,123 +1,241 @@
-import React from "react"
+import React, { useRef, useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 import { motion } from "framer-motion"
 import { ArrowRight } from "lucide-react"
 
-const AsciiTooth = ({ className }: { className?: string }) => (
-  <pre className={`text-[8px] sm:text-[10px] md:text-[12px] leading-[8px] sm:leading-[10px] md:leading-[12px] font-mono whitespace-pre select-none pointer-events-none ${className}`}>
-    {`       +++++++++++++++
-     +++++++++++++++++++
-    +++++++++++++++++++++
-    +++++++++++++++++++++
-    +++++++++++++++++++++
-     +++++++++++++++++++
-       +++++++++++++++
-        ++++     ++++
-        ++++     ++++
-        ++++     ++++
-        +++       +++
-        ++         ++`}
-  </pre>
-);
+const useSectionMouse = (sectionRef: React.RefObject<HTMLElement | null>) => {
+  const [mouse, setMouse] = useState({ x: 0, y: 0 })
 
-const AsciiAgenda = ({ className }: { className?: string }) => (
-  <pre className={`text-[7px] sm:text-[9px] md:text-[10px] leading-[9px] sm:leading-[11px] md:leading-[12px] font-mono whitespace-pre select-none pointer-events-none ${className}`}>
-    {`+========================+
-|  <<<   AGENDA   >>>    |
-+========================+
-|  LU  MA  MI  JU  VI   |
-|------------------------+
-|  08  --  --  09  --    |
-|  09  10  --  --  11    |
-|  --  --  14  15  --    |
-|  16  --  17  --  18    |
-|  --  20  --  21  --    |
-+------------------------+
-|  >> TURNO 09:30  <<    |
-|  >> TURNO 14:00  <<    |
-+========================+`}
-  </pre>
-);
+  useEffect(() => {
+    const el = sectionRef.current
+    if (!el) return
 
-const AsciiCalendar = ({ className }: { className?: string }) => (
-  <pre className={`text-[7px] sm:text-[9px] md:text-[10px] leading-[9px] sm:leading-[11px] md:leading-[12px] font-mono whitespace-pre select-none pointer-events-none ${className}`}>
-    {`+--+--+--+--+--+
-|LU|MA|MI|JU|VI|
-+--+--+--+--+--+
-|  |##|  |##|  |
-|##|  |  |  |##|
-|  |  |##|  |  |
-|  |##|  |##|  |
-+--+--+--+--+--+`}
-  </pre>
-);
+    const onMove = (e: MouseEvent) => {
+      const rect = el.getBoundingClientRect()
+      const x = ((e.clientX - rect.left) / rect.width - 0.5) * 2
+      const y = ((e.clientY - rect.top) / rect.height - 0.5) * 2
+      setMouse({ x, y })
+    }
+
+    const onLeave = () => setMouse({ x: 0, y: 0 })
+
+    el.addEventListener("mousemove", onMove)
+    el.addEventListener("mouseleave", onLeave)
+    return () => {
+      el.removeEventListener("mousemove", onMove)
+      el.removeEventListener("mouseleave", onLeave)
+    }
+  }, [sectionRef])
+
+  return mouse
+}
+
+const FloatingCard: React.FC<{
+  src: string
+  alt: string
+  side: "left" | "right"
+  delay?: number
+  mouse: { x: number; y: number }
+}> = ({ src, alt, side, delay = 0, mouse }) => {
+  const isLeft = side === "left"
+
+  const rotateY = mouse.x * (isLeft ? 14 : 10)
+  const rotateX = -mouse.y * (isLeft ? 10 : 14)
+  const translateX = mouse.x * (isLeft ? 8 : -8)
+  const translateY = mouse.y * (isLeft ? -6 : 6)
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: isLeft ? -80 : 80, y: 40 }}
+      animate={{ opacity: 1, x: 0, y: 0 }}
+      transition={{ duration: 0.9, delay: delay + 0.3, ease: [0.22, 1, 0.36, 1] }}
+      className="relative group w-full"
+      style={{ perspective: "1200px" }}
+    >
+      <motion.div
+        animate={{ y: [0, -12, 0] }}
+        transition={{
+          duration: isLeft ? 5 : 6,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: isLeft ? 0 : 1.5,
+        }}
+      >
+        <div
+          style={{
+            transform: `perspective(1200px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateX(${translateX}px) translateY(${translateY}px)`,
+            transformStyle: "preserve-3d",
+            transition: "transform 0.25s cubic-bezier(0.22, 1, 0.36, 1)",
+          }}
+        >
+          <div
+            className="absolute -inset-6 rounded-[28px] blur-2xl transition-opacity duration-700"
+            style={{
+              opacity: 0.2 + Math.abs(mouse.x) * 0.15 + Math.abs(mouse.y) * 0.1,
+              background: `radial-gradient(ellipse at ${50 + mouse.x * 20}% ${50 + mouse.y * 20}%, rgba(37,99,255,0.3), transparent 70%)`,
+              transform: "translateZ(-40px)",
+            }}
+          />
+
+          <img
+            src={src}
+            alt={alt}
+            loading="eager"
+            className="relative z-10 w-full h-auto rounded-2xl"
+            style={{
+              transform: "translateZ(40px)",
+              filter: `drop-shadow(${-mouse.x * 10}px ${-mouse.y * 10 + 20}px 40px rgba(0,0,0,0.15))`,
+              transition: "filter 0.25s ease-out",
+            }}
+          />
+
+          <div
+            className="absolute inset-0 rounded-2xl z-20 pointer-events-none"
+            style={{
+              background: `radial-gradient(circle at ${50 + mouse.x * 30}% ${50 + mouse.y * 30}%, rgba(255,255,255,0.08), transparent 60%)`,
+              transform: "translateZ(50px)",
+            }}
+          />
+        </div>
+      </motion.div>
+    </motion.div>
+  )
+}
 
 export const HeroSection: React.FC = () => {
+  const sectionRef = useRef<HTMLElement>(null)
+  const mouse = useSectionMouse(sectionRef)
+
   return (
-    <section className="relative min-h-[95vh] flex flex-col items-center justify-center overflow-hidden bg-white pt-32 pb-20">
-
-      {/* ── Background ASCII Shapes ── */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden flex items-center justify-center z-0">
-        <AsciiTooth className="absolute left-[5%] top-[22%] text-[#0A0F2D]/20 -rotate-12" />
-        <AsciiTooth className="absolute right-[8%] bottom-[20%] text-[#0A0F2D]/25 rotate-12 scale-125" />
-        <AsciiTooth className="absolute left-[15%] bottom-[10%] text-[#0A0F2D]/20 -rotate-6 scale-75" />
-        <AsciiTooth className="absolute right-[15%] top-[18%] text-[#0A0F2D]/20 rotate-6 scale-90" />
-
-        <AsciiAgenda className="absolute left-[2%] top-[50%] text-[#0A0F2D]/[0.7] rotate-6" />
-        <AsciiAgenda className="absolute right-[3%] top-[38%] text-[#0A0F2D]/[0.9] -rotate-3 scale-110" />
-        <AsciiCalendar className="absolute left-[22%] top-[12%] text-[#0A0F2D]/[0.8] rotate-3" />
-        <AsciiCalendar className="absolute right-[20%] bottom-[8%] text-[#0A0F2D]/[0.8] -rotate-6 scale-110" />
+    <section
+      ref={sectionRef}
+      className="relative min-h-[100vh] flex flex-col items-center justify-center overflow-hidden pt-28 pb-16 lg:pt-24 lg:pb-12"
+    >
+      {/* ── Background image ── */}
+      <div className="absolute inset-0 z-0">
+        <img
+          src="/assets/hero/fondo.png"
+          alt=""
+          aria-hidden="true"
+          className="w-full h-full object-cover"
+        />
       </div>
 
-      <div className="relative z-10 w-full max-w-[1000px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center">
+      {/* ── Main 3-col layout ── */}
+      <div className="relative z-10 w-full max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row items-center justify-between gap-6 lg:gap-4 xl:gap-6">
 
-        {/* ── Title ── */}
-        <motion.h1
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="text-[2.8rem] sm:text-[3.5rem] md:text-[4rem] lg:text-[4.8rem] font-semibold tracking-[-3px] leading-[1.05] text-[#0A0F2D] mb-6 w-full"
-        >
-          Software dental<br />
-          todo en uno
-        </motion.h1>
+        {/* Left Card */}
+        <div className="hidden lg:flex lg:w-[32%] xl:w-[34%] justify-center items-center">
+          <FloatingCard
+            src="/assets/hero/tarjeta-izquierda.png"
+            alt="Dentiqly - Agenda dental con turnos y citas de pacientes"
+            side="left"
+            delay={0}
+            mouse={mouse}
+          />
+        </div>
 
-        {/* ── Paragraph ── */}
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="text-[17px] sm:text-[20px] text-gray-500 leading-relaxed max-w-[700px] mb-10"
-        >
-          Desarrolla experiencias excepcionales para tus pacientes.
-          Gestiona historias clínicas, turnos y facturación con una fluidez que parece magia. Sin complicaciones.
-        </motion.p>
+        {/* Center Text */}
+        <div className="flex-shrink-0 w-full lg:w-auto lg:max-w-[460px] xl:max-w-[480px] flex flex-col items-center text-center px-2 py-4">
+          <motion.h1
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+            className="text-[2.6rem] sm:text-[3.2rem] md:text-[3.8rem] lg:text-[3.6rem] xl:text-[4.2rem] font-semibold tracking-[-3px] leading-[1.05] text-[#0A0F2D] mb-6"
+          >
+            Software dental
+            <br />
+            todo <span className="text-[#2563FF]">en uno</span>
+          </motion.h1>
 
-        {/* ── Buttons ── */}
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
+            className="text-[15px] sm:text-[17px] md:text-[18px] text-gray-500 leading-relaxed max-w-[440px] mb-10"
+          >
+            Desarrolla experiencias excepcionales para tus pacientes.
+            Gestiona historias clínicas, turnos y facturación con una fluidez que parece magia. Sin complicaciones.
+          </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            className="flex flex-col sm:flex-row gap-4 items-center justify-center w-full"
+          >
+            <Link to="/register" className="btn-wayflyer-secondary min-w-[165px]">
+              Ver demo
+            </Link>
+            <Link to="/register" className="btn-wayflyer-primary min-w-[165px]">
+              Comenzar gratis
+              <div className="btn-icon-circle">
+                <ArrowRight size={14} />
+              </div>
+            </Link>
+          </motion.div>
+        </div>
+
+        {/* Right Card */}
+        <div className="hidden lg:flex lg:w-[32%] xl:w-[34%] justify-center items-center">
+          <FloatingCard
+            src="/assets/hero/tarjeta-derecha.png"
+            alt="Dentiqly - Ficha de paciente con historial clínico y facturación"
+            side="right"
+            delay={0.15}
+            mouse={mouse}
+          />
+        </div>
+
+        {/* Mobile: Both cards */}
+        <div className="flex lg:hidden gap-4 mt-8 w-full max-w-[600px] mx-auto">
+          <motion.img
+            src="/assets/hero/tarjeta-izquierda.png"
+            alt="Dentiqly - Agenda dental"
+            loading="eager"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.5 }}
+            className="flex-1 w-0 h-auto rounded-xl drop-shadow-xl"
+          />
+          <motion.img
+            src="/assets/hero/tarjeta-derecha.png"
+            alt="Dentiqly - Ficha de paciente"
+            loading="eager"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.65 }}
+            className="flex-1 w-0 h-auto rounded-xl drop-shadow-xl"
+          />
+        </div>
+      </div>
+
+      {/* Bottom-left mini card */}
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 0.9, ease: [0.22, 1, 0.36, 1] }}
+        className="hidden xl:block absolute bottom-10 left-[6%] z-10"
+      >
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          className="flex flex-col sm:flex-row gap-4 items-center justify-center w-full"
+          animate={{ y: [0, -6, 0] }}
+          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+          className="bg-white/90 backdrop-blur-sm rounded-2xl px-5 py-4 shadow-lg border border-gray-100/80"
         >
-          <Link
-            to="/register"
-            className="btn-wayflyer-secondary min-w-[180px]"
-          >
-            Ver demo
-          </Link>
-          <Link
-            to="/register"
-            className="btn-wayflyer-primary min-w-[180px]"
-          >
-            Comenzar gratis
-            <div className="btn-icon-circle">
-              <ArrowRight size={14} />
+          <p className="text-xs font-bold text-[#0A0F2D] mb-1">Resumen del día</p>
+          <div className="flex items-center gap-4">
+            <div>
+              <p className="text-lg font-bold text-[#0A0F2D]">12 <span className="text-xs font-semibold text-green-500">+20%</span></p>
+              <p className="text-[10px] text-gray-400">Pacientes</p>
             </div>
-          </Link>
+            <div className="w-px h-8 bg-gray-200" />
+            <div>
+              <p className="text-lg font-bold text-[#0A0F2D]">$1,890 <span className="text-xs font-semibold text-green-500">+15%</span></p>
+              <p className="text-[10px] text-gray-400">Ingresos</p>
+            </div>
+          </div>
         </motion.div>
-
-      </div>
+      </motion.div>
     </section>
   )
 }
