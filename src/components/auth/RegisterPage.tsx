@@ -85,7 +85,15 @@ export const RegisterPage: React.FC = () => {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    let value = e.target.value;
+    if (e.target.name === 'web_url') {
+      if (value.includes('/')) {
+        const parts = value.split('/').filter(Boolean);
+        value = parts[parts.length - 1] || '';
+      }
+      value = value.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    }
+    setFormData({ ...formData, [e.target.name]: value });
   };
 
   const monthlyPrice = 80000;
@@ -233,20 +241,23 @@ export const RegisterPage: React.FC = () => {
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-[#0B1023] mb-1.5 uppercase tracking-wider">URL / Web</label>
+                      <label className="block text-xs font-bold text-[#0B1023] mb-1.5 uppercase tracking-wider">Enlace de reservas (Slug)</label>
                       <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                           <Globe className="h-4 w-4 text-[#8A93A8]" />
                         </div>
                         <input
-                          type="url"
+                          type="text"
                           name="web_url"
                           value={formData.web_url}
                           onChange={handleChange}
                           className="block w-full pl-9 pr-3 py-3 text-sm bg-[#F7F8FA] border border-transparent rounded-xl focus:ring-2 focus:ring-[#2563FF]/20 focus:border-[#2563FF] focus:bg-white transition-all text-[#0B1023]"
-                          placeholder="https://..."
+                          placeholder="tu-centro"
                         />
                       </div>
+                      <p className="mt-1.5 text-xs text-[#8A93A8]">
+                        Tus pacientes reservarán en: <br/><span className="font-semibold text-[#2563FF]">dentiqly.com/booking/{formData.web_url || 'tu-centro'}</span>
+                      </p>
                     </div>
                   </div>
 
