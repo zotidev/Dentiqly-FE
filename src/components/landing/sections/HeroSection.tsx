@@ -191,27 +191,7 @@ export const HeroSection: React.FC = () => {
           />
         </div>
 
-        {/* Mobile: Both cards */}
-        <div className="flex lg:hidden gap-4 mt-8 w-full max-w-[600px] mx-auto">
-          <motion.img
-            src="/assets/hero/tarjeta-izquierda.png"
-            alt="Dentiqly - Agenda dental"
-            loading="eager"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.5 }}
-            className="flex-1 w-0 h-auto rounded-xl drop-shadow-xl"
-          />
-          <motion.img
-            src="/assets/hero/tarjeta-derecha.png"
-            alt="Dentiqly - Ficha de paciente"
-            loading="eager"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.65 }}
-            className="flex-1 w-0 h-auto rounded-xl drop-shadow-xl"
-          />
-        </div>
+
       </div>
 
     </section>

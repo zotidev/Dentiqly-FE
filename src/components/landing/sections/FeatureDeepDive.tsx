@@ -153,7 +153,7 @@ export const FeatureDeepDive: React.FC = () => {
 
               <div className={`${isReversed ? "lg:order-1" : ""}`}>
                 <div
-                  className="feature-visual relative rounded-3xl overflow-hidden aspect-[4/3] flex items-center justify-center bg-[#0B1023]"
+                  className="feature-visual relative rounded-3xl overflow-hidden aspect-[4/3] flex items-center justify-center bg-[#0B1023] isolate transform-gpu"
                   style={{
                     border: `1px solid ${feature.color}40`,
                     boxShadow: `0 30px 60px -15px ${feature.color}30`,

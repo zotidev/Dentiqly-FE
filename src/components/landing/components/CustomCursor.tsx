@@ -7,7 +7,7 @@ export const CustomCursor: React.FC = () => {
   if (isHidden) return null
 
   return (
-    <>
+    <div className="hidden md:block">
       <div
         ref={dotRef}
         className="custom-cursor-dot"
@@ -15,15 +15,15 @@ export const CustomCursor: React.FC = () => {
           position: "fixed",
           top: 0,
           left: 0,
-          width: isHovering ? 12 : 8,
-          height: isHovering ? 12 : 8,
+          width: isHovering ? 10 : 6,
+          height: isHovering ? 10 : 6,
           borderRadius: "50%",
-          background: "#02E3FF",
+          background: "#2563FF",
+          boxShadow: "0 2px 8px rgba(37,99,255,0.4)",
           pointerEvents: "none",
           zIndex: 9999,
           transform: "translate(-50%, -50%)",
-          transition: "width 0.3s, height 0.3s",
-          mixBlendMode: "difference",
+          transition: "width 0.3s cubic-bezier(0.22, 1, 0.36, 1), height 0.3s cubic-bezier(0.22, 1, 0.36, 1)",
         }}
       />
       <div
@@ -33,16 +33,17 @@ export const CustomCursor: React.FC = () => {
           position: "fixed",
           top: 0,
           left: 0,
-          width: isHovering ? 56 : 40,
-          height: isHovering ? 56 : 40,
+          width: isHovering ? 52 : 36,
+          height: isHovering ? 52 : 36,
           borderRadius: "50%",
-          border: `1.5px solid ${isHovering ? "#02E3FF" : "rgba(255,255,255,0.3)"}`,
+          border: `1.5px solid ${isHovering ? "#2563FF" : "rgba(37,99,255,0.3)"}`,
+          backgroundColor: isHovering ? "rgba(37,99,255,0.05)" : "transparent",
           pointerEvents: "none",
           zIndex: 9998,
           transform: "translate(-50%, -50%)",
-          transition: "width 0.3s, height 0.3s, border-color 0.3s",
+          transition: "all 0.3s cubic-bezier(0.22, 1, 0.36, 1)",
         }}
       />
-    </>
+    </div>
   )
 }

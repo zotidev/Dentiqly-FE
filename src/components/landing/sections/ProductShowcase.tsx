@@ -141,25 +141,27 @@ export const ProductShowcase: React.FC = () => {
         <div className="showcase-gallery flex flex-col lg:flex-row gap-2 items-stretch">
 
           {/* Main Image — shows full screenshot */}
-          <div className="relative rounded-2xl overflow-hidden group" style={{ flex: "1 1 0", minWidth: 0 }}>
-            <img
-              key={current.src}
-              src={current.src}
-              alt={`Dentiqly - ${current.title}`}
-              className="showcase-main-img w-full h-auto block rounded-2xl"
-              style={{ imageRendering: "auto", maxWidth: "1024px" }}
-            />
+          <div className="relative rounded-2xl overflow-hidden group w-full lg:flex-1 lg:min-w-0 flex flex-col bg-[#0A0F2D] lg:bg-transparent shadow-xl lg:shadow-none">
+            <div className="relative w-full">
+              <img
+                key={current.src}
+                src={current.src}
+                alt={`Dentiqly - ${current.title}`}
+                className="showcase-main-img w-full h-auto block rounded-t-2xl lg:rounded-2xl"
+                style={{ imageRendering: "auto", maxWidth: "1024px" }}
+              />
+              {/* Gradient for overlay blending on desktop */}
+              <div className="hidden lg:block absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent rounded-2xl" />
+            </div>
 
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent rounded-2xl" />
-
-            <div className="showcase-overlay-content absolute bottom-0 left-0 right-0 p-6">
-              <span className="inline-block px-3 py-1 rounded-md bg-white/15 backdrop-blur-sm text-white text-[11px] font-bold tracking-widest uppercase mb-3 border border-white/10">
+            <div className="showcase-overlay-content p-6 lg:absolute lg:bottom-0 lg:left-0 lg:right-0">
+              <span className="inline-block px-3 py-1 rounded-md bg-white/10 lg:bg-white/15 backdrop-blur-sm text-white text-[11px] font-bold tracking-widest uppercase mb-3 border border-white/10">
                 {current.label}
               </span>
               <h3 className="text-xl font-semibold text-white mb-1 tracking-[-1px]">
                 {current.title}
               </h3>
-              <p className="text-white/60 text-sm max-w-sm leading-relaxed mb-4">
+              <p className="text-white/70 lg:text-white/60 text-sm max-w-sm leading-relaxed mb-4">
                 {current.desc}
               </p>
               <Link

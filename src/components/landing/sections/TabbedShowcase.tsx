@@ -112,7 +112,7 @@ export const TabbedShowcase: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <div className="tabbed-showcase-inner">
             {/* Tab Navigation Bar */}
-            <div className="flex justify-center mb-10 sm:mb-12">
+            <div className="flex justify-center mb-6 sm:mb-12">
               <div
                 className="inline-flex items-center gap-0 rounded-full px-2 py-2"
                 style={{
@@ -175,7 +175,7 @@ export const TabbedShowcase: React.FC = () => {
             </div>
 
             {/* Progress bar */}
-            <div className="flex justify-center mb-8">
+            <div className="flex justify-center mb-6 lg:mb-8">
               <div className="flex items-center gap-2">
                 {tabs.map((_, index) => (
                   <div
@@ -199,12 +199,12 @@ export const TabbedShowcase: React.FC = () => {
             {/* Content Area */}
             <div
               ref={contentRef}
-              className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center"
+              className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-20 items-center"
             >
               {/* Left: Title + Description */}
               <div className="order-2 lg:order-1">
                 <h2
-                  className="tab-content-animate text-4xl sm:text-5xl lg:text-[3.25rem] font-semibold tracking-[-3px] leading-[1.1] mb-6"
+                  className="tab-content-animate text-3xl sm:text-4xl lg:text-[3.25rem] font-semibold tracking-[-2px] lg:tracking-[-3px] leading-[1.1] mb-4 lg:mb-6"
                   style={{
                     color: "#0A0F2D",
                     fontFamily: "'Instrument Sans', sans-serif",
@@ -213,7 +213,7 @@ export const TabbedShowcase: React.FC = () => {
                   {current.title}
                 </h2>
                 <p
-                  className="tab-content-animate text-lg leading-relaxed max-w-lg"
+                  className="tab-content-animate text-base lg:text-lg leading-relaxed max-w-lg"
                   style={{ color: "#64748B" }}
                 >
                   {current.description}
@@ -223,7 +223,7 @@ export const TabbedShowcase: React.FC = () => {
               {/* Right: Image Container */}
               <div className="order-1 lg:order-2">
                 <div
-                  className="tab-content-animate relative rounded-3xl overflow-hidden bg-[#FAFCFF]"
+                  className="tab-content-animate relative rounded-3xl overflow-hidden bg-[#FAFCFF] isolate transform-gpu"
                   style={{
                     border: "1px solid #E2E8F0",
                     boxShadow: "0 20px 40px -10px rgba(0,0,0,0.05)",
@@ -252,13 +252,13 @@ export const TabbedShowcase: React.FC = () => {
                     }}
                   />
 
-                  <div className="relative z-10 p-6 sm:p-8 flex items-center justify-center min-h-[320px] sm:min-h-[400px]">
+                  <div className="relative z-10 p-4 lg:p-8 flex items-center justify-center min-h-[220px] lg:min-h-[400px]">
                     <img
                       key={current.image}
                       src={current.image}
                       alt={`Dentiqly - ${current.label}: ${current.title}`}
                       loading="lazy"
-                      className="max-w-full max-h-[400px] object-contain drop-shadow-[0_20px_40px_rgba(37,99,255,0.15)] animate-float scale-110 mix-blend-multiply"
+                      className="max-w-full max-h-[220px] lg:max-h-[400px] object-contain drop-shadow-[0_20px_40px_rgba(37,99,255,0.15)] animate-float scale-110 mix-blend-multiply"
                     />
                   </div>
                 </div>
