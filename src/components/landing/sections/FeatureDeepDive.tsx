@@ -36,11 +36,11 @@ const features = [
     icon: Building2,
     title: "Panel multi-sucursal",
     subtitle: "Gestion centralizada",
-    desc: "Administra todas tus sucursales desde un unico panel. Compara rendimiento, gestiona profesionales y unifica la facturacion en un solo lugar.",
+    desc: "Administra todas tus sucursales desde un unico panel. Compara rendimiento, gestiona profesionales y unifica la gestion en un solo lugar.",
     bullets: [
       "Dashboard comparativo entre sucursales",
       "Profesionales compartidos entre sedes",
-      "Reportes consolidados de facturacion",
+      "Reportes consolidados de actividad",
     ],
     color: "#7C3AED",
     visual: "multi",
@@ -153,85 +153,26 @@ export const FeatureDeepDive: React.FC = () => {
 
               <div className={`${isReversed ? "lg:order-1" : ""}`}>
                 <div
-                  className="feature-visual relative rounded-3xl overflow-hidden aspect-[4/3] flex items-center justify-center"
+                  className="feature-visual relative rounded-3xl overflow-hidden aspect-[4/3] flex items-center justify-center bg-[#0B1023]"
                   style={{
-                    background: `linear-gradient(135deg, ${feature.color}08, ${feature.color}15)`,
-                    border: `1px solid ${feature.color}15`,
+                    border: `1px solid ${feature.color}40`,
+                    boxShadow: `0 30px 60px -15px ${feature.color}30`,
                   }}
                 >
-                  {feature.visual === "odontograma" && (
-                    <div className="w-full h-full p-8 flex items-center justify-center">
-                      <div className="grid grid-cols-8 gap-1.5">
-                        {Array.from({ length: 32 }).map((_, t) => (
-                          <div
-                            key={t}
-                            className="w-7 h-9 rounded-md border transition-colors"
-                            style={{
-                              borderColor: `${feature.color}30`,
-                              background:
-                                t % 7 === 0
-                                  ? `${feature.color}20`
-                                  : t % 5 === 0
-                                    ? "#22C55E20"
-                                    : "white",
-                            }}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  {feature.visual === "email" && (
-                    <div className="w-full h-full p-8 flex flex-col items-center justify-center gap-3">
-                      {[
-                        { align: "left", text: "Hola! Recordatorio de tu turno manana a las 10:00" },
-                        { align: "right", text: "Confirmo! Gracias" },
-                        { align: "left", text: "Perfecto, te esperamos!" },
-                      ].map((msg, m) => (
-                        <div
-                          key={m}
-                          className={`max-w-[70%] px-4 py-2.5 rounded-2xl text-sm ${
-                            msg.align === "left"
-                              ? "self-start bg-white shadow-sm text-gray-700"
-                              : "self-end bg-[#0047FF] text-[#0A0F2D] font-medium"
-                          }`}
-                        >
-                          {msg.text}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  {feature.visual === "multi" && (
-                    <div className="w-full h-full p-8 flex items-center justify-center">
-                      <div className="grid grid-cols-2 gap-4 w-full max-w-sm">
-                        {["Sede Central", "Sede Norte", "Sede Sur", "Sede Oeste"].map(
-                          (sede, s) => (
-                            <div
-                              key={s}
-                              className="bg-white rounded-xl p-4 shadow-sm border border-gray-100"
-                            >
-                              <div
-                                className="w-3 h-3 rounded-full mb-2"
-                                style={{
-                                  background:
-                                    s === 0
-                                      ? "#22C55E"
-                                      : s === 1
-                                        ? "#2563FF"
-                                        : s === 2
-                                          ? "#F59E0B"
-                                          : "#7C3AED",
-                                }}
-                              />
-                              <p className="text-xs font-bold text-[#0A0F2D]">{sede}</p>
-                              <p className="text-[10px] text-gray-400 mt-1 font-semibold tracking-[-2px]">
-                                {12 + s * 3} profesionales
-                              </p>
-                            </div>
-                          )
-                        )}
-                      </div>
-                    </div>
-                  )}
+                  {/* Ambient background glow */}
+                  <div 
+                    className="absolute inset-0 opacity-40 blur-3xl pointer-events-none"
+                    style={{ background: `radial-gradient(circle at center, ${feature.color}60 0%, transparent 70%)` }}
+                  />
+
+                  <img
+                    src={`/assets/features/3d-${feature.visual}-dark.png`}
+                    alt={feature.title}
+                    className="w-full h-full object-contain p-8 animate-float scale-[1.15] mix-blend-screen"
+                  />
+                  
+                  {/* Glass reflection effect */}
+                  <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent mix-blend-overlay pointer-events-none" />
                 </div>
               </div>
             </div>

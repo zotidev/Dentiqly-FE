@@ -39,8 +39,10 @@ const FloatingCard: React.FC<{
 }> = ({ src, alt, side, delay = 0, mouse }) => {
   const isLeft = side === "left"
 
-  const rotateY = mouse.x * (isLeft ? 14 : 10)
-  const rotateX = -mouse.y * (isLeft ? 10 : 14)
+  const baseRotateY = isLeft ? 16 : -16
+  const baseRotateX = 4
+  const rotateY = baseRotateY + mouse.x * (isLeft ? 14 : 10)
+  const rotateX = baseRotateX + -mouse.y * (isLeft ? 10 : 14)
   const translateX = mouse.x * (isLeft ? 8 : -8)
   const translateY = mouse.y * (isLeft ? -6 : 6)
 
@@ -154,8 +156,7 @@ export const HeroSection: React.FC = () => {
             transition={{ duration: 0.7, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
             className="text-[15px] sm:text-[17px] md:text-[18px] text-gray-500 leading-relaxed max-w-[500px] mb-10"
           >
-            Desarrolla experiencias excepcionales para tus pacientes.
-            Gestiona historias clínicas, turnos y facturación con una fluidez que parece magia. Sin complicaciones.
+            Gestiona historias clínicas y turnos con una fluidez que parece magia. Sin complicaciones.
           </motion.p>
 
           <motion.div
@@ -164,9 +165,12 @@ export const HeroSection: React.FC = () => {
             transition={{ duration: 0.7, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
             className="flex flex-col sm:flex-row gap-4 items-center justify-center w-full"
           >
-            <Link to="/register" className="btn-wayflyer-secondary min-w-[165px]">
+            <a 
+              href="mailto:hola@dentiqly.com?subject=Solicitud de Demo - Dentiqly&body=Hola equipo de Dentiqly,%0D%0A%0D%0AMe gustaría agendar una demo personalizada para conocer más sobre la plataforma.%0D%0A%0D%0AMuchas gracias!" 
+              className="btn-wayflyer-secondary min-w-[165px]"
+            >
               Ver demo
-            </Link>
+            </a>
             <Link to="/register" className="btn-wayflyer-primary min-w-[165px]">
               Comenzar gratis
               <div className="btn-icon-circle">
@@ -180,7 +184,7 @@ export const HeroSection: React.FC = () => {
         <div className="hidden lg:flex lg:w-[28%] xl:w-[30%] justify-center items-center">
           <FloatingCard
             src="/assets/hero/tarjeta-derecha.png"
-            alt="Dentiqly - Ficha de paciente con historial clínico y facturación"
+            alt="Dentiqly - Ficha de paciente con historial clínico y odontograma"
             side="right"
             delay={0.15}
             mouse={mouse}
@@ -210,32 +214,6 @@ export const HeroSection: React.FC = () => {
         </div>
       </div>
 
-      {/* Bottom-left mini card */}
-      <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 0.9, ease: [0.22, 1, 0.36, 1] }}
-        className="hidden xl:block absolute bottom-10 left-[6%] z-10"
-      >
-        <motion.div
-          animate={{ y: [0, -6, 0] }}
-          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-          className="bg-white/90 backdrop-blur-sm rounded-2xl px-5 py-4 shadow-lg border border-gray-100/80"
-        >
-          <p className="text-xs font-bold text-[#0A0F2D] mb-1">Resumen del día</p>
-          <div className="flex items-center gap-4">
-            <div>
-              <p className="text-lg font-bold text-[#0A0F2D]">12 <span className="text-xs font-semibold text-green-500">+20%</span></p>
-              <p className="text-[10px] text-gray-400">Pacientes</p>
-            </div>
-            <div className="w-px h-8 bg-gray-200" />
-            <div>
-              <p className="text-lg font-bold text-[#0A0F2D]">$1,890 <span className="text-xs font-semibold text-green-500">+15%</span></p>
-              <p className="text-[10px] text-gray-400">Ingresos</p>
-            </div>
-          </div>
-        </motion.div>
-      </motion.div>
     </section>
   )
 }

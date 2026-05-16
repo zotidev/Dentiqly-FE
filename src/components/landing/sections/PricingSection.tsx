@@ -26,7 +26,7 @@ const allFeatures = [
   { icon: Calendar, text: "Gestión de turnos y agenda online" },
   { icon: FileText, text: "Historias clínicas digitales completas" },
   { icon: Stethoscope, text: "Odontograma interactivo" },
-  { icon: CreditCard, text: "Facturación y control de caja" },
+  { icon: CreditCard, text: "Control de caja y finanzas" },
   { icon: MessageCircle, text: "Recordatorios automáticos por email" },
   { icon: Building2, text: "Gestión multi-sucursal" },
   { icon: BarChart3, text: "Dashboard con métricas en tiempo real" },

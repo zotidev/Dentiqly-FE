@@ -44,13 +44,13 @@ const useCases = [
     cta: "Descubrí Recordatorios",
   },
   {
-    key: "configuracion",
-    src: "/assets/screenshots/configuracion.png",
-    label: "CONFIGURACIÓN",
-    title: "Personalización total",
-    desc: "Servicios, horarios, permisos y roles adaptados a tu clínica.",
-    icon: Settings,
-    cta: "Descubrí Configuración",
+    key: "booking",
+    src: "/assets/screenshots/booking.png",
+    label: "RESERVA ONLINE",
+    title: "Tus pacientes agendan 24/7",
+    desc: "Plataforma de autogestión de turnos para que tus pacientes reserven sin llamadas ni demoras.",
+    icon: Calendar,
+    cta: "Descubrí el Booking",
   },
 ]
 

@@ -366,11 +366,11 @@ export const OdontogramSection: React.FC<OdontogramSectionProps> = ({ pacienteId
 
       {/* ══════════════════════════════════════ MODAL ══════════════════════════════════════ */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-[1400px] w-full max-h-[95vh] overflow-hidden flex flex-col border border-gray-100">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-[1400px] w-full h-[80vh] overflow-hidden flex flex-col border border-gray-100">
 
             {/* ── Header ── */}
-            <div className="bg-gradient-to-r from-[#0A0F2D] to-[#1a2456] px-6 py-5 flex justify-between items-center">
+            <div className="bg-gradient-to-r from-[#0A0F2D] to-[#1a2456] px-4 sm:px-6 py-4 sm:py-5 flex justify-between items-center">
               <div className="flex items-center gap-4">
                 <div>
                   <h3 className="text-lg font-semibold text-white">
@@ -418,7 +418,7 @@ export const OdontogramSection: React.FC<OdontogramSectionProps> = ({ pacienteId
 
             {/* ── Toolbar ── */}
             {modalMode !== "view" && (
-              <div className="bg-white px-6 py-3.5 border-b border-gray-100 flex items-center gap-3 flex-wrap">
+              <div className="bg-white px-4 sm:px-6 py-3 border-b border-gray-100 flex items-center gap-3 flex-wrap">
                 {/* Temporarios toggle */}
                 <label className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium bg-gray-50 hover:bg-gray-100 cursor-pointer transition-colors border border-gray-200">
                   <input
@@ -445,10 +445,10 @@ export const OdontogramSection: React.FC<OdontogramSectionProps> = ({ pacienteId
                   Borrar
                 </button>
 
-                <div className="w-px h-8 bg-gray-200" />
+                <div className="hidden sm:block w-px h-8 bg-gray-200" />
 
                 {/* Treatment selector */}
-                <div className="relative flex-1 max-w-xs">
+                <div className="relative w-full sm:flex-1 sm:max-w-xs">
                   <select
                     value={selectedTratamiento}
                     onChange={(e) => {
@@ -500,7 +500,7 @@ export const OdontogramSection: React.FC<OdontogramSectionProps> = ({ pacienteId
                 </div>
 
                 {selectedTratamiento && (
-                  <span className="text-xs text-gray-400 ml-2">
+                  <span className="text-[11px] text-gray-400 w-full sm:w-auto">
                     Hacé click en las superficies para aplicar
                   </span>
                 )}
@@ -527,9 +527,11 @@ export const OdontogramSection: React.FC<OdontogramSectionProps> = ({ pacienteId
             )}
 
             {/* ── Dental Chart ── */}
-            <div className="flex-1 overflow-y-auto p-6 bg-[#FAFCFF]">
-              <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm">
-                {/* Upper teeth */}
+            <div className="flex-1 overflow-y-auto p-3 sm:p-6 bg-[#FAFCFF]">
+              <div className="bg-white rounded-2xl p-4 sm:p-8 border border-gray-100 shadow-sm overflow-hidden flex flex-col">
+                <div className="overflow-x-auto pb-6 custom-scrollbar">
+                  <div className="min-w-[950px] lg:min-w-0 flex flex-col items-center">
+                    {/* Upper teeth */}
                 <div className="mb-2">
                   <div className="flex justify-center gap-0.5 xl:gap-1">
                     {DIENTES_SUPERIORES.map((num) => (
@@ -623,38 +625,40 @@ export const OdontogramSection: React.FC<OdontogramSectionProps> = ({ pacienteId
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
 
               {/* Observaciones + Legend row */}
-              <div className="mt-5 flex flex-col lg:flex-row gap-4">
+              <div className="mt-5 flex flex-col lg:flex-row gap-6">
                 <div className="flex-1">
-                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">
                     Observaciones
                   </label>
                   <textarea
                     value={observaciones}
                     onChange={(e) => setObservaciones(e.target.value)}
                     disabled={modalMode === "view"}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm disabled:bg-gray-50 disabled:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#2563FF]/20 focus:border-[#2563FF] transition-all resize-none"
-                    rows={3}
+                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm disabled:bg-gray-50/50 disabled:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#2563FF]/10 focus:border-[#2563FF] transition-all resize-none min-h-[100px]"
+                    rows={4}
                     placeholder="Observaciones generales del odontograma..."
                   />
                 </div>
-                <div className="lg:w-64 shrink-0">
-                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                <div className="lg:w-72 shrink-0">
+                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">
                     Leyenda
                   </label>
-                  <div className="bg-white rounded-xl border border-gray-100 p-4 space-y-3">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-4 h-4 rounded-full bg-[#2563FF]" />
-                      <span className="text-sm text-gray-600">Buen estado</span>
+                  <div className="bg-white rounded-xl border border-gray-200/60 p-5 space-y-4 shadow-sm">
+                    <div className="flex items-center gap-3">
+                      <div className="w-3.5 h-3.5 rounded-full bg-[#2563FF] shadow-sm shadow-blue-200" />
+                      <span className="text-sm font-medium text-gray-600">Buen estado</span>
                     </div>
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-4 h-4 rounded-full bg-[#EF4444]" />
-                      <span className="text-sm text-gray-600">Mal estado</span>
+                    <div className="flex items-center gap-3">
+                      <div className="w-3.5 h-3.5 rounded-full bg-[#EF4444] shadow-sm shadow-red-200" />
+                      <span className="text-sm font-medium text-gray-600">Mal estado</span>
                     </div>
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-4 h-4 rounded-full bg-white border-2 border-gray-200" />
-                      <span className="text-sm text-gray-600">Sano</span>
+                    <div className="flex items-center gap-3">
+                      <div className="w-3.5 h-3.5 rounded-full bg-white border-2 border-gray-200" />
+                      <span className="text-sm font-medium text-gray-600">Sano / Sin tratamiento</span>
                     </div>
                   </div>
                 </div>
@@ -786,7 +790,7 @@ const DienteVisual: React.FC<DienteVisualProps> = ({
   )
 
   return (
-    <div className={`relative flex flex-col items-center group ${cursorClass}`}>
+    <div className={`relative flex flex-col items-center group shrink-0 ${cursorClass}`}>
       {/* Erupción / Extrusión arrows */}
       {((datos as any)?.tratamiento_general?.tratamiento === "erupcion_up" || (datos as any)?.tratamiento_general?.tratamiento === "extrusion") && (
         <ArrowUp className="w-4 h-4 absolute -top-4" style={{ color: (datos as any)?.tratamiento_general?.estado === "buen_estado" ? ESTADO_COLORS.buen_estado : ESTADO_COLORS.mal_estado }} />

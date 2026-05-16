@@ -12,7 +12,7 @@ const tabs = [
       "Cada diente con su historial completo, accesible con un clic.",
     description:
       "Registrá hallazgos, tratamientos y evoluciones en un odontograma digital interactivo. Vista por diente, códigos de colores y exportación en PDF.",
-    image: "/assets/features/odontograma.png",
+    image: "/assets/features/3d-odontograma.png",
   },
   {
     number: "02",
@@ -21,7 +21,7 @@ const tabs = [
       "Reduce ausencias hasta un 80% sin mover un dedo.",
     description:
       "Tus pacientes reciben recordatorios automáticos por email antes de cada turno. Confirmación, cancelación y mensajes personalizables.",
-    image: "/assets/features/turnos-email.png",
+    image: "/assets/features/3d-email.png",
   },
   {
     number: "03",
@@ -29,8 +29,8 @@ const tabs = [
     title:
       "Todas tus sedes, un solo panel de control.",
     description:
-      "Administrá todas tus sucursales desde un único panel. Compará rendimiento, gestioná profesionales y unificá la facturación en un solo lugar.",
-    image: "/assets/features/multi-sucursal.png",
+      "Administrá todas tus sucursales desde un único panel. Compará rendimiento, gestioná profesionales y unificá la gestión en un solo lugar.",
+    image: "/assets/features/3d-multi.png",
   },
 ]
 
@@ -162,7 +162,7 @@ export const TabbedShowcase: React.FC = () => {
                         <span
                           className="text-xs font-bold tracking-[0.12em] uppercase whitespace-nowrap transition-colors duration-300"
                           style={{
-                            fontFamily: "'Inter', sans-serif",
+                            fontFamily: "'Instrument Sans', sans-serif",
                           }}
                         >
                           {tab.label}
@@ -207,7 +207,7 @@ export const TabbedShowcase: React.FC = () => {
                   className="tab-content-animate text-4xl sm:text-5xl lg:text-[3.25rem] font-semibold tracking-[-3px] leading-[1.1] mb-6"
                   style={{
                     color: "#0A0F2D",
-                    fontFamily: "'Inter', sans-serif",
+                    fontFamily: "'Instrument Sans', sans-serif",
                   }}
                 >
                   {current.title}
@@ -223,15 +223,14 @@ export const TabbedShowcase: React.FC = () => {
               {/* Right: Image Container */}
               <div className="order-1 lg:order-2">
                 <div
-                  className="tab-content-animate relative rounded-3xl overflow-hidden"
+                  className="tab-content-animate relative rounded-3xl overflow-hidden bg-[#FAFCFF]"
                   style={{
-                    background:
-                      "linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 50%, #EEF2FF 100%)",
                     border: "1px solid #E2E8F0",
+                    boxShadow: "0 20px 40px -10px rgba(0,0,0,0.05)",
                   }}
                 >
                   <div
-                    className="absolute inset-0 pointer-events-none opacity-[0.35]"
+                    className="absolute inset-0 pointer-events-none opacity-50"
                     style={{
                       backgroundImage: `
                         linear-gradient(to right, #CBD5E1 1px, transparent 1px),
@@ -241,11 +240,15 @@ export const TabbedShowcase: React.FC = () => {
                     }}
                   />
 
+                  {/* Dynamic glow based on active tab */}
                   <div
-                    className="absolute bottom-0 left-0 w-40 h-40 pointer-events-none"
+                    className="absolute inset-0 pointer-events-none opacity-20 blur-[60px] transition-colors duration-1000"
                     style={{
-                      background:
-                        "radial-gradient(ellipse at bottom left, rgba(37,99,255,0.08) 0%, transparent 70%)",
+                      background: activeTab === 0 
+                        ? 'radial-gradient(circle at center, #2563FF 0%, transparent 70%)'
+                        : activeTab === 1 
+                        ? 'radial-gradient(circle at center, #02E3FF 0%, transparent 70%)'
+                        : 'radial-gradient(circle at center, #8B5CF6 0%, transparent 70%)'
                     }}
                   />
 
@@ -255,26 +258,7 @@ export const TabbedShowcase: React.FC = () => {
                       src={current.image}
                       alt={`Dentiqly - ${current.label}: ${current.title}`}
                       loading="lazy"
-                      className="max-w-full max-h-[400px] object-contain drop-shadow-lg transition-opacity duration-300"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement
-                        target.style.display = "none"
-                        const parent = target.parentElement
-                        if (parent && !parent.querySelector(".img-fallback")) {
-                          const fallback = document.createElement("div")
-                          fallback.className =
-                            "img-fallback flex items-center justify-center text-center p-8"
-                          fallback.innerHTML = `
-                            <div>
-                              <div style="width:64px;height:64px;border-radius:16px;background:rgba(37,99,255,0.1);display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
-                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2563FF" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
-                              </div>
-                              <p style="color:#94A3B8;font-size:14px;font-weight:500">Imagen próximamente</p>
-                            </div>
-                          `
-                          parent.appendChild(fallback)
-                        }
-                      }}
+                      className="max-w-full max-h-[400px] object-contain drop-shadow-[0_20px_40px_rgba(37,99,255,0.15)] animate-float scale-110 mix-blend-multiply"
                     />
                   </div>
                 </div>

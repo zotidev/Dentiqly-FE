@@ -11,8 +11,8 @@ interface SEOProps {
 }
 
 const BASE_URL = 'https://dentiqly.com'
-const DEFAULT_TITLE = 'Dentiqly - Software de Gestión Dental | Turnos, Historias Clínicas y Facturación'
-const DEFAULT_DESCRIPTION = 'Dentiqly es el software dental todo en uno para clínicas odontológicas. Gestión de turnos online, historias clínicas digitales, odontogramas, facturación y recordatorios por WhatsApp. Prueba gratuita 14 días.'
+const DEFAULT_TITLE = 'Dentiqly - Software de Gestión Dental | Turnos, Historias Clínicas y Odontogramas'
+const DEFAULT_DESCRIPTION = 'Dentiqly es el software dental todo en uno para clínicas odontológicas. Gestión de turnos online, historias clínicas digitales, odontogramas y recordatorios por WhatsApp. Prueba gratuita 14 días.'
 const DEFAULT_IMAGE = `${BASE_URL}/assets/og-image.png`
 
 export const SEO: React.FC<SEOProps> = ({
@@ -65,12 +65,12 @@ export const PAGE_SEO = {
   },
   register: {
     title: 'Registrarse Gratis - Prueba 14 Días',
-    description: 'Registrate gratis en Dentiqly y probá el software dental más completo durante 14 días. Sin tarjeta de crédito. Gestión de turnos, historias clínicas, odontogramas y facturación.',
+    description: 'Registrate gratis en Dentiqly y probá el software dental más completo durante 14 días. Sin tarjeta de crédito. Gestión de turnos, historias clínicas y odontogramas.',
     canonical: '/register',
   },
   login: {
     title: 'Iniciar Sesión',
-    description: 'Accedé a tu cuenta de Dentiqly. Software de gestión dental para clínicas odontológicas con turnos online, historias clínicas y facturación.',
+    description: 'Accedé a tu cuenta de Dentiqly. Software de gestión dental para clínicas odontológicas con turnos online, historias clínicas y odontogramas.',
     canonical: '/login',
     noindex: true,
   },

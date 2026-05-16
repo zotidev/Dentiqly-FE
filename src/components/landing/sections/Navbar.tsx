@@ -146,26 +146,26 @@ export const Navbar: React.FC = () => {
           <div className="hidden md:flex items-center gap-[10px]">
             <Link
               to="/login"
-              className={`px-5 py-2.5 text-[13px] transition-all duration-300 ${
+              className={`h-[42px] px-6 text-[13px] transition-all duration-300 flex items-center justify-center rounded-lg font-medium ${
                 isDark
-                  ? "border border-white/30 text-white hover:bg-white/10 inline-flex items-center justify-center font-medium"
-                  : "btn-wayflyer-secondary"
+                  ? "border border-white/30 text-white hover:bg-white/10"
+                  : "bg-white border border-[#0047FF] text-[#0047FF] hover:bg-gray-50"
               }`}
             >
-              <User size={14} className="mr-1.5" />
+              <User size={14} className="mr-2" />
               Ingresar
             </Link>
             <Link
               to="/register"
-              className={`px-5 py-2.5 text-[13px] transition-all duration-300 ${
+              className={`h-[42px] px-6 text-[13px] transition-all duration-300 flex items-center justify-center rounded-lg font-semibold gap-3 ${
                 isDark
-                  ? "bg-white text-[#0A0F2D] hover:bg-white/90 inline-flex items-center justify-center font-semibold gap-3"
-                  : "btn-wayflyer-primary"
+                  ? "bg-white text-[#0A0F2D] hover:bg-white/90"
+                  : "bg-[#0047FF] text-white hover:bg-[#0036CC]"
               }`}
             >
               Registrarse
-              <div className={`btn-icon-circle ${isDark ? "!bg-[#0047FF] !text-white" : ""}`}>
-                <ArrowRight size={12} />
+              <div className={`flex items-center justify-center w-5 h-5 rounded-full ${isDark ? "bg-[#0047FF] text-white" : "bg-white text-[#0047FF]"}`}>
+                <ArrowRight size={11} />
               </div>
             </Link>
           </div>
@@ -193,14 +193,14 @@ export const Navbar: React.FC = () => {
               <Link
                 to="/login"
                 onClick={() => setMobileMenuOpen(false)}
-                className="mobile-nav-link text-center py-3.5 btn-wayflyer-secondary w-full"
+                className="h-12 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-white font-medium transition-all"
               >
                 Ingresar
               </Link>
               <Link
                 to="/register"
                 onClick={() => setMobileMenuOpen(false)}
-                className="mobile-nav-link text-center py-3.5 btn-wayflyer-primary w-full"
+                className="h-12 flex items-center justify-center rounded-xl bg-[#0047FF] text-white font-semibold shadow-lg shadow-blue-500/20 transition-all"
               >
                 Registrarse
               </Link>

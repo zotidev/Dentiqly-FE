@@ -115,12 +115,12 @@ const tabsData: TabData[] = [
     headline:
       "El descontrol financiero es el enemigo silencioso de las clínicas. Cobros pendientes, liquidaciones incorrectas y falta de visibilidad.",
     headlineFaded:
-      "Dentiqly automatiza facturación, controla cuentas corrientes y genera liquidaciones precisas para cada profesional.",
+      "Dentiqly controla cuentas corrientes y genera liquidaciones precisas para cada profesional de forma automática.",
     cta: "Mirá cómo optimizar tus finanzas",
     metrics: [
       {
         multiplier: "4.5x",
-        label: "Facturación más rápida",
+        label: "Liquidaciones más rápidas",
         competitionLabel: "COMPETENCIA",
         competitionValue: "45 min",
         competitionWidth: "90%",
